@@ -33,15 +33,16 @@
 # install.packages("mongolite")
 
 
-# Descarga automatizada de los datos
-tabla <- read.delim("C:/Users/rocio/Documents/data/filereport_read_run_PRJEB34168_tsv", header = TRUE, sep = "\t")
-columna <- tabla[["submitted_ftp"]]
+# Descarga automatizada de los datos de la BBDD
 
-for (i in 1:nrow(tabla)){
-  muestras <- strsplit(columna[i], ";")
-}
+texto <- readLines("C:/Users/rocio/Documents/data/filereport_read_run_PRJEB34168_tsv.txt")
+completo <- paste(texto, collapse = " ")
 
-print(muestras)
+frases <- strsplit(completo, "\t")[[1]]
+indices <- seq(17, length(frases), by = 9)
+enlaces <- frases[indices]
+
+print(enlaces)
 
 flt <- mongo("flights")
 flt$import(gzcon(curl::curl("enlace_descarga")))
