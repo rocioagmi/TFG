@@ -30,19 +30,26 @@
 # BiocManager::install("MicrobiotaProcess")
 
 # mongolite
-# install.packages("mongolite")
+install.packages("mongolite")
 
 
 # Descarga automatizada de los datos de la BBDD
 
-texto <- readLines("C:/Users/rocio/Documents/data/filereport_read_run_PRJEB34168_tsv.txt")
-completo <- paste(texto, collapse = " ")
+library(readr)
+library(dplyr)
+library(mongolite)
 
-frases <- strsplit(completo, "\t")[[1]]
-indices <- seq(17, length(frases), by = 9)
-enlaces <- frases[indices]
+tabla <- read_delim("C:/ANTIGUA_D/TodoTFG/filereport_read_run_PRJEB34168_tsv.tsv", col_names = TRUE, delim ="\t")
+head(tabla)
 
-print(enlaces)
+tabla_ordenada <- tabla[order(tabla$submitted_ftp), ]
+head(tabla_ordenada)
 
-flt <- mongo("flights")
-flt$import(gzcon(curl::curl("enlace_descarga")))
+enlaces <- strsplit(tabla_ordenada$submitted_ftp, ";")
+# print(enlaces[[65]][1])
+
+# Revisarlo da error porque no encuentra el servidor
+for (i in 1:length(enlaces)){
+  flt <- mongo("flights")
+  muestras <- flt$import(gzcon(curl::curl(enlaces[i])))
+}
