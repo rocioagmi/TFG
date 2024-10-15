@@ -35,25 +35,32 @@ install.packages("mongolite")
 # fastqcr
 install.packages("fastqcr")
 
+# svDialogs
+install.packages("svDialogs")
 
 library(readr)
 library(dplyr)
 library(Biostrings)
 library(mongolite)
-
-tabla <- read_delim("C:/ANTIGUA_D/TodoTFG/filereport_read_run_PRJEB34168_tsv.tsv", col_names = TRUE, delim ="\t")
-head(tabla)
-
-tabla_ordenada <- tabla[order(tabla$submitted_ftp), ]
-head(tabla_ordenada)
-
-enlaces <- strsplit(tabla_ordenada$submitted_ftp, ";")
-print(enlaces)
+library(svDialogs)
 
 # AUTOMATIZACIÓN DE LA DESCARGA DE LAS MUESTRAS DEL ENA
+#   Esto sólo haría falta ejecutarlo una vez
+
+directorio <- dlgInput(message = "Introduzca el directorio al tsv: ")$res
+
+tabla <- read_delim(directorio, col_names = TRUE, delim ="\t")
+
+tabla_ordenada <- tabla[order(tabla$submitted_ftp), ]
+
+enlaces <- strsplit(tabla_ordenada$submitted_ftp, ";")
+
 for (enl in enlaces){
   for (i in enl){
     destino <- strsplit(i, "/")[[1]]
     download.file(i,destino[length(destino)])
   }
 }
+
+# ABRIR LAS SECUENCIAS PARA EL PROCESAMIENTO
+
