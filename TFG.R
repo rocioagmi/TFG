@@ -48,3 +48,7 @@ library(mongolite)
 library(svDialogs)
 library(TAF)
 
+# DESCARGA DE LOS DATOS
+source("FUNC/Descargas_ENA.R")
+nAcceso <- dlgInput(message = "Introduzca el número de acceso al proyecto ENA: ")$res
+descargas_ENA(nAcceso)
