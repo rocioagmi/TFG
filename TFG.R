@@ -38,11 +38,13 @@ install.packages("fastqcr")
 # svDialogs
 install.packages("svDialogs")
 
+# TAF
+install.packages("TAF")
+
 library(readr)
 library(dplyr)
 library(Biostrings)
 library(mongolite)
 library(svDialogs)
-
-# ABRIR LAS SECUENCIAS PARA EL PROCESAMIENTO
+library(TAF)
 
