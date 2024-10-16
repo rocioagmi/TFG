@@ -8,7 +8,6 @@ library(TAF)
 
 
 descargas_ENA <- function(nAcceso){
-#nAcceso <- dlgInput(message = "Introduzca el número de acceso al proyecto ENA: ")$res
 
   # DESCARGA DEL TSV
   enlaceTSV <- paste("https://www.ebi.ac.uk/ena/portal/api/filereport?accession=","&result=read_run&fields=study_accession,sample_accession,experiment_accession,run_accession,tax_id,scientific_name,fastq_bytes,fastq_ftp,submitted_bytes,submitted_ftp,sra_bytes,sra_ftp,bam_ftp,bam_bytes&format=tsv&download=true&limit=0", sep = nAcceso)
