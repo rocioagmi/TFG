@@ -52,3 +52,16 @@ library(TAF)
 source("FUNC/Descargas_ENA.R")
 nAcceso <- dlgInput(message = "Introduzca el número de acceso al proyecto ENA: ")$res
 descargas_ENA(nAcceso)
+
+# ALMACENAMIENTO DE LOS DATOS EN UNA BASE DE DATOS MONGODB
+datos_ENA <- mongo(collection = "datos_ENA", url = "mongodb://localhost:27017")
+
+muestras <- list.files("C:/ANTIGUA_D/TFG/INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE)
+
+for (i in muestras) {
+  cadena <- readLines(gzfile(i))
+  contenido <- list(nombre = basename(i), contenido = cadena)
+  datos_ENA$insert(contenido)
+}
+
+datos_ENA$disconect()
