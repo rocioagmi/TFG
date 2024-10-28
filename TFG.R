@@ -59,9 +59,9 @@ datos_ENA <- mongo(collection = "datos_ENA", url = "mongodb://localhost:27017")
 muestras <- list.files("C:/ANTIGUA_D/TFG/INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE)
 
 for (i in muestras) {
-  cadena <- readLines(gzfile(i))
-  contenido <- list(nombre = basename(i), contenido = cadena)
-  datos_ENA$insert(contenido)
+  contenido <- list(nombre = basename(i), contenido = i)
+  #datos_ENA$insert(contenido) 
 }
 
-datos_ENA$disconect()
+datos_ENA$find()
+datos_ENA$disconnect()
