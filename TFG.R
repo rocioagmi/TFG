@@ -8,7 +8,7 @@ BiocManager::install(c("GenomicFeatures", "AnnotationDbi"))
 BiocManager::install("Biostrings", force = TRUE)
 
 # DADA2
-BiocManager::install("dada2", force = TRUE)
+BiocManager::install("dada2")
 
 # phyloseq
 BiocManager::install("phyloseq")
@@ -41,12 +41,14 @@ install.packages("svDialogs")
 # TAF
 install.packages("TAF")
 
+
 library(readr)
 library(dplyr)
 library(Biostrings)
 library(mongolite)
 library(svDialogs)
 library(TAF)
+library(dada2)
 
 # DESCARGA DE LOS DATOS
 source("FUNC/Descargas_ENA.R")
@@ -78,3 +80,9 @@ MS_R2 <- muestrasMS[grepl("R2", muestrasMS)]
 Healty_R1 <- muestrasHealty[grepl("R1", muestrasHealty)]
 Healty_R2 <- muestrasHealty[grepl("R2", muestrasHealty)]
 
+#   Visualizamos la calidad de las muestras MS y Healthy
+plotQualityProfile(MS_R1[1:2])
+plotQualityProfile(MS_R2[1:2]) # la calidad baja mucho
+
+plotQualityProfile(Healty_R1[1:2])
+plotQualityProfile(Healty_R2[1:2]) # la calidad baja mucho
