@@ -60,8 +60,21 @@ muestras <- list.files("C:/ANTIGUA_D/TFG/INPUT/DATA", pattern = "\\.fastq\\.gz$"
 
 for (i in muestras) {
   contenido <- list(nombre = basename(i), contenido = i)
-  #datos_ENA$insert(contenido) 
+  datos_ENA$insert(contenido) 
 }
 
-datos_ENA$find()
+datos_ENA$find(sort = '{"nombre": 1}')
 datos_ENA$disconnect()
+
+# PREPROCESAMIENTO DE LOS DATOS
+#   Separamos las muestras de personas MS de Healthy
+muestrasMS <- list.files("C:/ANTIGUA_D/TFG/INPUT/DATA", pattern = "MS", full.names = TRUE)
+muestrasHealty <- list.files("C:/ANTIGUA_D/TFG/INPUT/DATA", pattern = "Healthy", full.names = TRUE)
+
+#   Separamos las hebras R1 y R2
+MS_R1 <- muestrasMS[grepl("R1", muestrasMS)]
+MS_R2 <- muestrasMS[grepl("R2", muestrasMS)]
+
+Healty_R1 <- muestrasHealty[grepl("R1", muestrasHealty)]
+Healty_R2 <- muestrasHealty[grepl("R2", muestrasHealty)]
+
