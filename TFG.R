@@ -76,8 +76,8 @@ datos_ENA$disconnect()
 
 # PREPROCESAMIENTO DE LOS DATOS
 #   Separamos las muestras de personas MS de Healthy
-muestrasMS <- list.files("C:/ANTIGUA_D/TFG/INPUT/DATA", pattern = "MS", full.names = TRUE)
-muestrasHealty <- list.files("C:/ANTIGUA_D/TFG/INPUT/DATA", pattern = "Healthy", full.names = TRUE)
+muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
+muestrasHealty <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names = TRUE))
 
 #   Separamos las hebras R1 y R2
 MS_R1 <- muestrasMS[grepl("R1", muestrasMS)]
@@ -94,6 +94,10 @@ plotQualityProfile(Healty_R1[1:2])
 plotQualityProfile(Healty_R2[1:2]) # la calidad baja mucho
 
 # Filtramos las secuencias para mejorar la calidad
-filterAndTrim(MS_R1, filtradasMS_R1, MS_R2, filtradasMS_R2, truncLen = c(280,260),
+directorio <- mkdir("INPUT/DATA/FILTRADAS")
+nMS_R1 <- paste("INPUT/DATA", strsplit(basename(MS_R1), "/M"),sep = "/FILTRADAS")
+nMS_R2 <- paste("INPUT/DATA", strsplit(basename(MS_R2), "/M"),sep = "/FILTRADAS")
+
+filterAndTrim(MS_R1, nMS_R1, MS_R2, nMS_R2, truncLen = c(280,260),
               maxN = 0, maxEE = c(2,2), truncQ = 2, rm.phix = TRUE,
               compress = TRUE, trimLeft = 20, multithread = FALSE)
