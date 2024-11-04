@@ -41,14 +41,20 @@ install.packages("svDialogs")
 # TAF
 install.packages("TAF")
 
+# ShortRead
+BiocManager::install("ShortRead", force = TRUE)
 
 library(readr)
 library(dplyr)
 library(Biostrings)
+library(ShortRead)
 library(mongolite)
 library(svDialogs)
 library(TAF)
 library(dada2)
+
+
+
 
 # DESCARGA DE LOS DATOS
 source("FUNC/Descargas_ENA.R")
@@ -86,3 +92,8 @@ plotQualityProfile(MS_R2[1:2]) # la calidad baja mucho
 
 plotQualityProfile(Healty_R1[1:2])
 plotQualityProfile(Healty_R2[1:2]) # la calidad baja mucho
+
+# Filtramos las secuencias para mejorar la calidad
+filterAndTrim(MS_R1, filtradasMS_R1, MS_R2, filtradasMS_R2, truncLen = c(280,260),
+              maxN = 0, maxEE = c(2,2), truncQ = 2, rm.phix = TRUE,
+              compress = TRUE, trimLeft = 20, multithread = FALSE)
