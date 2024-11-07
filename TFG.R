@@ -95,11 +95,11 @@ plotQualityProfile(Healty_R2[1:2]) # la calidad baja mucho
 
 # Filtramos las secuencias para mejorar la calidad
 directorio <- mkdir("INPUT/DATA/FILTRADAS")
-nMS_R1 <- paste("INPUT/DATA", strsplit(basename(MS_R1), "/M"),sep = "/FILTRADAS")
-nMS_R2 <- paste("INPUT/DATA", strsplit(basename(MS_R2), "/M"),sep = "/FILTRADAS")
+nMS_R1 <- paste("INPUT/DATA", strsplit(basename(MS_R1), "/M"),sep = "/FILTRADAS/")
+nMS_R2 <- paste("INPUT/DATA", strsplit(basename(MS_R2), "/M"),sep = "/FILTRADAS/")
 
-nH_R1 <- paste("INPUT/DATA", strsplit(basename(Healty_R1), "/H"),sep = "/FILTRADAS")
-nH_R2 <- paste("INPUT/DATA", strsplit(basename(Healty_R2), "/H"),sep = "/FILTRADAS")
+nH_R1 <- paste("INPUT/DATA", strsplit(basename(Healty_R1), "/H"),sep = "/FILTRADAS/")
+nH_R2 <- paste("INPUT/DATA", strsplit(basename(Healty_R2), "/H"),sep = "/FILTRADAS/")
 
 #   Vamos a obtener por dónde cortar las secuencias según la posición en la que empieza a disminuir la caliadad por debajo de un humbral
 fqMS_R1 <- lapply(MS_R1, readFastq)
