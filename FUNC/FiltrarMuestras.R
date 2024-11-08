@@ -12,6 +12,6 @@ filtrarMuestras <- function(R1, R2){
                 maxN = 0, maxEE = c(2,2), truncQ = 20, rm.phix = TRUE,
                 compress = TRUE, trimLeft = 10, multithread = FALSE)
   
-  plotQualityProfile(nMS_R1[10:11])
-  plotQualityProfile(nMS_R2[10:11])
+  plotQualityProfile(nombres_R1[10:11])
+  plotQualityProfile(nombres_R2[10:11])
 }
