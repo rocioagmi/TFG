@@ -95,15 +95,10 @@ plotQualityProfile(Healty_R2[1:2]) # la calidad baja mucho
 
 # Filtramos las secuencias para mejorar la calidad
 directorio <- mkdir("INPUT/DATA/FILTRADAS")
-nMS_R1 <- paste("INPUT/DATA", strsplit(basename(MS_R1), "/M"),sep = "/FILTRADAS/")
-nMS_R2 <- paste("INPUT/DATA", strsplit(basename(MS_R2), "/M"),sep = "/FILTRADAS/")
 
-nH_R1 <- paste("INPUT/DATA", strsplit(basename(Healty_R1), "/H"),sep = "/FILTRADAS/")
-nH_R2 <- paste("INPUT/DATA", strsplit(basename(Healty_R2), "/H"),sep = "/FILTRADAS/")
-
-filterAndTrim(MS_R1, nMS_R1, MS_R2, nMS_R2, truncLen = c(240,240),
-              maxN = 0, maxEE = c(2,2), truncQ = 20, rm.phix = TRUE,
-              compress = TRUE, trimLeft = 10, multithread = FALSE)
+source("FUNC/FiltrarMuestras.R")
+filtrarMuestras(MS_R1, MS_R2)
+filtrarMuestras(Healty_R1, Healty_R2)
 
 plotQualityProfile(nMS_R1[10:11])
 plotQualityProfile(nMS_R2[10:11]) # la calidad es mejor aunque por muestra los read son menos
