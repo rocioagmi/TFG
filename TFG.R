@@ -55,7 +55,6 @@ library(dada2)
 
 
 
-
 # DESCARGA DE LOS DATOS
 source("FUNC/Descargas_ENA.R")
 nAcceso <- dlgInput(message = "Introduzca el número de acceso al proyecto ENA: ")$res
@@ -99,6 +98,3 @@ directorio <- mkdir("INPUT/DATA/FILTRADAS")
 source("FUNC/FiltrarMuestras.R")
 filtrarMuestras(MS_R1, MS_R2)
 filtrarMuestras(Healty_R1, Healty_R2)
-
-plotQualityProfile(nMS_R1[10:11])
-plotQualityProfile(nMS_R2[10:11]) # la calidad es mejor aunque por muestra los read son menos
