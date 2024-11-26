@@ -96,5 +96,14 @@ plotQualityProfile(Healty_R2[1:2]) # la calidad baja mucho
 directorio <- mkdir("INPUT/DATA/FILTRADAS")
 
 source("FUNC/FiltrarMuestras.R")
-filtrarMuestras(MS_R1, MS_R2)
-filtrarMuestras(Healty_R1, Healty_R2)
+filtradasM <- filtrarMuestras(MS_R1, MS_R2)
+
+plotQualityProfile(filtradasM$nombres_R1[1:2])
+plotQualityProfile(filtradasM$nombres_R2[1:2])
+
+filtradasH <- filtrarMuestras(Healty_R1, Healty_R2)
+
+plotQualityProfile(filtradasH$nombres_R1[1:2])
+plotQualityProfile(filtradasH$nombres_R2[1:2])
+
+# Arreglar el filtrado de secuencias (quita demasiadas en algunos casos)
