@@ -98,12 +98,12 @@ directorio <- mkdir("INPUT/DATA/FILTRADAS")
 source("FUNC/FiltrarMuestras.R")
 filtradasM <- filtrarMuestras(MS_R1, MS_R2)
 
-plotQualityProfile(filtradasM$nombres_R1[1:2])
-plotQualityProfile(filtradasM$nombres_R2[1:2])
+plotQualityProfile(filtradasM$nombres_R1[12:14])
+plotQualityProfile(filtradasM$nombres_R2[12:14])
 
 filtradasH <- filtrarMuestras(Healty_R1, Healty_R2)
 
-plotQualityProfile(filtradasH$nombres_R1[1:2])
-plotQualityProfile(filtradasH$nombres_R2[1:2])
+plotQualityProfile(filtradasH$nombres_R1[12:14])
+plotQualityProfile(filtradasH$nombres_R2[12:14])
 
 # Arreglar el filtrado de secuencias (quita demasiadas en algunos casos)
