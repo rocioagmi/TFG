@@ -97,13 +97,34 @@ directorio <- mkdir("INPUT/DATA/FILTRADAS")
 
 source("FUNC/FiltrarMuestras.R")
 filtradasM <- filtrarMuestras(MS_R1, MS_R2)
-
-plotQualityProfile(filtradasM$nombres_R1[12:14])
-plotQualityProfile(filtradasM$nombres_R2[12:14])
-
 filtradasH <- filtrarMuestras(Healty_R1, Healty_R2)
 
-plotQualityProfile(filtradasH$nombres_R1[12:14])
-plotQualityProfile(filtradasH$nombres_R2[12:14])
+filtradasMS <- sort(list.files("INPUT/DATA/FILTRADAS", pattern = "MS", full.names = TRUE))
+filtradasHealty <- sort(list.files("INPUT/DATA/FILTRADAS", pattern = "Healthy", full.names = TRUE))
 
-# Arreglar el filtrado de secuencias (quita demasiadas en algunos casos)
+filtradasMS_R1 <- filtradasMS[grepl("R1", filtradasMS)]
+filtradasMS_R2 <- filtradasMS[grepl("R2", filtradasMS)]
+
+filtradasH_R1 <- filtradasHealty[grepl("R1", filtradasHealty)]
+filtradasH_R2 <- filtradasHealty[grepl("R2", filtradasHealty)]
+
+plotQualityProfile(filtradasMS_R1[12:14])
+plotQualityProfile(filtradasMS_R2[12:14])
+
+plotQualityProfile(filtradasH_R1[12:14])
+plotQualityProfile(filtradasH_R2[12:14])
+
+# Dereplicación para eliminar posibles replicados de ADN
+derepM_R1 <- derepFastq(filtradasMS_R1, verbose = TRUE)
+derepM_R2 <- derepFastq(filtradasMS_R2, verbose = TRUE)
+
+derepH_R1 <- derepFastq(filtradasH_R1, verbose = TRUE) 
+derepH_R2 <- derepFastq(filtradasH_R2, verbose = TRUE)
+
+names(derepM_R1) <- filtradasMS_R1
+names(derepM_R2) <- filtradasMS_R2
+
+names(derepH_R1) <- filtradasH_R1
+names(derepH_R2) <- filtradasH_R2
+
+# Para usar el algoritmo dada() también tenemos que calcular la tasa de error
