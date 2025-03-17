@@ -44,6 +44,10 @@ install.packages("TAF")
 # ShortRead
 BiocManager::install("ShortRead", force = TRUE)
 
+# Rqc
+BiocManager::install("Rqc")
+
+
 library(readr)
 library(dplyr)
 library(Biostrings)
@@ -52,6 +56,7 @@ library(mongolite)
 library(svDialogs)
 library(TAF)
 library(dada2)
+library(Rqc)
 
 
 
@@ -60,18 +65,6 @@ source("FUNC/Descargas_ENA.R")
 nAcceso <- dlgInput(message = "Introduzca el número de acceso al proyecto ENA: ")$res
 descargas_ENA(nAcceso)
 
-# ALMACENAMIENTO DE LOS DATOS EN UNA BASE DE DATOS MONGODB
-datos_ENA <- mongo(collection = "datos_ENA", url = "mongodb://localhost:27017")
-
-muestras <- list.files("C:/ANTIGUA_D/TFG/INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE)
-
-for (i in muestras) {
-  contenido <- list(nombre = basename(i), contenido = i)
-  datos_ENA$insert(contenido) 
-}
-
-datos_ENA$find(sort = '{"nombre": 1}')
-datos_ENA$disconnect()
 
 # PREPROCESAMIENTO DE LOS DATOS
 #   Separamos las muestras de personas MS de Healthy
@@ -85,12 +78,17 @@ MS_R2 <- muestrasMS[grepl("R2", muestrasMS)]
 Healty_R1 <- muestrasHealty[grepl("R1", muestrasHealty)]
 Healty_R2 <- muestrasHealty[grepl("R2", muestrasHealty)]
 
+# Obtenemos un objeto con reusltados relacionados con la calidad de las secuencias
+rqc("INPUT/DATA", ".fastq.gz", pair = c(1,1), workers = 1, openBrowser = TRUE)
+
+
 #   Visualizamos la calidad de las muestras MS y Healthy
 plotQualityProfile(MS_R1[1:2])
 plotQualityProfile(MS_R2[1:2]) # la calidad baja mucho
 
 plotQualityProfile(Healty_R1[1:2])
 plotQualityProfile(Healty_R2[1:2]) # la calidad baja mucho
+
 
 # Filtramos las secuencias para mejorar la calidad
 directorio <- mkdir("INPUT/DATA/FILTRADAS")
@@ -126,5 +124,6 @@ names(derepM_R2) <- filtradasMS_R2
 
 names(derepH_R1) <- filtradasH_R1
 names(derepH_R2) <- filtradasH_R2
+
 
 # Para usar el algoritmo dada() también tenemos que calcular la tasa de error
