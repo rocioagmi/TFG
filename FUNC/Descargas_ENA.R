@@ -25,9 +25,6 @@ descargas_ENA <- function(nAcceso){
       destino <- strsplit(i, "/")[[1]]
       directorioEnl <- paste("INPUT/DATA/",destino[length(destino)])
       download.file(i,directorioEnl)
-      close(i)
     }
   }
-  
-  close(tsv)
 }
