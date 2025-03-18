@@ -79,7 +79,7 @@ Healty_R1 <- muestrasHealty[grepl("R1", muestrasHealty)]
 Healty_R2 <- muestrasHealty[grepl("R2", muestrasHealty)]
 
 # Obtenemos un objeto con reusltados relacionados con la calidad de las secuencias
-rqc("INPUT/DATA", ".fastq.gz", pair = c(1,1), workers = 1, openBrowser = TRUE)
+rqc("INPUT/DATA", ".fastq.gz", pair = c(1,1), openBrowser = TRUE)
 
 
 #   Visualizamos la calidad de las muestras MS y Healthy
@@ -125,5 +125,19 @@ names(derepM_R2) <- filtradasMS_R2
 names(derepH_R1) <- filtradasH_R1
 names(derepH_R2) <- filtradasH_R2
 
+# CERRAR ARCHIVOS
 
+# ALMACENAMIENTO DE LOS DATOS EN UNA BASE DE DATOS MONGODB
+# Abrir consola y escribir mongodb
+datos_ENA <- mongo(collection = "datos_ENA", url = "mongodb://localhost:27017")
+
+muestras <- list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE)
+
+for (i in muestras) {
+  contenido <- list(nombre = basename(i), contenido = i)
+  datos_ENA$insert(contenido) 
+}
+
+datos_ENA$find(sort = '{"nombre": 1}')
+datos_ENA$disconnect()
 # Para usar el algoritmo dada() también tenemos que calcular la tasa de error
