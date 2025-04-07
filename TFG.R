@@ -56,7 +56,6 @@ library(mongolite)
 library(svDialogs)
 library(TAF)
 library(dada2)
-library(Rqc)
 
 
 
@@ -78,19 +77,23 @@ MS_R2 <- muestrasMS[grepl("R2", muestrasMS)]
 Healty_R1 <- muestrasHealty[grepl("R1", muestrasHealty)]
 Healty_R2 <- muestrasHealty[grepl("R2", muestrasHealty)]
 
-# Obtenemos un objeto con reusltados relacionados con la calidad de las secuencias
-rqc("INPUT/DATA", ".fastq.gz", pair = c(1,1), openBrowser = TRUE)
+# FALLA rqc("INPUT/DATA", ".fastq.gz", pair = c(1,1), openBrowser = TRUE)
+# FALLA qc <- qc_aggregate("INPUT/DATA", progressbar = TRUE)
 
+# Informe con la calidad de las secuencias
+source("FUNC/InformeCalidad.R")
+directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
+informeCalidad(directorioMuestras)
 
 #   Visualizamos la calidad de las muestras MS y Healthy
-plotQualityProfile(MS_R1[1:2])
-plotQualityProfile(MS_R2[1:2]) # la calidad baja mucho
+#plotQualityProfile(MS_R1[1:2])
+#plotQualityProfile(MS_R2[1:2]) # la calidad baja mucho
 
-plotQualityProfile(Healty_R1[1:2])
-plotQualityProfile(Healty_R2[1:2]) # la calidad baja mucho
+#plotQualityProfile(Healty_R1[1:2])
+#plotQualityProfile(Healty_R2[1:2]) # la calidad baja mucho
 
 
-# Filtramos las secuencias para mejorar la calidad
+# Filtramos muestras --- PACKAGE DADA2 ---
 directorio <- mkdir("INPUT/DATA/FILTRADAS")
 
 source("FUNC/FiltrarMuestras.R")
