@@ -121,6 +121,11 @@ plotQualityProfile(filtradasH_R2[12:14])
 source("FUNC/FiltrarMuestras.R")
 filtradoSR(listadoMuestras)
 
+# Evaluamos la calidad de las muestras filtradas
+source("FUNC/InformeCalidad.R")
+directorioFiltradas <- dir("INPUT/DATA/FILTRADAS", "\\.fastq\\.gz$", full = TRUE)
+informeCalidad(directorioFiltradas)
+
 # Dereplicación para eliminar posibles replicados de ADN
 derepM_R1 <- derepFastq(filtradasMS_R1, verbose = TRUE)
 derepM_R2 <- derepFastq(filtradasMS_R2, verbose = TRUE)
