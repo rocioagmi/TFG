@@ -96,7 +96,7 @@ informeCalidad(directorioMuestras)
 
 # Filtramos muestras 
 # --- PACKAGE DADA2 ---
-directorio <- mkdir("INPUT/DATA/FILTRADAS")
+dir.create("INPUT/DATA/FILTRADAS")
 
 source("FUNC/FiltrarMuestras.R")
 filtradasM <- filtrarMuestras(MS_R1, MS_R2)
@@ -119,7 +119,7 @@ plotQualityProfile(filtradasH_R2[12:14])
 
 # --- PACKAGE SHORTREAD ---
 source("FUNC/FiltrarMuestras.R")
-filtradosSR(listadoMuesrtras)
+filtradoSR(listadoMuestras)
 
 # Dereplicación para eliminar posibles replicados de ADN
 derepM_R1 <- derepFastq(filtradasMS_R1, verbose = TRUE)
