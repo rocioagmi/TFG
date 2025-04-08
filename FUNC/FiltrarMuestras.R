@@ -18,7 +18,6 @@ filtrarMuestras <- function(R1, R2){
 
 filtradoSR <- function(listadoMuestras){
   for (muestra in listadoMuestras){
-    destino <- file.path("INPUT/DATA/FILTRADAS", paste0(basename(muestra), "_filtered.fastq.gz"))
     
     stream <- open(FastqStreamer(muestra))
     on.exit(close(stream))
@@ -32,7 +31,13 @@ filtradoSR <- function(listadoMuestras){
       fq <- trimTailw(fq, 2, "4", 2)
       fq <- fq[width(fq) >= 36]
       
-      writeFastq(fq, destino, "a")
+      destino <- file.path("INPUT/DATA/FILTRADAS", paste0(trimws(basename(muestra)), "_filtered.fastq.gz"))
+      
+      if (!file.exists(destino)) {
+        writeFastq(fq, destino, "w")
+      } else {
+        writeFastq(fq, destino, "a")
+      }
     }
   }
 }
