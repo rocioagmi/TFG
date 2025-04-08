@@ -67,6 +67,7 @@ descargas_ENA(nAcceso)
 
 # PREPROCESAMIENTO DE LOS DATOS
 #   Separamos las muestras de personas MS de Healthy
+listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
 muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
 muestrasHealty <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names = TRUE))
 
@@ -93,7 +94,8 @@ informeCalidad(directorioMuestras)
 #plotQualityProfile(Healty_R2[1:2]) # la calidad baja mucho
 
 
-# Filtramos muestras --- PACKAGE DADA2 ---
+# Filtramos muestras 
+# --- PACKAGE DADA2 ---
 directorio <- mkdir("INPUT/DATA/FILTRADAS")
 
 source("FUNC/FiltrarMuestras.R")
@@ -114,6 +116,10 @@ plotQualityProfile(filtradasMS_R2[12:14])
 
 plotQualityProfile(filtradasH_R1[12:14])
 plotQualityProfile(filtradasH_R2[12:14])
+
+# --- PACKAGE SHORTREAD ---
+source("FUNC/FiltrarMuestras.R")
+filtradosSR(listadoMuesrtras)
 
 # Dereplicación para eliminar posibles replicados de ADN
 derepM_R1 <- derepFastq(filtradasMS_R1, verbose = TRUE)

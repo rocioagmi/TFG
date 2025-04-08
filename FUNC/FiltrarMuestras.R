@@ -14,3 +14,25 @@ filtrarMuestras <- function(R1, R2){
   
   return(list(nombres_R1 = nombres_R1, nombres_R2 = nombres_R2))
 }
+
+
+filtradoSR <- function(listadoMuestras){
+  for (muestra in listadoMuestras){
+    destino <- file.path("INPUT/DATA/FILTRADAS", paste0(basename(muestra), "_filtered.fastq.gz"))
+    
+    stream <- open(FastqStreamer(muestra))
+    on.exit(close(stream))
+    
+    repeat {
+      fq <- yield(stream)
+      if (length(fq) == 0)
+        break
+      
+      fq <- fq[nFilter()(fq)] 
+      fq <- trimTailw(fq, 2, "4", 2)
+      fq <- fq[width(fq) >= 36]
+      
+      writeFastq(fq, destino, "a")
+    }
+  }
+}
