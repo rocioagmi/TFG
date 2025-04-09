@@ -5,8 +5,6 @@ library(ShortRead)
 library(dada2)
 
 filtrarMuestras <- function(R1, R2){
-  #nombres_R1 <- paste("INPUT/DATA", strsplit(basename(R1), "/M"),sep = "/FILTRADAS/")
-  #nombres_R2 <- paste("INPUT/DATA", strsplit(basename(R2), "/M"),sep = "/FILTRADAS/")
   
   nombres_R1 <- file.path("INPUT/DATA/FILTRADAS", basename(R1))
   nombres_R2 <- file.path("INPUT/DATA/FILTRADAS", basename(R2))
@@ -34,7 +32,7 @@ filtradoSR <- function(listadoMuestras){
       fq <- trimTailw(fq, 2, "4", 2)
       fq <- fq[width(fq) >= 36]
       
-      destino <- file.path("INPUT/DATA/FILTRADAS", paste0(trimws(basename(muestra)), "_filtered.fastq.gz"))
+      destino <- file.path("INPUT/DATA/FILTRADAS", basename(muestra))
       
       if (!file.exists(destino)) {
         writeFastq(fq, destino, "w")
