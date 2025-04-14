@@ -32,8 +32,8 @@ BiocManager::install("MicrobiotaProcess")
 # mongolite
 install.packages("mongolite")
 
-# fastqcr
-install.packages("fastqcr")
+# QuasR
+BiocManager::install("QuasR")
 
 # svDialogs
 install.packages("svDialogs")
@@ -56,13 +56,14 @@ library(mongolite)
 library(svDialogs)
 library(TAF)
 library(dada2)
-
+library(QuasR)
 
 
 # DESCARGA DE LOS DATOS
 source("FUNC/Descargas_ENA.R")
 nAcceso <- dlgInput(message = "Introduzca el número de acceso al proyecto ENA: ")$res
 descargas_ENA(nAcceso)
+
 
 
 # PREPROCESAMIENTO DE LOS DATOS
@@ -74,12 +75,12 @@ muestrasHealty <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names 
 #   Separamos las hebras R1 y R2
 MS_R1 <- muestrasMS[grepl("R1", muestrasMS)]
 MS_R2 <- muestrasMS[grepl("R2", muestrasMS)]
-
 Healty_R1 <- muestrasHealty[grepl("R1", muestrasHealty)]
 Healty_R2 <- muestrasHealty[grepl("R2", muestrasHealty)]
 
 # FALLA rqc("INPUT/DATA", ".fastq.gz", pair = c(1,1), openBrowser = TRUE)
 # FALLA qc <- qc_aggregate("INPUT/DATA", progressbar = TRUE)
+
 
 # Informe con la calidad de las secuencias
 source("FUNC/InformeCalidad.R")
@@ -92,6 +93,7 @@ informeCalidad(directorioMuestras)
 
 #plotQualityProfile(Healty_R1[1:2])
 #plotQualityProfile(Healty_R2[1:2]) # la calidad baja mucho
+
 
 
 # Filtramos muestras 
@@ -125,6 +127,10 @@ filtradoSR(listadoMuestras)
 source("FUNC/InformeCalidad.R")
 directorioFiltradas <- dir("INPUT/DATA/FILTRADAS", "\\.fastq\\.gz$", full = TRUE)
 informeCalidad(directorioFiltradas)
+
+# --- PACKAGE QUASR ---
+
+
 
 # Dereplicación para eliminar posibles replicados de ADN
 derepM_R1 <- derepFastq(filtradasMS_R1, verbose = TRUE)
