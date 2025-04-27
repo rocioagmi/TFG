@@ -78,23 +78,10 @@ MS_R2 <- muestrasMS[grepl("R2", muestrasMS)]
 Healty_R1 <- muestrasHealty[grepl("R1", muestrasHealty)]
 Healty_R2 <- muestrasHealty[grepl("R2", muestrasHealty)]
 
-# FALLA rqc("INPUT/DATA", ".fastq.gz", pair = c(1,1), openBrowser = TRUE)
-# FALLA qc <- qc_aggregate("INPUT/DATA", progressbar = TRUE)
-
-
 # Informe con la calidad de las secuencias
 source("FUNC/InformeCalidad.R")
 directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
 informeCalidad(directorioMuestras)
-
-#   Visualizamos la calidad de las muestras MS y Healthy
-#plotQualityProfile(MS_R1[1:2])
-#plotQualityProfile(MS_R2[1:2]) # la calidad baja mucho
-
-#plotQualityProfile(Healty_R1[1:2])
-#plotQualityProfile(Healty_R2[1:2]) # la calidad baja mucho
-
-
 
 # Filtramos muestras 
 # --- PACKAGE DADA2 ---
@@ -127,10 +114,6 @@ filtradoSR(listadoMuestras)
 source("FUNC/InformeCalidad.R")
 directorioFiltradas <- dir("INPUT/DATA/FILTRADAS", "\\.fastq\\.gz$", full = TRUE)
 informeCalidad(directorioFiltradas)
-
-# --- PACKAGE QUASR ---
-
-
 
 # Dereplicación para eliminar posibles replicados de ADN
 derepM_R1 <- derepFastq(filtradasMS_R1, verbose = TRUE)
