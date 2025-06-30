@@ -26,6 +26,11 @@ descargas_ENA(nAcceso)
 
 A partir de este código, se descarga un archivo en formato .tsv, que incluye los enlaces de descarga correspondientes a todas las muestras disponibles. Una vez obtenido este archivo, se procede a la descarga automática de todas las muestras en formato .fastq. Tanto el archivo .tsv como las muestras descargadas se almacenan en el directorio "INPUT/DATA".
 
+```{r warning = FALSE, message = FALSE}
+archivo_tsv <-"INPUT/DATA/filereport_read_run_PRJEB34168_tsv.tsv"
+tabla <- read.delim(archivo_tsv, sep = "\t")
+datatable(tabla)
+```
 
 # Preprocesamiento
 
@@ -41,9 +46,11 @@ informeCalidad(directorioMuestras)
 A continuación, se procede a filtrarlas, recortarlas y aplicar otros tratamientos necesarios para garantizar que la calidad sea 
 óptima y no haya elementos que puedan afectar negativamente en las fases posteriores del análisis.
 
+Para ello se aconseja separar las muestras de pacientes con EM de las muestras de personas sanas, y las muestras R1 de las R2.
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+A continuacuón, he probado distintos paquetes de R para realizar el filtrado:
+Por un lado utilizando la función FilterAndTrim() del paquete DADA2
+
+```{r}
+
 ```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

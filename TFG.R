@@ -47,6 +47,8 @@ BiocManager::install("ShortRead", force = TRUE)
 # Rqc
 BiocManager::install("Rqc")
 
+# DT
+install.packages("DT")
 
 library(readr)
 library(dplyr)
@@ -57,6 +59,7 @@ library(svDialogs)
 library(TAF)
 library(dada2)
 library(QuasR)
+library(DT)
 
 
 # DESCARGA DE LOS DATOS
@@ -67,6 +70,7 @@ descargas_ENA(nAcceso)
 
 
 # PREPROCESAMIENTO DE LOS DATOS
+
 #   Separamos las muestras de personas MS de Healthy
 listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
 muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
@@ -128,7 +132,6 @@ names(derepM_R2) <- filtradasMS_R2
 names(derepH_R1) <- filtradasH_R1
 names(derepH_R2) <- filtradasH_R2
 
-# CERRAR ARCHIVOS
 
 # ALMACENAMIENTO DE LOS DATOS EN UNA BASE DE DATOS MONGODB
 # Abrir consola y escribir mongodb
@@ -143,4 +146,3 @@ for (i in muestras) {
 
 datos_ENA$find(sort = '{"nombre": 1}')
 datos_ENA$disconnect()
-# Para usar el algoritmo dada() también tenemos que calcular la tasa de error
