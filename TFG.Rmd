@@ -11,21 +11,16 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Origen de los datos
 
-Los datos utilizados en este trabajo se obtuvieron de la base de datos del [European Nucleotide Archive (ENA)](https://www.ebi.ac.uk/ena/browser/home), específicamente del proyecto [PRJEB34168](https://www.ebi.ac.uk/ena/browser/view/PRJEB34168). En total, se descargaron 65 muestras: 39 correcpondientes a personas sanas y 26 a pacientes con esclerosis múltiple. Las muestras se descargaron en formato .fastq, ya que es el único formato disponible en el proyecto que permite diferenciar entre muestras de personas con esclerosis múltiple y personas sanas.
+Los datos utilizados en este trabajo se obtuvieron de la base de datos del European Nucleotide Archive (ENA), específicamente del proyecto PRJEB34168. En total, se descargaron 65 muestras: 39 correcpondientes a personas sanas y 26 a pacientes con esclerosis múltiple. Las muestras se descargaron en formato .fastq, ya que es el único formato disponible en el proyecto que permite diferenciar entre muestras de personas con esclerosis múltiple y personas sanas.
 
 # Descarga de los datos
 
 La descarga de las muestras se realiza de forma automatizada mediante la función descargas_ENA, ubicada en el archivo Descargas_ENA, dentro de la carpeta FUNC. Para iniciar el proceso, es necesario introducir el código del proyecto del ENA que contiene las muestras a descargar.
 
-```{r}
-source("FUNC/Descargas_ENA.R")
-nAcceso <- dlgInput(message = "Introduzca el número de acceso al proyecto ENA: ")$res
-descargas_ENA(nAcceso)
-```
-
 A partir de este código, se descarga un archivo en formato .tsv, que incluye los enlaces de descarga correspondientes a todas las muestras disponibles. Una vez obtenido este archivo, se procede a la descarga automática de todas las muestras en formato .fastq. Tanto el archivo .tsv como las muestras descargadas se almacenan en el directorio "INPUT/DATA".
 
 ```{r warning = FALSE, message = FALSE}
+library(DT)
 archivo_tsv <-"INPUT/DATA/filereport_read_run_PRJEB34168_tsv.tsv"
 tabla <- read.delim(archivo_tsv, sep = "\t")
 datatable(tabla)
@@ -35,7 +30,8 @@ datatable(tabla)
 
 Una vez se han recopilado todas las muestras, el siguiente paso es prepararlas para su posterior procesamiento. Esta etapa comienza con la elavoración de un informe de calidad, que permite evaluar el estado de las muestras.
 
-```{r, warning = FALSE, message = FALSE}
+```{r, eval = FALSE, warning = FALSE, message = FALSE}
+library(ShortRead)
 source("FUNC/InformeCalidad.R")
 directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
 informeCalidad(directorioMuestras)
@@ -78,6 +74,7 @@ A continuacuón, he probado distintos paquetes de R para realizar el filtrado. P
 -   rm.phix (Opcional). Valor predeterminado TRUE. Si es TRUE, se descartan las lecturas que coincidan con el genoma phiX.
 
 ```{r, eval = FALSE}
+library(dada2)
 filterAndTrim(R1, nombres_R1, R2, nombres_R2, truncLen = c(240,200),
                  trimLeft = c(15, 15), maxN = 0, maxEE = c(2,2), truncQ = 10, 
                  rm.phix = TRUE, compress = TRUE, multithread = FALSE)
@@ -89,7 +86,7 @@ Por otro lado, probé a utilizar distintas funciones el paquete ShortRead:
 -   width()
 Estas permiten eliminar o filtrar lecturas en función de características como la presencia de N, la calidad o la longitud de las secuencias.
 
-```{r}
+```{r, eval = FALSE}
   for (muestra in listadoMuestras){
     
     stream <- open(FastqStreamer(muestra))
