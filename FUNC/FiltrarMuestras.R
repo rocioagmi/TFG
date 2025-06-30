@@ -10,8 +10,8 @@ filtrarMuestras <- function(R1, R2){
   nombres_R2 <- file.path("INPUT/DATA/FILTRADAS", basename(R2))
   
   filterAndTrim(R1, nombres_R1, R2, nombres_R2, truncLen = c(240,200),
-                 trimLeft = c(15, 15), maxN = 0, maxEE = c(2,2), truncQ = 10, 
-                 rm.phix = TRUE, compress = TRUE, multithread = FALSE)
+                trimLeft = c(15, 15), maxN = 0, maxEE = c(2,2), truncQ = 10, 
+                rm.phix = TRUE, compress = TRUE, multithread = FALSE)
   
   return(list(nombres_R1 = nombres_R1, nombres_R2 = nombres_R2))
 }

@@ -15,8 +15,7 @@ Los datos utilizados en este trabajo se obtuvieron de la base de datos del [Euro
 
 # Descarga de los datos
 
-La descarga de las muestras se realiza de forma automatizada mediante la función descargas_ENA, ubicada en el archivo Descargas_ENA, dentro de la carpeta FUNC. 
-Para iniciar el proceso, es necesario introducir el código del proyecto del ENA que contiene las muestras a descargar.
+La descarga de las muestras se realiza de forma automatizada mediante la función descargas_ENA, ubicada en el archivo Descargas_ENA, dentro de la carpeta FUNC. Para iniciar el proceso, es necesario introducir el código del proyecto del ENA que contiene las muestras a descargar.
 
 ```{r}
 source("FUNC/Descargas_ENA.R")
@@ -34,8 +33,7 @@ datatable(tabla)
 
 # Preprocesamiento
 
-Una vez se han recopilado todas las muestras, el siguiente paso es prepararlas para su posterior procesamiento. 
-Esta etapa comienza con la elavoración de un informe de calidad, que permite evaluar el estado de las muestras.
+Una vez se han recopilado todas las muestras, el siguiente paso es prepararlas para su posterior procesamiento. Esta etapa comienza con la elavoración de un informe de calidad, que permite evaluar el estado de las muestras.
 
 ```{r, warning = FALSE, message = FALSE}
 source("FUNC/InformeCalidad.R")
@@ -43,14 +41,78 @@ directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
 informeCalidad(directorioMuestras)
 ```
 
-A continuación, se procede a filtrarlas, recortarlas y aplicar otros tratamientos necesarios para garantizar que la calidad sea 
-óptima y no haya elementos que puedan afectar negativamente en las fases posteriores del análisis.
+A continuación, se procede a filtrarlas, recortarlas y aplicar otros tratamientos necesarios para garantizar que la calidad sea óptima y no haya elementos que puedan afectar negativamente en las fases posteriores del análisis.
 
 Para ello se aconseja separar las muestras de pacientes con EM de las muestras de personas sanas, y las muestras R1 de las R2.
 
-A continuacuón, he probado distintos paquetes de R para realizar el filtrado:
-Por un lado utilizando la función FilterAndTrim() del paquete DADA2
+A continuacuón, he probado distintos paquetes de R para realizar el filtrado. Por un lado utilizando la función FilterAndTrim() del paquete DADA2, con argumentos como:
+
+-   fwd: (Obligatorio) Directorio que contiene los archivos fastq.
+
+-   filt: (Obligatorio) Directorio que contendrá los archivos filtrados de salida.
+
+-   rev: (Opcional) El valor predeterminado es NULL. Directorio que contiene los archivos fastq de la hebra reverse. Si es NULL, los archivos se procesan como lecturas únicas.
+
+-   filt.rev: (Opcional). Valor predeterminado NUL. Directorio que contendrá los archivos filtrados de salida de la hebra reverse.
+
+-   compress (Opcional). El valor predeterminado es TRUE. Si es TRUE, los archivos fastq de salida se comprimen con gzip.
+
+-   truncQ (Opcional). Valor predeterminado 2. Elimina lecturas con una puntuación de calidad menor o igual que la indicada.
+
+-   truncLen (Opcional). Valor predeterminado 0. Elimina las lecturas más cortas que el valor indicado.
+
+-   trimLeft (Opcional). Valor predeterminado 0. El número de nucleótidos que se van a eliminar desde el inicio de cada lectura.
+
+-   trimRight (Opcional). Valor predeterminado 0. El número de nucleótidos que se van a eliminar al final de cada lectura.
+
+-   maxLen (Opcional). Elimina lecturas con una longitud mayor que maxLen. Se aplica antes del recorte y el truncamiento.
+
+-   minLen (Opcional). Por defecto 20. Elimina las lecturas con una longitud inferior a minLen. Se aplica después del recorte y el truncamiento.
+
+-   maxN (Opcional). Valor predeterminado 0. Después del truncamiento, se descartarán las secuencias con más de esta cantidad de salores N.
+
+-   minQ (Opcional). Valor predeterminado 0. Después del truncamiento, las lecturas con una calidad menor que la indicada serán descartadas.
+
+-   maxEE (Opcional). Después del truncamiento, se descartarán las lecturas con errores superiores a los "esperados".
+
+-   rm.phix (Opcional). Valor predeterminado TRUE. Si es TRUE, se descartan las lecturas que coincidan con el genoma phiX.
+
+```{r, eval = FALSE}
+filterAndTrim(R1, nombres_R1, R2, nombres_R2, truncLen = c(240,200),
+                 trimLeft = c(15, 15), maxN = 0, maxEE = c(2,2), truncQ = 10, 
+                 rm.phix = TRUE, compress = TRUE, multithread = FALSE)
+```
+
+Por otro lado, probé a utilizar distintas funciones el paquete ShortRead:
+-   nFilter()
+-   trimTaiklw()
+-   width()
+Estas permiten eliminar o filtrar lecturas en función de características como la presencia de N, la calidad o la longitud de las secuencias.
 
 ```{r}
-
+  for (muestra in listadoMuestras){
+    
+    stream <- open(FastqStreamer(muestra))
+    on.exit(close(stream))
+    
+    repeat {
+      fq <- yield(stream)
+      if (length(fq) == 0)
+        break
+      
+      fq <- fq[nFilter()(fq)] 
+      fq <- trimTailw(fq, 2, "4", 2)
+      fq <- fq[width(fq) >= 36]
+      
+      destino <- file.path("INPUT/DATA/FILTRADAS", basename(muestra))
+      
+      if (!file.exists(destino)) {
+        writeFastq(fq, destino, "w")
+      } else {
+        writeFastq(fq, destino, "a")
+      }
+    }
+  }
 ```
+
+En conclusión, utilizar filterAndTrim() de DADA2 resulta más recomendable, ya que es la función específicamente diseñada para el procesamiento de lecturas de secuenciación. Por su parte, el segundo enfoque (filtrado manual), aunque más flexible, requiere una mayor cantidad de código, lo que también incrementa la probabilidad de cometer errores.
