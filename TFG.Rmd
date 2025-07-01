@@ -80,7 +80,7 @@ filterAndTrim(R1, nombres_R1, R2, nombres_R2, truncLen = c(240,200),
                  rm.phix = TRUE, compress = TRUE, multithread = FALSE)
 ```
 
-Además, encontré un pipeline R que utiliza este paquete para a partir de datos 16S, asignar taxones con una base de datos de referencia, pasando por todo el proceso de filtrado, etc.
+Además, encontré un pipeline en el artículo [Microbiota Analysis Using Two-step PCR and Next-generation 16S rRNA Gene Sequencing](https://pubmed.ncbi.nlm.nih.gov/31680682/), el cual utiliza este paquete para procesar datos de secuenciación 16S. Este pipeline permite asignar taxones utilizando una base de datos de referencia, relizando todo el proceso de filtrado y análisis necesario.
 
 [Descargar el documento R.](Supplementary_file_2_(R_script).R)
 
@@ -88,7 +88,7 @@ Por otro lado, probé a utilizar distintas funciones el paquete [ShortRead](http
 -   nFilter()
 -   trimTaiklw()
 -   width()
-Estas permiten eliminar o filtrar lecturas en función de características como la presencia de N, la calidad o la longitud de las secuencias. Existe un flujo de trabajo 
+Estas permiten eliminar o filtrar lecturas en función de características como la presencia de N, la calidad o la longitud de las secuencias. 
 
 ```{r, eval = FALSE}
   for (muestra in listadoMuestras){
@@ -116,4 +116,4 @@ Estas permiten eliminar o filtrar lecturas en función de características como 
   }
 ```
 
-En conclusión, utilizar filterAndTrim() de DADA2 resulta más recomendable, ya que es la función específicamente diseñada para el procesamiento de lecturas de secuenciación. Por su parte, el segundo enfoque (filtrado manual), aunque más flexible, requiere una mayor cantidad de código, lo que también incrementa la probabilidad de cometer errores.
+No estoy segura de qué método utilizar para el filtrado de los datos, ya que cada uno tiene unas ventajas distintas. Por un lado, utilizar el paquete dada2 es ventajoso ya que su función de filtrado está diseñada especialmente para datos de secuenciación, lo que simplifica el proceso. Por otro lado, realizar el filtrado de forma manual con las funciones del paquete ShortRead, hace que el filtrado sea más flexible, aunque implica escribir más código, lo que aumenta la probabilidad de cometer errores.
