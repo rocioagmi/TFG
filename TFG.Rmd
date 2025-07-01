@@ -11,13 +11,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Origen de los datos
 
-Los datos utilizados en este trabajo se obtuvieron de la base de datos del European Nucleotide Archive (ENA), específicamente del proyecto PRJEB34168. En total, se descargaron 65 muestras: 39 correcpondientes a personas sanas y 26 a pacientes con esclerosis múltiple. Las muestras se descargaron en formato .fastq, ya que es el único formato disponible en el proyecto que permite diferenciar entre muestras de personas con esclerosis múltiple y personas sanas.
+Los datos utilizados en este trabajo se obtuvieron de la base de datos del [European Nucleotide Archive (ENA)](https://www.ebi.ac.uk/ena/browser/home), específicamente del proyecto [PRJEB34168](https://www.ebi.ac.uk/ena/browser/view/PRJEB34168). En total, se descargaron 65 muestras: 39 correspondientes a personas sanas y 26 a pacientes con esclerosis múltiple. Las muestras se descargaron en formato .fastq, ya que es el único formato disponible en el proyecto que permite diferenciar entre muestras de personas con esclerosis múltiple y personas sanas.
 
 # Descarga de los datos
 
 La descarga de las muestras se realiza de forma automatizada mediante la función descargas_ENA, ubicada en el archivo Descargas_ENA, dentro de la carpeta FUNC. Para iniciar el proceso, es necesario introducir el código del proyecto del ENA que contiene las muestras a descargar.
 
-A partir de este código, se descarga un archivo en formato .tsv, que incluye los enlaces de descarga correspondientes a todas las muestras disponibles. Una vez obtenido este archivo, se procede a la descarga automática de todas las muestras en formato .fastq. Tanto el archivo .tsv como las muestras descargadas se almacenan en el directorio "INPUT/DATA".
+A partir de este código, se descarga un archivo en formato .tsv, que incluye los enlaces de descarga correspondientes a todas las muestras disponibles. Una vez obtenido este archivo, se procede a la descarga automática de todas las muestras comprimidas en formato .fastq.gz. Tanto el archivo .tsv como las muestras descargadas se almacenan en el directorio "INPUT/DATA".
 
 ```{r warning = FALSE, message = FALSE}
 library(DT)
@@ -80,11 +80,15 @@ filterAndTrim(R1, nombres_R1, R2, nombres_R2, truncLen = c(240,200),
                  rm.phix = TRUE, compress = TRUE, multithread = FALSE)
 ```
 
-Por otro lado, probé a utilizar distintas funciones el paquete ShortRead:
+Además, encontré un pipeline R que utiliza este paquete para a partir de datos 16S, asignar taxones con una base de datos de referencia, pasando por todo el proceso de filtrado, etc.
+
+[Descargar el documento R.](Supplementary_file_2_(R_script).R)
+
+Por otro lado, probé a utilizar distintas funciones el paquete [ShortRead](https://bioconductor.org/packages/release/bioc/vignettes/ShortRead/inst/doc/Overview.html#tab:table):
 -   nFilter()
 -   trimTaiklw()
 -   width()
-Estas permiten eliminar o filtrar lecturas en función de características como la presencia de N, la calidad o la longitud de las secuencias.
+Estas permiten eliminar o filtrar lecturas en función de características como la presencia de N, la calidad o la longitud de las secuencias. Existe un flujo de trabajo 
 
 ```{r, eval = FALSE}
   for (muestra in listadoMuestras){
