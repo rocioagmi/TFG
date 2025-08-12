@@ -61,34 +61,36 @@ library(dada2)
 library(QuasR)
 library(DT)
 
+# PRIMERO BÚSQUEDA PROGRAMÁTICA EN ENA
+  # El estudio que escojamos en la búsqueda será el que se introduzca a continuación para 
+  # la descarga automática de las muestras.
 
 # DESCARGA DE LOS DATOS
 source("FUNC/Descargas_ENA.R")
 nAcceso <- dlgInput(message = "Introduzca el número de acceso al proyecto ENA: ")$res
 descargas_ENA(nAcceso)
 
-
-
 # PREPROCESAMIENTO DE LOS DATOS
 
-#   Separamos las muestras de personas MS de Healthy
+  # Separamos las muestras de personas MS de Healthy
 listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
 muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
 muestrasHealty <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names = TRUE))
 
-#   Separamos las hebras R1 y R2
+  # Separamos las hebras R1 y R2
 MS_R1 <- muestrasMS[grepl("R1", muestrasMS)]
 MS_R2 <- muestrasMS[grepl("R2", muestrasMS)]
 Healty_R1 <- muestrasHealty[grepl("R1", muestrasHealty)]
 Healty_R2 <- muestrasHealty[grepl("R2", muestrasHealty)]
 
-# Informe con la calidad de las secuencias
+  # Genera un informe con la calidad de las secuencias
 source("FUNC/InformeCalidad.R")
 directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
 informeCalidad(directorioMuestras)
 
-# Filtramos muestras 
-# --- PACKAGE DADA2 ---
+  # Preprocesamiento de las muestras para mejorar la calidad 
+  
+  # --- PACKAGE DADA2 ---
 dir.create("INPUT/DATA/FILTRADAS")
 
 source("FUNC/FiltrarMuestras.R")
@@ -104,34 +106,14 @@ filtradasMS_R2 <- filtradasMS[grepl("R2", filtradasMS)]
 filtradasH_R1 <- filtradasHealty[grepl("R1", filtradasHealty)]
 filtradasH_R2 <- filtradasHealty[grepl("R2", filtradasHealty)]
 
-plotQualityProfile(filtradasMS_R1[12:14])
-plotQualityProfile(filtradasMS_R2[12:14])
-
-plotQualityProfile(filtradasH_R1[12:14])
-plotQualityProfile(filtradasH_R2[12:14])
-
-# --- PACKAGE SHORTREAD ---
+  # --- PACKAGE SHORTREAD ---
 source("FUNC/FiltrarMuestras.R")
 filtradoSR(listadoMuestras)
 
-# Evaluamos la calidad de las muestras filtradas
+  # Evalúa la calidad de las muestras ya filtradas
 source("FUNC/InformeCalidad.R")
 directorioFiltradas <- dir("INPUT/DATA/FILTRADAS", "\\.fastq\\.gz$", full = TRUE)
 informeCalidad(directorioFiltradas)
-
-# Dereplicación para eliminar posibles replicados de ADN
-derepM_R1 <- derepFastq(filtradasMS_R1, verbose = TRUE)
-derepM_R2 <- derepFastq(filtradasMS_R2, verbose = TRUE)
-
-derepH_R1 <- derepFastq(filtradasH_R1, verbose = TRUE) 
-derepH_R2 <- derepFastq(filtradasH_R2, verbose = TRUE)
-
-names(derepM_R1) <- filtradasMS_R1
-names(derepM_R2) <- filtradasMS_R2
-
-names(derepH_R1) <- filtradasH_R1
-names(derepH_R2) <- filtradasH_R2
-
 
 # ALMACENAMIENTO DE LOS DATOS EN UNA BASE DE DATOS MONGODB
 # Abrir consola y escribir mongodb
