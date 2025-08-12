@@ -60,6 +60,7 @@ library(TAF)
 library(dada2)
 library(QuasR)
 library(DT)
+library(Rqc)
 
 # PRIMERO BÚSQUEDA PROGRAMÁTICA EN ENA
   # El estudio que escojamos en la búsqueda será el que se introduzca a continuación para 
@@ -84,9 +85,17 @@ Healty_R1 <- muestrasHealty[grepl("R1", muestrasHealty)]
 Healty_R2 <- muestrasHealty[grepl("R2", muestrasHealty)]
 
   # Genera un informe con la calidad de las secuencias
+
+
+  # --- PACKAGE SHORTREAD ---
 source("FUNC/InformeCalidad.R")
 directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
-informeCalidad(directorioMuestras)
+informeCalidadSR(directorioMuestras)
+
+  # --- PACKAGE RQC ---
+source("FUNC/InformeCalidad.R")
+directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
+informeCalidadR(directorioMuestras)
 
   # Preprocesamiento de las muestras para mejorar la calidad 
   
