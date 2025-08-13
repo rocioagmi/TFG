@@ -50,6 +50,11 @@ BiocManager::install("Rqc")
 # DT
 install.packages("DT")
 
+# BiocParallel
+BiocManager::install("BiocParallel")
+
+BiocManager::install
+
 library(readr)
 library(dplyr)
 library(Biostrings)
@@ -61,6 +66,7 @@ library(dada2)
 library(QuasR)
 library(DT)
 library(Rqc)
+library(BiocParallel)
 
 # PRIMERO BÚSQUEDA PROGRAMÁTICA EN ENA
   # El estudio que escojamos en la búsqueda será el que se introduzca a continuación para 
@@ -94,8 +100,10 @@ informeCalidadSR(directorioMuestras)
 
   # --- PACKAGE RQC ---
 source("FUNC/InformeCalidad.R")
-directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
+directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)[1:2]
 informeCalidadR(directorioMuestras)
+
+sessionInfo("Rqc")
 
   # Preprocesamiento de las muestras para mejorar la calidad 
   
