@@ -95,11 +95,6 @@ source("FUNC/InformeCalidad.R")
 directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
 informeCalidadSR(directorioMuestras)
 
-  # --- PACKAGE RQC ---
-source("FUNC/InformeCalidad.R")
-directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
-informeCalidadR(directorioMuestras)
-
   # Preprocesamiento de las muestras para mejorar la calidad 
   
   # --- PACKAGE DADA2 ---
