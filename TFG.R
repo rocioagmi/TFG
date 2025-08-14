@@ -77,23 +77,21 @@ descargas_ENA(nAcceso)
 
 # PREPROCESAMIENTO DE LOS DATOS
 
-  # Separamos las muestras de personas MS de Healthy
+  # Genera un informe con la calidad de las secuencias
+source("FUNC/InformeCalidad.R")
+directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
+informeCalidadSR(directorioMuestras)
+
+# Separamos las muestras de personas MS de Healthy
 listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
 muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
 muestrasHealty <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names = TRUE))
 
-  # Separamos las hebras R1 y R2
+# Separamos las hebras R1 y R2
 MS_R1 <- muestrasMS[grepl("R1", muestrasMS)]
 MS_R2 <- muestrasMS[grepl("R2", muestrasMS)]
 Healty_R1 <- muestrasHealty[grepl("R1", muestrasHealty)]
 Healty_R2 <- muestrasHealty[grepl("R2", muestrasHealty)]
-
-  # Genera un informe con la calidad de las secuencias
-
-  # --- PACKAGE SHORTREAD ---
-source("FUNC/InformeCalidad.R")
-directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
-informeCalidadSR(directorioMuestras)
 
   # Preprocesamiento de las muestras para mejorar la calidad 
   
