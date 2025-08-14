@@ -53,8 +53,6 @@ install.packages("DT")
 # BiocParallel
 BiocManager::install("BiocParallel")
 
-BiocManager::install
-
 library(readr)
 library(dplyr)
 library(Biostrings)
@@ -92,7 +90,6 @@ Healty_R2 <- muestrasHealty[grepl("R2", muestrasHealty)]
 
   # Genera un informe con la calidad de las secuencias
 
-
   # --- PACKAGE SHORTREAD ---
 source("FUNC/InformeCalidad.R")
 directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
@@ -100,10 +97,8 @@ informeCalidadSR(directorioMuestras)
 
   # --- PACKAGE RQC ---
 source("FUNC/InformeCalidad.R")
-directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)[1:2]
+directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
 informeCalidadR(directorioMuestras)
-
-sessionInfo("Rqc")
 
   # Preprocesamiento de las muestras para mejorar la calidad 
   
