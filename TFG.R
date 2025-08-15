@@ -82,7 +82,12 @@ source("FUNC/InformeCalidad.R")
 directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
 informeCalidadSR(directorioMuestras)
 
-# Separamos las muestras de personas MS de Healthy
+source("FUNC/InformeCalidad.R")
+R1 <- sort(list.files("INPUT/DATA", pattern = "_R1_001.fastq.gz", full.names = TRUE))
+R2 <- sort(list.files("INPUT/DATA", pattern = "_R2_001.fastq.gz", full.names = TRUE))
+informeCalidadD(R1,R2)
+
+  # Separamos las muestras de personas MS de Healthy
 listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
 muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
 muestrasHealty <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names = TRUE))

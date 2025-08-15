@@ -3,3 +3,7 @@ informeCalidadSR <- function(directorioMuestras){
   browseURL(report(qaSummary)) 
 }
 
+informeCalidadD <- function(R1, R2){
+  plotQualityProfile(R1)
+  plotQualityProfile(R2)
+}
