@@ -80,7 +80,7 @@ descargas_ENA(nAcceso)
   # Informe de calidad
 source("FUNC/InformeCalidad.R")
 directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
-informeCalidadSR(directorioMuestras)
+informeCalidad(directorioMuestras)
 
   # Separa las muestras
 listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
