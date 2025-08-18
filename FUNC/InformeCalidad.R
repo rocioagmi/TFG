@@ -1,9 +1,6 @@
 informeCalidadSR <- function(directorioMuestras){
   qaSummary <- qa(directorioMuestras, type = "fastq")
-  browseURL(report(qaSummary)) 
+  report(qaSummary, dest = "INPUT/DATA/REPORT", type = "html")
+  browseURL(file.path("INPUT/DATA/REPORT", "index.html")) 
 }
 
-informeCalidadD <- function(R1, R2){
-  plotQualityProfile(R1)
-  plotQualityProfile(R2)
-}
