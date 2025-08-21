@@ -1,6 +1,6 @@
 informeCalidad <- function(directorioMuestras){
   qaSummary <- qa(directorioMuestras, type = "fastq")
-  report(qaSummary, dest = "INPUT/DATA/REPORT", type = "html")
-  browseURL(file.path("INPUT/DATA/REPORT", "index.html")) 
+  report(qaSummary, dest = "OUTPUT/REPORT", type = "html")
+  browseURL(file.path("OUTPUT/REPORT", "index.html")) 
 }
 
