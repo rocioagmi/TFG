@@ -6,14 +6,14 @@ library(dada2)
 
 filtrarMuestras <- function(R1, R2){
   
-  nombres_R1 <- file.path("INPUT/DATA/FILTRADAS", basename(R1))
-  nombres_R2 <- file.path("INPUT/DATA/FILTRADAS", basename(R2))
+  nombres_R1 <- file.path("OUTPUT/FILTRADO", basename(R1))
+  nombres_R2 <- file.path("OUTPUT/FILTRADO", basename(R2))
   
-  filterAndTrim(R1, nombres_R1, R2, nombres_R2, truncLen = c(240,160),
+  out <- filterAndTrim(R1, nombres_R1, R2, nombres_R2, truncLen = c(240,160),
                 trimLeft = c(10, 10), maxN = 0, maxEE = c(2,5), truncQ = 2, 
                 rm.phix = TRUE, compress = TRUE, multithread = FALSE)
   
-  write.csv(out, "INPUT/DATA/FILTRADAS/filter_summary.csv", row.names = FALSE)
+  write.csv(out, "OUTPUT/FILTRADO/filter_summary.csv", row.names = FALSE)
   
   return(list(nombres_R1 = nombres_R1, nombres_R2 = nombres_R2))
 }
@@ -34,7 +34,7 @@ filtradoSR <- function(listadoMuestras){
       fq <- trimTailw(fq, 2, "4", 2)
       fq <- fq[width(fq) >= 36]
       
-      destino <- file.path("INPUT/DATA/FILTRADAS", basename(muestra))
+      destino <- file.path("OUTPUT/FILTRADO", basename(muestra))
       
       if (!file.exists(destino)) {
         writeFastq(fq, destino, "w")
