@@ -78,6 +78,8 @@ descargas_ENA(nAcceso)
 # PREPROCESAMIENTO DE LOS DATOS
 
   # Informe de calidad
+dir.create("OUTPUT/REPORT")
+
 source("FUNC/InformeCalidad.R")
 directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
 informeCalidad(directorioMuestras)
@@ -94,14 +96,14 @@ Healty_R1 <- muestrasHealty[grepl("R1", muestrasHealty)]
 Healty_R2 <- muestrasHealty[grepl("R2", muestrasHealty)]
 
   # --- PACKAGE DADA2 ---
-dir.create("INPUT/DATA/FILTRADAS")
+dir.create("OUTPUT/FILTRADO")
 
 source("FUNC/FiltrarMuestras.R")
 filtradasM <- filtrarMuestras(MS_R1, MS_R2)
 filtradasH <- filtrarMuestras(Healty_R1, Healty_R2)
 
-filtradasMS <- sort(list.files("INPUT/DATA/FILTRADAS", pattern = "MS", full.names = TRUE))
-filtradasHealty <- sort(list.files("INPUT/DATA/FILTRADAS", pattern = "Healthy", full.names = TRUE))
+filtradasMS <- sort(list.files("OUTPUT/FILTRADO", pattern = "MS", full.names = TRUE))
+filtradasHealty <- sort(list.files("OUTPUT/FILTRADO", pattern = "Healthy", full.names = TRUE))
 
 filtradasMS_R1 <- filtradasMS[grepl("R1", filtradasMS)]
 filtradasMS_R2 <- filtradasMS[grepl("R2", filtradasMS)]
@@ -115,7 +117,7 @@ filtradoSR(listadoMuestras)
 
   # Evalúa la calidad de las muestras ya filtradas
 source("FUNC/InformeCalidad.R")
-directorioFiltradas <- dir("INPUT/DATA/FILTRADAS", "\\.fastq\\.gz$", full = TRUE)
+directorioFiltradas <- dir("OUTPUT/FILTRADO", "\\.fastq\\.gz$", full = TRUE)
 informeCalidad(directorioFiltradas)
 
   # REVISAR READ COUNTS, DEDUPLICACIÓN, CUTADAPT
