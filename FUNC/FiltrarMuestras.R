@@ -9,9 +9,11 @@ filtrarMuestras <- function(R1, R2){
   nombres_R1 <- file.path("INPUT/DATA/FILTRADAS", basename(R1))
   nombres_R2 <- file.path("INPUT/DATA/FILTRADAS", basename(R2))
   
-  filterAndTrim(R1, nombres_R1, R2, nombres_R2, truncLen = c(240,200),
-                trimLeft = c(15, 15), maxN = 0, maxEE = c(2,2), truncQ = 10, 
+  filterAndTrim(R1, nombres_R1, R2, nombres_R2, truncLen = c(240,160),
+                trimLeft = c(10, 10), maxN = 0, maxEE = c(2,5), truncQ = 2, 
                 rm.phix = TRUE, compress = TRUE, multithread = FALSE)
+  
+  write.csv(out, "INPUT/DATA/FILTRADAS/filter_summary.csv", row.names = FALSE)
   
   return(list(nombres_R1 = nombres_R1, nombres_R2 = nombres_R2))
 }

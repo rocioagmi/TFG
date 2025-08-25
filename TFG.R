@@ -82,19 +82,17 @@ source("FUNC/InformeCalidad.R")
 directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
 informeCalidad(directorioMuestras)
 
-  # Separa las muestras
+  # Filtrado
+
 listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
 muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
 muestrasHealty <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names = TRUE))
 
-# Separamos las hebras R1 y R2
 MS_R1 <- muestrasMS[grepl("R1", muestrasMS)]
 MS_R2 <- muestrasMS[grepl("R2", muestrasMS)]
 Healty_R1 <- muestrasHealty[grepl("R1", muestrasHealty)]
 Healty_R2 <- muestrasHealty[grepl("R2", muestrasHealty)]
 
-  # Preprocesamiento de las muestras para mejorar la calidad 
-  
   # --- PACKAGE DADA2 ---
 dir.create("INPUT/DATA/FILTRADAS")
 
@@ -119,6 +117,8 @@ filtradoSR(listadoMuestras)
 source("FUNC/InformeCalidad.R")
 directorioFiltradas <- dir("INPUT/DATA/FILTRADAS", "\\.fastq\\.gz$", full = TRUE)
 informeCalidad(directorioFiltradas)
+
+  # REVISAR READ COUNTS, DEDUPLICACIÓN, CUTADAPT
 
 # ALMACENAMIENTO DE LOS DATOS EN UNA BASE DE DATOS MONGODB
 # Abrir consola y escribir mongodb
