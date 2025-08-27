@@ -1,0 +1,1031 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'> 
+<head>
+  <meta http-equiv="Content-Type" 
+		content="text/html; charset=utf-8"></meta>
+  <link rel="stylesheet" type="text/css" href="QA.css" />
+  <title>ShortRead Quality Assessment</title>
+</head>
+<body>
+  <div id="header">
+	<div id="logo"><a href="http://bioconductor.org">
+		<img src="./image/bioclogo-small.gif" alt="Bioconductor" />
+	</a></div>
+	<div id="locationline"><p><ul id="pagelocation">
+		<li><em>ShortRead</em> Quality Assessment</li>
+	</ul></p></div>
+  </div>
+
+<h2>Overview</h2>
+<a name="Overview"></a>
+
+<p>
+  This document provides a quality assessment of Genome Analyzer
+  results. The assessment is meant to complement, rather than replace,
+  quality assessment available from the Genome Analyzer and its
+  documentation. The narrative interpretation is based on experience
+  of the package maintainer. It is applicable to results from the
+  'Genome Analyzer' hardware single-end module, configured to scan 300
+  tiles per lane. The 'control' results refered to below are from
+  analysis of PhiX-174 sequence provided by Illumina.
+</p>
+<h2>Run Summary</h2>
+<a name="Run-Summary"></a>
+
+<p>
+  Subsequent sections of the report use the following to identify figures and
+  other information.
+</p>
+<table border="0">
+<tr>
+<td></td><td>Key</td></tr>
+<tr>
+<td> Healthy01_23_L001_R1_001.fastq.gz</td><td>1</td></tr>
+<tr>
+<td> Healthy01_23_L001_R2_001.fastq.gz</td><td>2</td></tr>
+<tr>
+<td> Healthy02_18_L001_R1_001.fastq.gz</td><td>3</td></tr>
+<tr>
+<td> Healthy02_18_L001_R2_001.fastq.gz</td><td>4</td></tr>
+<tr>
+<td> Healthy03_9_L001_R1_001.fastq.gz</td><td>5</td></tr>
+<tr>
+<td> Healthy03_9_L001_R2_001.fastq.gz</td><td>6</td></tr>
+<tr>
+<td> Healthy04_1_L001_R1_001.fastq.gz</td><td>7</td></tr>
+<tr>
+<td> Healthy04_1_L001_R2_001.fastq.gz</td><td>8</td></tr>
+<tr>
+<td> Healthy05_12_L001_R1_001.fastq.gz</td><td>9</td></tr>
+<tr>
+<td> Healthy05_12_L001_R2_001.fastq.gz</td><td>10</td></tr>
+<tr>
+<td> Healthy06_7_L001_R1_001.fastq.gz</td><td>11</td></tr>
+<tr>
+<td> Healthy06_7_L001_R2_001.fastq.gz</td><td>12</td></tr>
+<tr>
+<td> Healthy07_3_L001_R1_001.fastq.gz</td><td>13</td></tr>
+<tr>
+<td> Healthy07_3_L001_R2_001.fastq.gz</td><td>14</td></tr>
+<tr>
+<td> Healthy08_14_L001_R1_001.fastq.gz</td><td>15</td></tr>
+<tr>
+<td> Healthy08_14_L001_R2_001.fastq.gz</td><td>16</td></tr>
+<tr>
+<td> Healthy09_5_L001_R1_001.fastq.gz</td><td>17</td></tr>
+<tr>
+<td> Healthy09_5_L001_R2_001.fastq.gz</td><td>18</td></tr>
+<tr>
+<td> Healthy10_24_L001_R1_001.fastq.gz</td><td>19</td></tr>
+<tr>
+<td> Healthy10_24_L001_R2_001.fastq.gz</td><td>20</td></tr>
+<tr>
+<td> Healthy11_10_L001_R1_001.fastq.gz</td><td>21</td></tr>
+<tr>
+<td> Healthy11_10_L001_R2_001.fastq.gz</td><td>22</td></tr>
+<tr>
+<td> Healthy12_11_L001_R1_001.fastq.gz</td><td>23</td></tr>
+<tr>
+<td> Healthy12_11_L001_R2_001.fastq.gz</td><td>24</td></tr>
+<tr>
+<td> Healthy13_15_L001_R1_001.fastq.gz</td><td>25</td></tr>
+<tr>
+<td> Healthy13_15_L001_R2_001.fastq.gz</td><td>26</td></tr>
+<tr>
+<td> Healthy14_16_L001_R1_001.fastq.gz</td><td>27</td></tr>
+<tr>
+<td> Healthy14_16_L001_R2_001.fastq.gz</td><td>28</td></tr>
+<tr>
+<td> Healthy15_19_L001_R1_001.fastq.gz</td><td>29</td></tr>
+<tr>
+<td> Healthy15_19_L001_R2_001.fastq.gz</td><td>30</td></tr>
+<tr>
+<td> Healthy16_9_L001_R1_001.fastq.gz</td><td>31</td></tr>
+<tr>
+<td> Healthy16_9_L001_R2_001.fastq.gz</td><td>32</td></tr>
+<tr>
+<td> Healthy17_12_L001_R1_001.fastq.gz</td><td>33</td></tr>
+<tr>
+<td> Healthy17_12_L001_R2_001.fastq.gz</td><td>34</td></tr>
+<tr>
+<td> Healthy18_8_L001_R1_001.fastq.gz</td><td>35</td></tr>
+<tr>
+<td> Healthy18_8_L001_R2_001.fastq.gz</td><td>36</td></tr>
+<tr>
+<td> Healthy19_2_L001_R1_001.fastq.gz</td><td>37</td></tr>
+<tr>
+<td> Healthy19_2_L001_R2_001.fastq.gz</td><td>38</td></tr>
+<tr>
+<td> Healthy20_1_L001_R1_001.fastq.gz</td><td>39</td></tr>
+<tr>
+<td> Healthy20_1_L001_R2_001.fastq.gz</td><td>40</td></tr>
+<tr>
+<td> Healthy21_22_L001_R1_001.fastq.gz</td><td>41</td></tr>
+<tr>
+<td> Healthy21_22_L001_R2_001.fastq.gz</td><td>42</td></tr>
+<tr>
+<td> Healthy22_15_L001_R1_001.fastq.gz</td><td>43</td></tr>
+<tr>
+<td> Healthy22_15_L001_R2_001.fastq.gz</td><td>44</td></tr>
+<tr>
+<td> Healthy23_14_L001_R1_001.fastq.gz</td><td>45</td></tr>
+<tr>
+<td> Healthy23_14_L001_R2_001.fastq.gz</td><td>46</td></tr>
+<tr>
+<td> Healthy24_24_L001_R1_001.fastq.gz</td><td>47</td></tr>
+<tr>
+<td> Healthy24_24_L001_R2_001.fastq.gz</td><td>48</td></tr>
+<tr>
+<td> Healthy25_26_L001_R1_001.fastq.gz</td><td>49</td></tr>
+<tr>
+<td> Healthy25_26_L001_R2_001.fastq.gz</td><td>50</td></tr>
+<tr>
+<td> Healthy26_4_L001_R1_001.fastq.gz</td><td>51</td></tr>
+<tr>
+<td> Healthy26_4_L001_R2_001.fastq.gz</td><td>52</td></tr>
+<tr>
+<td> Healthy27_29_L001_R1_001.fastq.gz</td><td>53</td></tr>
+<tr>
+<td> Healthy27_29_L001_R2_001.fastq.gz</td><td>54</td></tr>
+<tr>
+<td> Healthy28_3_L001_R1_001.fastq.gz</td><td>55</td></tr>
+<tr>
+<td> Healthy28_3_L001_R2_001.fastq.gz</td><td>56</td></tr>
+<tr>
+<td> Healthy29_17_L001_R1_001.fastq.gz</td><td>57</td></tr>
+<tr>
+<td> Healthy29_17_L001_R2_001.fastq.gz</td><td>58</td></tr>
+<tr>
+<td> Healthy30_19_L001_R1_001.fastq.gz</td><td>59</td></tr>
+<tr>
+<td> Healthy30_19_L001_R2_001.fastq.gz</td><td>60</td></tr>
+<tr>
+<td> Healthy31_20_L001_R1_001.fastq.gz</td><td>61</td></tr>
+<tr>
+<td> Healthy31_20_L001_R2_001.fastq.gz</td><td>62</td></tr>
+<tr>
+<td> Healthy32_27_L001_R1_001.fastq.gz</td><td>63</td></tr>
+<tr>
+<td> Healthy32_27_L001_R2_001.fastq.gz</td><td>64</td></tr>
+<tr>
+<td> Healthy33_10_L001_R1_001.fastq.gz</td><td>65</td></tr>
+<tr>
+<td> Healthy33_10_L001_R2_001.fastq.gz</td><td>66</td></tr>
+<tr>
+<td> Healthy34_8_L001_R1_001.fastq.gz</td><td>67</td></tr>
+<tr>
+<td> Healthy34_8_L001_R2_001.fastq.gz</td><td>68</td></tr>
+<tr>
+<td> Healthy35_7_L001_R1_001.fastq.gz</td><td>69</td></tr>
+<tr>
+<td> Healthy35_7_L001_R2_001.fastq.gz</td><td>70</td></tr>
+<tr>
+<td> Healthy36_9_L001_R1_001.fastq.gz</td><td>71</td></tr>
+<tr>
+<td> Healthy36_9_L001_R2_001.fastq.gz</td><td>72</td></tr>
+<tr>
+<td> Healthy37_1_L001_R1_001.fastq.gz</td><td>73</td></tr>
+<tr>
+<td> Healthy37_1_L001_R2_001.fastq.gz</td><td>74</td></tr>
+<tr>
+<td> Healthy38_11_L001_R1_001.fastq.gz</td><td>75</td></tr>
+<tr>
+<td> Healthy38_11_L001_R2_001.fastq.gz</td><td>76</td></tr>
+<tr>
+<td> Healthy39_10_L001_R1_001.fastq.gz</td><td>77</td></tr>
+<tr>
+<td> Healthy39_10_L001_R2_001.fastq.gz</td><td>78</td></tr>
+<tr>
+<td> MS01_8_L001_R1_001.fastq.gz</td><td>79</td></tr>
+<tr>
+<td> MS01_8_L001_R2_001.fastq.gz</td><td>80</td></tr>
+<tr>
+<td> MS02_13_L001_R1_001.fastq.gz</td><td>81</td></tr>
+<tr>
+<td> MS02_13_L001_R2_001.fastq.gz</td><td>82</td></tr>
+<tr>
+<td> MS03_17_L001_R1_001.fastq.gz</td><td>83</td></tr>
+<tr>
+<td> MS03_17_L001_R2_001.fastq.gz</td><td>84</td></tr>
+<tr>
+<td> MS04_22_L001_R1_001.fastq.gz</td><td>85</td></tr>
+<tr>
+<td> MS04_22_L001_R2_001.fastq.gz</td><td>86</td></tr>
+<tr>
+<td> MS05_20_L001_R1_001.fastq.gz</td><td>87</td></tr>
+<tr>
+<td> MS05_20_L001_R2_001.fastq.gz</td><td>88</td></tr>
+<tr>
+<td> MS06_21_L001_R1_001.fastq.gz</td><td>89</td></tr>
+<tr>
+<td> MS06_21_L001_R2_001.fastq.gz</td><td>90</td></tr>
+<tr>
+<td> MS07_4_L001_R1_001.fastq.gz</td><td>91</td></tr>
+<tr>
+<td> MS07_4_L001_R2_001.fastq.gz</td><td>92</td></tr>
+<tr>
+<td> MS08_2_L001_R1_001.fastq.gz</td><td>93</td></tr>
+<tr>
+<td> MS08_2_L001_R2_001.fastq.gz</td><td>94</td></tr>
+<tr>
+<td> MS09_6_L001_R1_001.fastq.gz</td><td>95</td></tr>
+<tr>
+<td> MS09_6_L001_R2_001.fastq.gz</td><td>96</td></tr>
+<tr>
+<td> MS10_11_L001_R1_001.fastq.gz</td><td>97</td></tr>
+<tr>
+<td> MS10_11_L001_R2_001.fastq.gz</td><td>98</td></tr>
+<tr>
+<td> MS11_13_L001_R1_001.fastq.gz</td><td>99</td></tr>
+<tr>
+<td> MS11_13_L001_R2_001.fastq.gz</td><td>100</td></tr>
+<tr>
+<td> MS12_25_L001_R1_001.fastq.gz</td><td>101</td></tr>
+<tr>
+<td> MS12_25_L001_R2_001.fastq.gz</td><td>102</td></tr>
+<tr>
+<td> MS13_7_L001_R1_001.fastq.gz</td><td>103</td></tr>
+<tr>
+<td> MS13_7_L001_R2_001.fastq.gz</td><td>104</td></tr>
+<tr>
+<td> MS14_28_L001_R1_001.fastq.gz</td><td>105</td></tr>
+<tr>
+<td> MS14_28_L001_R2_001.fastq.gz</td><td>106</td></tr>
+<tr>
+<td> MS15_23_L001_R1_001.fastq.gz</td><td>107</td></tr>
+<tr>
+<td> MS15_23_L001_R2_001.fastq.gz</td><td>108</td></tr>
+<tr>
+<td> MS16_21_L001_R1_001.fastq.gz</td><td>109</td></tr>
+<tr>
+<td> MS16_21_L001_R2_001.fastq.gz</td><td>110</td></tr>
+<tr>
+<td> MS17_30_L001_R1_001.fastq.gz</td><td>111</td></tr>
+<tr>
+<td> MS17_30_L001_R2_001.fastq.gz</td><td>112</td></tr>
+<tr>
+<td> MS18_16_L001_R1_001.fastq.gz</td><td>113</td></tr>
+<tr>
+<td> MS18_16_L001_R2_001.fastq.gz</td><td>114</td></tr>
+<tr>
+<td> MS19_5_L001_R1_001.fastq.gz</td><td>115</td></tr>
+<tr>
+<td> MS19_5_L001_R2_001.fastq.gz</td><td>116</td></tr>
+<tr>
+<td> MS20_6_L001_R1_001.fastq.gz</td><td>117</td></tr>
+<tr>
+<td> MS20_6_L001_R2_001.fastq.gz</td><td>118</td></tr>
+<tr>
+<td> MS21_18_L001_R1_001.fastq.gz</td><td>119</td></tr>
+<tr>
+<td> MS21_18_L001_R2_001.fastq.gz</td><td>120</td></tr>
+<tr>
+<td> MS22_2_L001_R1_001.fastq.gz</td><td>121</td></tr>
+<tr>
+<td> MS22_2_L001_R2_001.fastq.gz</td><td>122</td></tr>
+<tr>
+<td> MS23_3_L001_R1_001.fastq.gz</td><td>123</td></tr>
+<tr>
+<td> MS23_3_L001_R2_001.fastq.gz</td><td>124</td></tr>
+<tr>
+<td> MS24_4_L001_R1_001.fastq.gz</td><td>125</td></tr>
+<tr>
+<td> MS24_4_L001_R2_001.fastq.gz</td><td>126</td></tr>
+<tr>
+<td> MS25_5_L001_R1_001.fastq.gz</td><td>127</td></tr>
+<tr>
+<td> MS25_5_L001_R2_001.fastq.gz</td><td>128</td></tr>
+<tr>
+<td> MS26_6_L001_R1_001.fastq.gz</td><td>129</td></tr>
+<tr>
+<td> MS26_6_L001_R2_001.fastq.gz</td><td>130</td></tr>
+</table>
+
+
+<p>
+  Read counts. Filtered and aligned read counts are reported relative
+  to the total number of reads (clusters; if only filtered or aligned
+  reads are available, total read count is reported). Consult Genome
+  Analyzer documentation for official guidelines. From experience,
+  very good runs of the Genome Analyzer 'control' lane result in 25-30
+  million reads, with up to 95&#37; passing pre-defined filters.
+</p>
+<pre>
+  ShortRead:::.ppnCount(qa[["readCounts"]])
+</pre>
+<table border="0">
+<tr>
+<td></td><td>read</td><td>filter</td><td>aligned</td></tr>
+<tr>
+<td>1</td><td>70048</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>2</td><td>70048</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>3</td><td>54652</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>4</td><td>54652</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>5</td><td>62778</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>6</td><td>62778</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>7</td><td>53053</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>8</td><td>53053</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>9</td><td>56214</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>10</td><td>56214</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>11</td><td>57508</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>12</td><td>57508</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>13</td><td>51321</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>14</td><td>51321</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>15</td><td>58540</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>16</td><td>58540</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>17</td><td>79103</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>18</td><td>79103</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>19</td><td>43167</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>20</td><td>43167</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>21</td><td>46996</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>22</td><td>46996</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>23</td><td>47381</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>24</td><td>47381</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>25</td><td>38383</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>26</td><td>38383</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>27</td><td>48752</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>28</td><td>48752</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>29</td><td>48832</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>30</td><td>48832</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>31</td><td>49741</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>32</td><td>49741</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>33</td><td>61038</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>34</td><td>61038</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>35</td><td>120701</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>36</td><td>120701</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>37</td><td>102647</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>38</td><td>102647</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>39</td><td>105261</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>40</td><td>105261</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>41</td><td>77245</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>42</td><td>77245</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>43</td><td>65611</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>44</td><td>65611</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>45</td><td>68255</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>46</td><td>68255</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>47</td><td>39594</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>48</td><td>39594</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>49</td><td>25598</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>50</td><td>25598</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>51</td><td>69390</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>52</td><td>69390</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>53</td><td>62275</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>54</td><td>62275</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>55</td><td>49875</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>56</td><td>49875</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>57</td><td>52621</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>58</td><td>52621</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>59</td><td>47353</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>60</td><td>47353</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>61</td><td>60495</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>62</td><td>60495</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>63</td><td>73005</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>64</td><td>73005</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>65</td><td>44857</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>66</td><td>44857</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>67</td><td>18230</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>68</td><td>18230</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>69</td><td>17677</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>70</td><td>17677</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>71</td><td>14582</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>72</td><td>14582</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>73</td><td>12450</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>74</td><td>12450</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>75</td><td>16450</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>76</td><td>16450</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>77</td><td>19984</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>78</td><td>19984</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>79</td><td>50569</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>80</td><td>50569</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>81</td><td>40689</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>82</td><td>40689</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>83</td><td>46517</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>84</td><td>46517</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>85</td><td>61029</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>86</td><td>61029</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>87</td><td>52040</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>88</td><td>52040</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>89</td><td>39947</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>90</td><td>39947</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>91</td><td>38518</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>92</td><td>38518</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>93</td><td>38415</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>94</td><td>38415</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>95</td><td>37114</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>96</td><td>37114</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>97</td><td>87051</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>98</td><td>87051</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>99</td><td>55401</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>100</td><td>55401</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>101</td><td>50590</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>102</td><td>50590</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>103</td><td>146060</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>104</td><td>146060</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>105</td><td>79944</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>106</td><td>79944</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>107</td><td>59652</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>108</td><td>59652</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>109</td><td>67284</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>110</td><td>67284</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>111</td><td>54104</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>112</td><td>54104</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>113</td><td>56684</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>114</td><td>56684</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>115</td><td>54753</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>116</td><td>54753</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>117</td><td>70174</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>118</td><td>70174</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>119</td><td>67722</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>120</td><td>67722</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>121</td><td>20875</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>122</td><td>20875</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>123</td><td>18016</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>124</td><td>18016</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>125</td><td>22434</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>126</td><td>22434</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>127</td><td>14309</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>128</td><td>14309</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>129</td><td>19162</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr>
+<td>130</td><td>19162</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+</table>
+
+<pre>
+  ShortRead:::.plotReadCount(qa)
+</pre>
+<a href="./image/readCount.pdf"><img border="0" src="./image/readCount.jpg" alt="./image/readCount.jpg"></img></a>
+
+<p>
+  Base call frequency over all reads. Base frequencies should accurately
+  reflect the frequencies of the regions sequenced.
+</p>
+<pre>
+  ShortRead:::.plotNucleotideCount(qa)
+</pre> 
+<a href="./image/baseCalls.pdf"><img border="0" src="./image/baseCalls.jpg" alt="./image/baseCalls.jpg"></img></a>
+
+<p>
+  Overall read quality. Lanes with consistently good quality reads have
+  strong peaks at the right of the panel.
+</p>
+<pre>
+  df &lt;- qa[["readQualityScore"]]
+  ShortRead:::.plotReadQuality(df[df$type=="read",])
+</pre>
+<a href="./image/readQuality.pdf"><img border="0" src="./image/readQuality.jpg" alt="./image/readQuality.jpg"></img></a>
+<h2>Read Distribution</h2>
+<a name="Read-Distribution"></a>
+
+<p>
+  These curves show how coverage is distributed amongst
+  reads. Ideally, the cumulative proportion of reads will transition
+  sharply from low to high.
+</p>
+<p>
+  Portions to the left of the transition might correspond roughly to
+  sequencing or sample processing errors, and correspond to reads that
+  are represented relatively infrequently. 10-15&#37;; of reads in a
+  typical Genome Analyzer 'control' lane fall in this category.
+</p>
+<p>
+  Portions to the right of the transition represent reads that are
+  over-represented compared to expectation. These might include
+  inadvertently sequenced primer or adapter sequences, sequencing or
+  base calling artifacts (e.g., poly-A reads), or features of the
+  sample DNA (highly repeated regions) not adequately removed during
+  sample preparation. About 5&#37; of Genome Analyzer 'control' lane
+  reads fall in this category.
+</p>
+<p>
+  Broad transitions from low to high cumulative proportion of reads
+  may reflect sequencing bias or (perhaps intentional) features of
+  sample preparation resulting in non-uniform coverage. the transition
+  is about 5 times as wide as expected from uniform sampling across
+  the Genome Analyzer 'control' lane.
+</p>
+<pre>
+  df &lt;- qa[["sequenceDistribution"]]
+  ShortRead:::.plotReadOccurrences(df[df$type=="read",], cex=.5)
+</pre>
+<a href="./image/readOccurences.pdf"><img border="0" src="./image/readOccurences.jpg" alt="./image/readOccurences.jpg"></img></a>
+
+<p>
+  Common duplicate reads might provide clues to the source of
+  over-represented sequences. Some of these reads are filtered by the
+  alignment algorithms; other duplicate reads might point to sample
+  preparation issues.
+</p>
+<pre>
+  ShortRead:::.freqSequences(qa, "read")
+</pre>
+<table border="0">
+<tr>
+<td>sequence</td><td>count</td><td>lane</td></tr>
+<tr>
+<td>ACCCGCACTTTCGAGCTTCAGCGTCAGTTGCGCTCCAGTGAGCTGCCTTCGCAATCGGAGTTCTTCGTGATATCTAAGCATTTCACCGCTACACCACGAATTCCGCCCACTTTGTGCGTACTCAAGGAAACCAGTTCGCGCTGCAGTGCA</td><td>27377</td><td>36</td></tr>
+<tr>
+<td>CCGGGCGTTATCCGGATTTATTGGGTTTAAAGGGAGCGTAGGCCGGAGATTAAGCGTGTTGTGAAATGTAGACGCTCAACGTCTGCACTGCAGCGCGAACTGGTTTCCTTGAGTACGCACAAAGTGGGCGGAATTCGTGGTGTAGCGGTGAAATGCTTAGATATCACGAAGAACTCCGATTGCGAAGGCAGCTCACTGGAGCGCAACTGACGCTGAAGCTCGAAAGTGCG</td><td>19590</td><td>35</td></tr>
+<tr>
+<td>ACCCACACTTTCGAGCCTCAATGTCAGTTGCAGCTTAGCAGGCTGCCTTCGCAATCGGAGTTCTTCGTGATATCTAAGCATTTCACCGCTACACCACGAATTCCGCCTGCCTCAACTGCACTCAAGATATCCAGTATCAACTGCAATTTT</td><td>14793</td><td>2</td></tr>
+<tr>
+<td>ACCCACACTTTCGAGCATCAGTGTCAGTAACAGTCTAGTGAGCTGCCTTCGCAATCGGAGTTCTTCGTGATATCTAAGCATTTCACCGCTACACCACGAATTCCGCCCACCTCTACTGTACTCAAGACTGCCAGTTTCAACTGCAATTTT</td><td>13377</td><td>104</td></tr>
+<tr>
+<td>ACCCGCACTTTCGAGCTTCAGCGTCAGTTGCGCTCCAGTGAGCTGCCTTCGCAATCGGAGTTCTTCGTGATATCTAAGCATTTCACCGCTACACCACGAATTCCGCCCACTTTGTGCGTACTCAAGGAAACCAGTTCGCGCTGCAGTGCA</td><td>13278</td><td>12</td></tr>
+<tr>
+<td>CCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGAGCGTAGGTGGATTGTTAAGTCAGTTGTGAAAGTTTGCGGCTCAACCGTAAAATTGCAGTTGAAACTGGCAGTCTTGAGTACAGTAGAGGTGGGCGGAATTCGTGGTGTAGCGGTGAAATGCTTAGATATCACGAAGAACTCCGATTGCGAAGGCAGCTCACTAGACTGTTACTGACACTGATGCTCGAAAGTGTG</td><td>13237</td><td>103</td></tr>
+<tr>
+<td>CCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGAGCGTAGATGGATGTTTAAGTCAGTTGTGAAAGTTTGCGGCTCAACCGTAAAATTGCAGTTGATACTGGATATCTTGAGTGCAGTTGAGGCAGGCGGAATTCGTGGTGTAGCGGTGAAATGCTTAGATATCACGAAGAACTCCGATTGCGAAGGCAGCCTGCTAAGCTGCAACTGACATTGAGGCTCGAAAGTGTG</td><td>12756</td><td>1</td></tr>
+<tr>
+<td>ACCCACACTTTCGAGCCTCAATGTCAGTTGCAGCTTAGCAGGCTGCCTTCGCAATCGGAGTTCTTCGTGATATCTAAGCATTTCACCGCTACACCACGAATTCCGCCTGCCTCAACTGCACTCAAGATATCCAGTATCAACTGCAATTTT</td><td>12741</td><td>40</td></tr>
+<tr>
+<td>ACCCACACTTTCGAGCCTCAATGTCAGTTGCAGCTTAGCAGGCTGCCTTCGCAATCGGAGTTCTTCGTGATATCTAAGCATTTCACCGCTACACCACGAATTCCGCCTGCCTCAACTGCACTCAAGATATCCAGTATCAACTGCAATTTT</td><td>12302</td><td>110</td></tr>
+<tr>
+<td>CCGGGCGTTATCCGGATTTATTGGGTTTAAAGGGAGCGTAGGCCGGAGATTAAGCGTGTTGTGAAATGTAGATGCTCAACATCTGCACTGCAGCGCGAACTGGTTTCCTTGAGTACGCACAAAGTGGGCGGAATTCGTGGTGTAGCGGTGAAATGCTTAGATATCACGAAGAACTCCGATTGCGAAGGCAGCTCACTGGAGCGCAACTGACGCTGAAGCTCGAAAGTGCG</td><td>11693</td><td>35</td></tr>
+<tr>
+<td>ACCCACACTTTCGAGCCTCAATGTCAGTTGCAGCTTAGCAGGCTGCCTTCGCAATCGGAGTTCTTCGTGATATCTAAGCATTTCACCGCTACACCACGAATTCCGCCTGCCTCAACTGCACTCAAGATATCCAGTATCAACTGCAATTTT</td><td>11668</td><td>118</td></tr>
+<tr>
+<td>ACCCACACTTTCGAGCCTCAATGTCAGTTGCAGCTTAGCAGGCTGCCTTCGCAATCGGAGTTCTTCGTGATATCTAAGCATTTCACCGCTACACCACGAATTCCGCCTGCCTCAACTGCACTCAAGATATCCAGTATCAACTGCAATTTT</td><td>11629</td><td>106</td></tr>
+<tr>
+<td>ACCCACACTTTCGAGCCTCAATGTCAGTTGCAGCTTAGCAGGCTGCCTTCGCAATCGGAGTTCTTCGTGATATCTAAGCATTTCACCGCTACACCACGAATTCCGCCTGCCTCAACTGCACTCAAGATATCCAGTATCAACTGCAATTTT</td><td>11626</td><td>86</td></tr>
+<tr>
+<td>CCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGAGCGTAGATGGATGTTTAAGTCAGTTGTGAAAGTTTGCGGCTCAACCGTAAAATTGCAGTTGATACTGGATATCTTGAGTGCAGTTGAGGCAGGCGGAATTCGTGGTGTAGCGGTGAAATGCTTAGATATCACGAAGAACTCCGATTGCGAAGGCAGCCTGCTAAGCTGCAACTGACATTGAGGCTCGAAAGTGTG</td><td>10819</td><td>85</td></tr>
+<tr>
+<td>ACCCACACTTTCGAGCCTCAATGTCAGTTGCAGCTTAGCAGGCTGCCTTCGCAATCGGAGTTCTTCGTGATATCTAAGCATTTCACCGCTACACCACGAATTCCGCCTGCCTCAACTGCACTCAAGATATCCAGTATCAACTGCAATTTT</td><td>10570</td><td>98</td></tr>
+<tr>
+<td>CCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGAGCGTAGATGGATGTTTAAGTCAGTTGTGAAAGTTTGCGGCTCAACCGTAAAATTGCAGTTGATACTGGATATCTTGAGTGCAGTTGAGGCAGGCGGAATTCGTGGTGTAGCGGTGAAATGCTTAGATATCACGAAGAACTCCGATTGCGAAGGCAGCCTGCTAAGCTGCAACTGACATTGAGGCTCGAAAGTGTG</td><td>10408</td><td>39</td></tr>
+<tr>
+<td>CCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGAGCGTAGATGGATGTTTAAGTCAGTTGTGAAAGTTTGCGGCTCAACCGTAAAATTGCAGTTGATACTGGATATCTTGAGTGCAGTTGAGGCAGGCGGAATTCGTGGTGTAGCGGTGAAATGCTTAGATATCACGAAGAACTCCGATTGCGAAGGCAGCCTGCTAAGCTGCAACTGACATTGAGGCTCGAAAGTGTG</td><td>10381</td><td>109</td></tr>
+<tr>
+<td>GCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGAGCGCAGACGGGTCGTTAAGTCAGCTGTGAAAGTTTGGGGCTCAACCTTAAAATTGCAGTTGATACTGGCGTCCTTGAGTGCGGTTGAGGTGTGCGGAATTCGTGGTGTAGCGGTGAAATGCTTAGATATCACGAAGAACTCCGATTGCGAAGGCAGCACACTAAGCCGTAACTGACGTTCATGCTCGAAAGTGTG</td><td>10141</td><td>63</td></tr>
+<tr>
+<td>CCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGAGCGTAGATGGATGTTTAAGTCAGTTGTGAAAGTTTGCGGCTCAACCGTAAAATTGCAGTTGATACTGGATATCTTGAGTGCAGTTGAGGCAGGCGGAATTCGTGGTGTAGCGGTGAAATGCTTAGATATCACGAAGAACTCCGATTGCGAAGGCAGCCTGCTAAGCTGCAACTGACATTGAGGCTCGAAAGTGTG</td><td>10130</td><td>117</td></tr>
+<tr>
+<td>GCGAGCGTTATCCGGATTTATTGGGTTTAAAGGGAGCGCAGGCTGCGAGGCAAGTCAGCGGTCAAATGTCGGGGCTCAACCCCGGCCTGCCGTTGAAACTGTCTTGCTAGAGTTCGAGTGAGGTATGCGGAATGCGTTGTGTAGCGGTGAAATGCATAGATATGACGCAGAACTCCGATTGCGAAGGCAGCATACCAACTCGCGACTGACGCTGAGGCTCGAAAGCGTGG</td><td>10058</td><td>103</td></tr>
+</table>
+
+
+<p>
+  Common duplicate reads after filtering
+</p>
+<pre>
+  ShortRead:::.freqSequences(qa, "filtered")
+</pre>
+<pre>NA</pre>
+
+<p>
+  Common aligned duplicate reads are
+</p>
+<pre>
+  ShortRead:::.freqSequences(qa, "aligned")
+</pre>
+<pre>NA</pre>
+<h2>Cycle-Specific Base Calls and Read Quality</h2>
+<a name="Cycle-Specific-Base-Calls-and-Read-Quality"></a>
+
+<p>
+Per-cycle base call should usually be approximately uniform across
+cycles. Genome Analyzer `control' lane results often show a deline in
+A and increase in T as cycles progress. This is likely an artifact of
+the underlying technology.
+</p>
+<pre>
+  perCycle &lt;- qa[["perCycle"]]
+  ShortRead:::.plotCycleBaseCall(perCycle$baseCall)
+</pre>
+<a href="./image/perCycleBaseCall.pdf"><img border="0" src="./image/perCycleBaseCall.jpg" alt="./image/perCycleBaseCall.jpg"></img></a>
+
+<p>
+Per-cycle quality score. Reported quality scores are `calibrated',
+i.e., incorporating phred-like adjustments following sequence
+alignment. These typically decline with cycle, in an accelerating
+manner. Abrupt transitions in quality between cycles toward the end of
+the read might result when only some of the cycles are used for
+alignment: the cycles included in the alignment are calibrated more
+effectively than the reads excluded from the alignment.
+</p>
+<p>
+The reddish lines are quartiles (solid: median, dotted: 25, 75), the green line
+is the mean. Shading is proporitional to number of reads.
+</p>
+<pre>
+  perCycle &lt;- qa[["perCycle"]]
+  ShortRead:::.plotCycleQuality(perCycle$quality)
+</pre>
+<a href="./image/perCycleQuality.pdf"><img border="0" src="./image/perCycleQuality.jpg" alt="./image/perCycleQuality.jpg"></img></a>
+<h2>Adapter Contamination</h2>
+<a name="Adapter-Contamination"></a>
+
+<p>
+ Adapter contamination is defined here as 
+ non-genetic sequences attached at either or both ends 
+ of the reads. The 'contamination' measure is
+ the number of reads with a right or left match to the adapter
+ sequence over the total number of reads. Mismatch rates
+ are 10&#37; on the left and 20&#37; on the right with a
+ minimum overlap of 10 nt. 
+</p>
+<pre>
+  ShortRead:::.ppnCount(qa[["adapterContamination"]])
+</pre>
+<table border="0">
+<tr>
+<td></td><td>contamination</td></tr>
+<tr>
+<td>1</td><td>NA</td></tr>
+<tr>
+<td>2</td><td>NA</td></tr>
+<tr>
+<td>3</td><td>NA</td></tr>
+<tr>
+<td>4</td><td>NA</td></tr>
+<tr>
+<td>5</td><td>NA</td></tr>
+<tr>
+<td>6</td><td>NA</td></tr>
+<tr>
+<td>7</td><td>NA</td></tr>
+<tr>
+<td>8</td><td>NA</td></tr>
+<tr>
+<td>9</td><td>NA</td></tr>
+<tr>
+<td>10</td><td>NA</td></tr>
+<tr>
+<td>11</td><td>NA</td></tr>
+<tr>
+<td>12</td><td>NA</td></tr>
+<tr>
+<td>13</td><td>NA</td></tr>
+<tr>
+<td>14</td><td>NA</td></tr>
+<tr>
+<td>15</td><td>NA</td></tr>
+<tr>
+<td>16</td><td>NA</td></tr>
+<tr>
+<td>17</td><td>NA</td></tr>
+<tr>
+<td>18</td><td>NA</td></tr>
+<tr>
+<td>19</td><td>NA</td></tr>
+<tr>
+<td>20</td><td>NA</td></tr>
+<tr>
+<td>21</td><td>NA</td></tr>
+<tr>
+<td>22</td><td>NA</td></tr>
+<tr>
+<td>23</td><td>NA</td></tr>
+<tr>
+<td>24</td><td>NA</td></tr>
+<tr>
+<td>25</td><td>NA</td></tr>
+<tr>
+<td>26</td><td>NA</td></tr>
+<tr>
+<td>27</td><td>NA</td></tr>
+<tr>
+<td>28</td><td>NA</td></tr>
+<tr>
+<td>29</td><td>NA</td></tr>
+<tr>
+<td>30</td><td>NA</td></tr>
+<tr>
+<td>31</td><td>NA</td></tr>
+<tr>
+<td>32</td><td>NA</td></tr>
+<tr>
+<td>33</td><td>NA</td></tr>
+<tr>
+<td>34</td><td>NA</td></tr>
+<tr>
+<td>35</td><td>NA</td></tr>
+<tr>
+<td>36</td><td>NA</td></tr>
+<tr>
+<td>37</td><td>NA</td></tr>
+<tr>
+<td>38</td><td>NA</td></tr>
+<tr>
+<td>39</td><td>NA</td></tr>
+<tr>
+<td>40</td><td>NA</td></tr>
+<tr>
+<td>41</td><td>NA</td></tr>
+<tr>
+<td>42</td><td>NA</td></tr>
+<tr>
+<td>43</td><td>NA</td></tr>
+<tr>
+<td>44</td><td>NA</td></tr>
+<tr>
+<td>45</td><td>NA</td></tr>
+<tr>
+<td>46</td><td>NA</td></tr>
+<tr>
+<td>47</td><td>NA</td></tr>
+<tr>
+<td>48</td><td>NA</td></tr>
+<tr>
+<td>49</td><td>NA</td></tr>
+<tr>
+<td>50</td><td>NA</td></tr>
+<tr>
+<td>51</td><td>NA</td></tr>
+<tr>
+<td>52</td><td>NA</td></tr>
+<tr>
+<td>53</td><td>NA</td></tr>
+<tr>
+<td>54</td><td>NA</td></tr>
+<tr>
+<td>55</td><td>NA</td></tr>
+<tr>
+<td>56</td><td>NA</td></tr>
+<tr>
+<td>57</td><td>NA</td></tr>
+<tr>
+<td>58</td><td>NA</td></tr>
+<tr>
+<td>59</td><td>NA</td></tr>
+<tr>
+<td>60</td><td>NA</td></tr>
+<tr>
+<td>61</td><td>NA</td></tr>
+<tr>
+<td>62</td><td>NA</td></tr>
+<tr>
+<td>63</td><td>NA</td></tr>
+<tr>
+<td>64</td><td>NA</td></tr>
+<tr>
+<td>65</td><td>NA</td></tr>
+<tr>
+<td>66</td><td>NA</td></tr>
+<tr>
+<td>67</td><td>NA</td></tr>
+<tr>
+<td>68</td><td>NA</td></tr>
+<tr>
+<td>69</td><td>NA</td></tr>
+<tr>
+<td>70</td><td>NA</td></tr>
+<tr>
+<td>71</td><td>NA</td></tr>
+<tr>
+<td>72</td><td>NA</td></tr>
+<tr>
+<td>73</td><td>NA</td></tr>
+<tr>
+<td>74</td><td>NA</td></tr>
+<tr>
+<td>75</td><td>NA</td></tr>
+<tr>
+<td>76</td><td>NA</td></tr>
+<tr>
+<td>77</td><td>NA</td></tr>
+<tr>
+<td>78</td><td>NA</td></tr>
+<tr>
+<td>79</td><td>NA</td></tr>
+<tr>
+<td>80</td><td>NA</td></tr>
+<tr>
+<td>81</td><td>NA</td></tr>
+<tr>
+<td>82</td><td>NA</td></tr>
+<tr>
+<td>83</td><td>NA</td></tr>
+<tr>
+<td>84</td><td>NA</td></tr>
+<tr>
+<td>85</td><td>NA</td></tr>
+<tr>
+<td>86</td><td>NA</td></tr>
+<tr>
+<td>87</td><td>NA</td></tr>
+<tr>
+<td>88</td><td>NA</td></tr>
+<tr>
+<td>89</td><td>NA</td></tr>
+<tr>
+<td>90</td><td>NA</td></tr>
+<tr>
+<td>91</td><td>NA</td></tr>
+<tr>
+<td>92</td><td>NA</td></tr>
+<tr>
+<td>93</td><td>NA</td></tr>
+<tr>
+<td>94</td><td>NA</td></tr>
+<tr>
+<td>95</td><td>NA</td></tr>
+<tr>
+<td>96</td><td>NA</td></tr>
+<tr>
+<td>97</td><td>NA</td></tr>
+<tr>
+<td>98</td><td>NA</td></tr>
+<tr>
+<td>99</td><td>NA</td></tr>
+<tr>
+<td>100</td><td>NA</td></tr>
+<tr>
+<td>101</td><td>NA</td></tr>
+<tr>
+<td>102</td><td>NA</td></tr>
+<tr>
+<td>103</td><td>NA</td></tr>
+<tr>
+<td>104</td><td>NA</td></tr>
+<tr>
+<td>105</td><td>NA</td></tr>
+<tr>
+<td>106</td><td>NA</td></tr>
+<tr>
+<td>107</td><td>NA</td></tr>
+<tr>
+<td>108</td><td>NA</td></tr>
+<tr>
+<td>109</td><td>NA</td></tr>
+<tr>
+<td>110</td><td>NA</td></tr>
+<tr>
+<td>111</td><td>NA</td></tr>
+<tr>
+<td>112</td><td>NA</td></tr>
+<tr>
+<td>113</td><td>NA</td></tr>
+<tr>
+<td>114</td><td>NA</td></tr>
+<tr>
+<td>115</td><td>NA</td></tr>
+<tr>
+<td>116</td><td>NA</td></tr>
+<tr>
+<td>117</td><td>NA</td></tr>
+<tr>
+<td>118</td><td>NA</td></tr>
+<tr>
+<td>119</td><td>NA</td></tr>
+<tr>
+<td>120</td><td>NA</td></tr>
+<tr>
+<td>121</td><td>NA</td></tr>
+<tr>
+<td>122</td><td>NA</td></tr>
+<tr>
+<td>123</td><td>NA</td></tr>
+<tr>
+<td>124</td><td>NA</td></tr>
+<tr>
+<td>125</td><td>NA</td></tr>
+<tr>
+<td>126</td><td>NA</td></tr>
+<tr>
+<td>127</td><td>NA</td></tr>
+<tr>
+<td>128</td><td>NA</td></tr>
+<tr>
+<td>129</td><td>NA</td></tr>
+<tr>
+<td>130</td><td>NA</td></tr>
+</table>
+
+
+  <hr />
+  <p>
+	Wed Aug 27 12:09:56 2025; ShortRead v. 1.62.0<br />
+	Report template: Martin Morgan
+  </p>
+</body>
+</html>
