@@ -98,8 +98,25 @@ Healthy_R1 <- muestrasHealthy[grepl("R1", muestrasHealthy)]
 Healthy_R2 <- muestrasHealthy[grepl("R2", muestrasHealthy)]
 
   # --- PACKAGE DADA2 ---
+source("FUNC/FiltrarMuestras.R")
+filtrarMuestras(MS_R1, MS_R2)
+filtrarMuestras(Healthy_R1, Healthy_R2)
 
+filtradasMS <- sort(list.files("OUTPUT/FILTRADO", pattern = "MS", full.names = TRUE))
+filtradasHealthy <-  sort(list.files("OUTPUT/FILTRADO", pattern = "Healthy", full.names = TRUE))
 
+filtradasMS_R1 <- filtradasMS[grepl("R1", filtradasMS)]
+filtradasMS_R2 <- filtradasMS[grepl("R2", filtradasMS)]
+
+filtradasH_R1 <- filtradasHealthy[grepl("R1", filtradasHealthy)]
+filtradasH_R2 <- filtradasHealthy[grepl("R2", filtradasHealthy)]
+
+# Confirmar la calidad
+plotQualityProfile(filtradasMS_R1[1:10])
+plotQualityProfile(filtradasMS_R2[1:10])
+
+plotQualityProfile(filtradasH_R1[1:10])
+plotQualityProfile(filtradasH_R2[1:10])
 
   # --- PACKAGE SHORTREAD ---
 source("FUNC/FiltrarMuestras.R")
