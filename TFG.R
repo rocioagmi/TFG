@@ -132,14 +132,24 @@ plotQualityProfile(filtradasMS_R2[1:10])
 plotQualityProfile(filtradasH_R1[1:10])
 plotQualityProfile(filtradasH_R2[1:10])
 
+
+  # Error Rates
+err_R1 <- learnErrors(filtradoR1)
+err_R2 <- learnErrors(filtradoR2)
+
   # Dereplicar y deduplicar
 derep_R1 <- derepFastq(filtradoR1, verbose = TRUE)
 derep_R2 <- derepFastq(filtradoR2, verbose = TRUE)
 
-#dedup_R1 <- lapply(derep_R1, collapseNoMismatch)
-#dedup_R2 <- lapply(derep_R2, collapseNoMismatch)
+  # Asignación de nombres
+nombres <- sapply(strsplit(basename(filtradoR1), "_"), `[`, 1)
+  
+names(derep_R1) <- nombres
+names(derep_R2) <- nombres
 
-
+  # Aplica algoritmo DADA2
+dadaR1 <- dada(derep_R1, err = err_R1, multithread = FALSE)
+dadaR2 <- dada(derep_R2, err = err_R2, multithread = FALSE)
 
 # ALMACENAMIENTO DE LOS DATOS EN UNA BASE DE DATOS MONGODB
 # Abrir consola y escribir mongodb
