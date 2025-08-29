@@ -84,8 +84,8 @@ source("FUNC/InformeCalidad.R")
 directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
 informeCalidad(directorioMuestras)
 
-  # Filtrado
 
+  # Filtrado DADA2
 listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
 
 muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
@@ -97,13 +97,17 @@ MS_R2 <- muestrasMS[grepl("R2", muestrasMS)]
 Healthy_R1 <- muestrasHealthy[grepl("R1", muestrasHealthy)]
 Healthy_R2 <- muestrasHealthy[grepl("R2", muestrasHealthy)]
 
-  # --- PACKAGE DADA2 ---
 source("FUNC/FiltrarMuestras.R")
 filtrarMuestras(MS_R1, MS_R2)
 filtrarMuestras(Healthy_R1, Healthy_R2)
 
+listadoFiltrado <- sort(list.files("OUTPUT/FILTRADO", pattern = "\\.fastq\\.gz$", full.names = TRUE))
+
 filtradasMS <- sort(list.files("OUTPUT/FILTRADO", pattern = "MS", full.names = TRUE))
 filtradasHealthy <-  sort(list.files("OUTPUT/FILTRADO", pattern = "Healthy", full.names = TRUE))
+
+filtradoR1 <- listadoFiltrado[grepl("R1", listadoFiltrado)]
+filtradoR2 <- listadoFiltrado[grepl("R2", listadoFiltrado)]
 
 filtradasMS_R1 <- filtradasMS[grepl("R1", filtradasMS)]
 filtradasMS_R2 <- filtradasMS[grepl("R2", filtradasMS)]
@@ -111,24 +115,31 @@ filtradasMS_R2 <- filtradasMS[grepl("R2", filtradasMS)]
 filtradasH_R1 <- filtradasHealthy[grepl("R1", filtradasHealthy)]
 filtradasH_R2 <- filtradasHealthy[grepl("R2", filtradasHealthy)]
 
-# Confirmar la calidad
-plotQualityProfile(filtradasMS_R1[1:10])
-plotQualityProfile(filtradasMS_R2[1:10])
+  # Filtrado SHORTREAD
+#source("FUNC/FiltrarMuestras.R")
+#filtradoSR(listadoMuestras)
 
-plotQualityProfile(filtradasH_R1[1:10])
-plotQualityProfile(filtradasH_R2[1:10])
-
-  # --- PACKAGE SHORTREAD ---
-source("FUNC/FiltrarMuestras.R")
-filtradoSR(listadoMuestras)
 
   # Evalúa la calidad de las muestras ya filtradas
 source("FUNC/InformeCalidad.R")
 directorioFiltradas <- dir("OUTPUT/FILTRADO", "\\.fastq\\.gz$", full = TRUE)
 informeCalidad(directorioFiltradas)
 
+    # Confirmar la calidad
+plotQualityProfile(filtradasMS_R1[1:10])
+plotQualityProfile(filtradasMS_R2[1:10])
 
-  # REVISAR READ COUNTS, DEDUPLICACIÓN, CUTADAPT
+plotQualityProfile(filtradasH_R1[1:10])
+plotQualityProfile(filtradasH_R2[1:10])
+
+  # Dereplicar y deduplicar
+derep_R1 <- derepFastq(filtradoR1, verbose = TRUE)
+derep_R2 <- derepFastq(filtradoR2, verbose = TRUE)
+
+#dedup_R1 <- lapply(derep_R1, collapseNoMismatch)
+#dedup_R2 <- lapply(derep_R2, collapseNoMismatch)
+
+
 
 # ALMACENAMIENTO DE LOS DATOS EN UNA BASE DE DATOS MONGODB
 # Abrir consola y escribir mongodb
