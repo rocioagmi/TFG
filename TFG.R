@@ -65,6 +65,7 @@ library(QuasR)
 library(DT)
 library(Rqc)
 library(BiocParallel)
+library(ggplot2)
 
 # PRIMERO BÚSQUEDA PROGRAMÁTICA EN ENA
   # El estudio que escojamos en la búsqueda será el que se introduzca a continuación para 
@@ -90,7 +91,7 @@ listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", ful
 
 muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
 muestrasHealthy <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names = TRUE))
-
+print(muestrasMS)
 MS_R1 <- muestrasMS[grepl("R1", muestrasMS)]
 MS_R2 <- muestrasMS[grepl("R2", muestrasMS)]
 
@@ -125,13 +126,6 @@ source("FUNC/InformeCalidad.R")
 directorioFiltradas <- dir("OUTPUT/FILTRADO", "\\.fastq\\.gz$", full = TRUE)
 informeCalidad(directorioFiltradas)
 
-    # Confirmar la calidad
-plotQualityProfile(filtradasMS_R1[1:10])
-plotQualityProfile(filtradasMS_R2[1:10])
-
-plotQualityProfile(filtradasH_R1[1:10])
-plotQualityProfile(filtradasH_R2[1:10])
-
 
   # Error Rates
 err_R1 <- learnErrors(filtradoR1)
@@ -150,6 +144,9 @@ names(derep_R2) <- nombres
   # Aplica algoritmo DADA2
 dadaR1 <- dada(derep_R1, err = err_R1, multithread = FALSE)
 dadaR2 <- dada(derep_R2, err = err_R2, multithread = FALSE)
+
+  # Junta las secuencias R1 y R2
+union <- mergePairs(dadaR1, derep_R1, dadaR2, derep_R2, verbose = TRUE, justConcatenate = TRUE)
 
 # ALMACENAMIENTO DE LOS DATOS EN UNA BASE DE DATOS MONGODB
 # Abrir consola y escribir mongodb
