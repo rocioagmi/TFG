@@ -76,28 +76,33 @@ source("FUNC/Descargas_ENA.R")
 nAcceso <- dlgInput(message = "Introduzca el número de acceso al proyecto ENA: ")$res
 descargas_ENA(nAcceso)
 
+
 # PREPROCESAMIENTO DE LOS DATOS
 
-  # Informe de calidad
-dir.create("OUTPUT/REPORT")
-
-source("FUNC/InformeCalidad.R")
-directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
-informeCalidad(directorioMuestras)
-
-
-  # Filtrado DADA2
 listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
 
 muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
 muestrasHealthy <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names = TRUE))
-print(muestrasMS)
+
 MS_R1 <- muestrasMS[grepl("R1", muestrasMS)]
 MS_R2 <- muestrasMS[grepl("R2", muestrasMS)]
 
 Healthy_R1 <- muestrasHealthy[grepl("R1", muestrasHealthy)]
 Healthy_R2 <- muestrasHealthy[grepl("R2", muestrasHealthy)]
 
+  # Informe de calidad
+dir.create("OUTPUT/REPORT")
+dir.create("OUTPUT/FIGURES")
+
+source("FUNC/InformeCalidad.R")
+#directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
+informeCalidad(listadoMuestras)
+
+source("FUNC/GraficosCalidad.R")
+graficosCalidad(MS_R1,MS_R2)
+graficosCalidad(Healthy_R1,Healthy_R2)
+
+  # Filtrado DADA2
 source("FUNC/FiltrarMuestras.R")
 filtrarMuestras(MS_R1, MS_R2)
 filtrarMuestras(Healthy_R1, Healthy_R2)
