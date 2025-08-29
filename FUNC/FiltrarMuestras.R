@@ -17,6 +17,7 @@ filtrarMuestras <- function(R1, R2){
 }
 
 
+
 filtradoSR <- function(listadoMuestras){
   for (muestra in listadoMuestras){
     
