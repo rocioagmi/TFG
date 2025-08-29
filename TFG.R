@@ -143,7 +143,7 @@ derep_R2 <- derepFastq(filtradoR2, verbose = TRUE)
 
   # Asignación de nombres
 nombres <- sapply(strsplit(basename(filtradoR1), "_"), `[`, 1)
-  
+   
 names(derep_R1) <- nombres
 names(derep_R2) <- nombres
 
