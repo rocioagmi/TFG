@@ -102,6 +102,7 @@ source("FUNC/GraficosCalidad.R")
 graficosCalidad(MS_R1,MS_R2)
 graficosCalidad(Healthy_R1,Healthy_R2)
 
+
   # Filtrado DADA2
 source("FUNC/FiltrarMuestras.R")
 filtrarMuestras(MS_R1, MS_R2)
@@ -131,6 +132,9 @@ source("FUNC/InformeCalidad.R")
 directorioFiltradas <- dir("OUTPUT/FILTRADO", "\\.fastq\\.gz$", full = TRUE)
 informeCalidad(directorioFiltradas)
 
+source("FUNC/GraficosCalidad.R")
+graficosCalidad(filtradasMS_R1, filtradasMS_R2)
+graficosCalidad(filtradasHealthy_R1, filtradasHealthy_R2)
 
   # Error Rates
 err_R1 <- learnErrors(filtradoR1)
