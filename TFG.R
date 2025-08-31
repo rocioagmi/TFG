@@ -129,8 +129,7 @@ filtradasH_R2 <- filtradasHealthy[grepl("R2", filtradasHealthy)]
 
   # Evalúa la calidad de las muestras ya filtradas
 source("FUNC/InformeCalidad.R")
-directorioFiltradas <- dir("OUTPUT/FILTRADO", "\\.fastq\\.gz$", full = TRUE)
-informeCalidad(directorioFiltradas)
+informeCalidad(listadoFiltrado)
 
 source("FUNC/GraficosCalidad.R")
 graficosCalidad(filtradasMS_R1, filtradasMS_R2)
@@ -156,6 +155,8 @@ dadaR2 <- dada(derep_R2, err = err_R2, multithread = FALSE)
 
   # Junta las secuencias R1 y R2
 union <- mergePairs(dadaR1, derep_R1, dadaR2, derep_R2, verbose = TRUE, justConcatenate = TRUE)
+
+
 
 # ALMACENAMIENTO DE LOS DATOS EN UNA BASE DE DATOS MONGODB
 # Abrir consola y escribir mongodb
