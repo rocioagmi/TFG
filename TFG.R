@@ -93,6 +93,7 @@ Healthy_R2 <- muestrasHealthy[grepl("R2", muestrasHealthy)]
   # Informe de calidad
 dir.create("OUTPUT/REPORT")
 dir.create("OUTPUT/FIGURES")
+dir.create("OUTPUT/RDS")
 
 source("FUNC/InformeCalidad.R")
 #directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
@@ -135,13 +136,16 @@ source("FUNC/GraficosCalidad.R")
 graficosCalidad(filtradasMS_R1, filtradasMS_R2)
 graficosCalidad(filtradasHealthy_R1, filtradasHealthy_R2)
 
+
   # Error Rates
 err_R1 <- learnErrors(filtradoR1)
 err_R2 <- learnErrors(filtradoR2)
 
+
   # Dereplicar y deduplicar
 derep_R1 <- derepFastq(filtradoR1, verbose = TRUE)
 derep_R2 <- derepFastq(filtradoR2, verbose = TRUE)
+
 
   # Asignación de nombres
 nombres <- sapply(strsplit(basename(filtradoR1), "_"), `[`, 1)
@@ -149,12 +153,32 @@ nombres <- sapply(strsplit(basename(filtradoR1), "_"), `[`, 1)
 names(derep_R1) <- nombres
 names(derep_R2) <- nombres
 
+
   # Aplica algoritmo DADA2
 dadaR1 <- dada(derep_R1, err = err_R1, multithread = FALSE)
 dadaR2 <- dada(derep_R2, err = err_R2, multithread = FALSE)
 
+
   # Junta las secuencias R1 y R2
 union <- mergePairs(dadaR1, derep_R1, dadaR2, derep_R2, verbose = TRUE, justConcatenate = TRUE)
+
+
+  # Construye la tabla de secuencias
+seqtab <- makeSequenceTable(union)
+dim(seqtab)
+table(nchar(getSequences(seqtab)))
+
+saveRDS(seqtab, paste0("OUTPUT/RDS","/seqtab.Rds"))
+  
+
+  # Elimina las quimeras
+tabSinQuim <- removeBimeraDenovo(seqtab, method = "consensus", multithread = TRUE, verbose = TRUE)
+dim(tabSinQuim)
+sum(tabSinQuim)/sum(seqtab)
+
+saveRDS(tabSinQuim, paste0("OUTPUT/RDS", "/tabSinQuim.Rds"))
+
+
 
 
 
