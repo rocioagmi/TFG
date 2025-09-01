@@ -178,13 +178,25 @@ sum(tabSinQuim)/sum(seqtab)
 saveRDS(tabSinQuim, paste0("OUTPUT/RDS", "/tabSinQuim.Rds"))
 
 
-  # Asignaciñon taxonómica
+  # Asignación taxonómica
 dir.create("INPUT/BB_DD")
 taxHit <- assignTaxonomy(tabSinQuim, "INPUT/BB_DD/hitdb_v1.00.fa.gz", multithread = TRUE)
 saveRDS(taxHit, paste0("OUTPUT/RDS", "/taxHit.Rds"))
 
-taxRDP <- assignTaxonomy(tabSinQuim, "INPUT/BB_DD/rdp_19_toSpecies_trainset.fa.gz", multithread = TRUE)
-saveRDS(taxRDP, paste0("OUTPUT/RDS", "/taxRDP.Rds"))
+taxRDP_S <- assignTaxonomy(tabSinQuim, "INPUT/BB_DD/rdp_19_toSpecies_trainset.fa.gz", multithread = TRUE)
+saveRDS(taxRDP_S, paste0("OUTPUT/RDS", "/taxRDP_S.Rds"))
+
+taxRDP_G <- assignTaxonomy(tabSinQuim, "INPUT/BB_DD/rdp_19_toGenus_trainset.fa.gz", multithread = TRUE)
+saveRDS(taxRDP_G, paste0("OUTPUT/RDS", "/taxRDP_G.Rds"))
+
+taxSilva <- assignTaxonomy(tabSinQuim, "INPUT/BB_DD/silva_nr99_v138.2_toGenus_trainset.fa.gz", multithread = TRUE)
+saveRDS(taxSilva, paste0("OUTPUT/RDS", "/taxSilva.Rds"))
+
+  
+
+
+  # Análisis PHYLOSEQ
+
 
 # ALMACENAMIENTO DE LOS DATOS EN UNA BASE DE DATOS MONGODB
 # Abrir consola y escribir mongodb
