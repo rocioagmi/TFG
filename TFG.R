@@ -96,7 +96,6 @@ dir.create("OUTPUT/FIGURES")
 dir.create("OUTPUT/RDS")
 
 source("FUNC/InformeCalidad.R")
-#directorioMuestras <- dir("INPUT/DATA", "\\.fastq\\.gz$", full = TRUE)
 informeCalidad(listadoMuestras)
 
 source("FUNC/GraficosCalidad.R")
@@ -179,8 +178,13 @@ sum(tabSinQuim)/sum(seqtab)
 saveRDS(tabSinQuim, paste0("OUTPUT/RDS", "/tabSinQuim.Rds"))
 
 
+  # Asignaciñon taxonómica
+dir.create("INPUT/BB_DD")
+taxHit <- assignTaxonomy(tabSinQuim, "INPUT/BB_DD/hitdb_v1.00.fa.gz", multithread = TRUE)
+saveRDS(taxHit, paste0("OUTPUT/RDS", "/taxHit.Rds"))
 
-
+taxRDP <- assignTaxonomy(tabSinQuim, "INPUT/BB_DD/rdp_19_toSpecies_trainset.fa.gz", multithread = TRUE)
+saveRDS(taxRDP, paste0("OUTPUT/RDS", "/taxRDP.Rds"))
 
 # ALMACENAMIENTO DE LOS DATOS EN UNA BASE DE DATOS MONGODB
 # Abrir consola y escribir mongodb
