@@ -53,6 +53,19 @@ install.packages("DT")
 # BiocParallel
 BiocManager::install("BiocParallel")
 
+install.packages("shiny") 
+install.packages("shinythemes")
+install.packages("networkD3")
+install.packages("rmarkdown")
+install.packages("markdown")
+install.packages("png")
+install.packages("ggplot2")
+install.packages("httpuv")
+install.packages("stringi")
+install.packages("XML")
+install.packages("IRanges")
+install.packages("genefilter")
+
 library(readr)
 library(dplyr)
 library(Biostrings)
@@ -66,6 +79,7 @@ library(DT)
 library(Rqc)
 library(BiocParallel)
 library(ggplot2)
+library(phyloseq)
 
 # PRIMERO BÚSQUEDA PROGRAMÁTICA EN ENA
   # El estudio que escojamos en la búsqueda será el que se introduzca a continuación para 
@@ -192,10 +206,17 @@ saveRDS(taxRDP_G, paste0("OUTPUT/RDS", "/taxRDP_G.Rds"))
 taxSilva <- assignTaxonomy(tabSinQuim, "INPUT/BB_DD/silva_nr99_v138.2_toGenus_trainset.fa.gz", multithread = TRUE)
 saveRDS(taxSilva, paste0("OUTPUT/RDS", "/taxSilva.Rds"))
 
-  
-
 
   # Análisis PHYLOSEQ
+#metadata <- data.frame(read.csv(file = "OUTPUT/RDS/tabSinQuim.Rds", sep = ',', header = TRUE))
+#samples.out <- rownames(tabSinQuim)
+#rownames(metadata) <- samples.out
+
+#ps <- phyloseq(otu_table(tabSinQuim, taxa_are_rows = FALSE), sample_data(metadata), tax_table(taxaHit))
+#save(ps, file = "OUTPUT")
+
+##Go to shiny-phyloseq
+#shiny::runGitHub("shiny-phyloseq","joey711")
 
 
 # ALMACENAMIENTO DE LOS DATOS EN UNA BASE DE DATOS MONGODB

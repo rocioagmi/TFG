@@ -33,7 +33,7 @@ filtradoSR <- function(listadoMuestras){
       fq <- trimTailw(fq, 2, "4", 2)
       fq <- fq[width(fq) >= 36]
       
-      destino <- file.path("OUTPUT/FILTRADO", basename(muestra))
+      destino <- file.path("OUTPUT/FILTRADOSR", basename(muestra))
       
       if (!file.exists(destino)) {
         writeFastq(fq, destino, "w")
