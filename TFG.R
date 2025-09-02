@@ -53,18 +53,6 @@ install.packages("DT")
 # BiocParallel
 BiocManager::install("BiocParallel")
 
-install.packages("shiny") 
-install.packages("shinythemes")
-install.packages("networkD3")
-install.packages("rmarkdown")
-install.packages("markdown")
-install.packages("png")
-install.packages("ggplot2")
-install.packages("httpuv")
-install.packages("stringi")
-install.packages("XML")
-install.packages("IRanges")
-install.packages("genefilter")
 
 library(readr)
 library(dplyr)
@@ -79,7 +67,7 @@ library(DT)
 library(Rqc)
 library(BiocParallel)
 library(ggplot2)
-library(phyloseq)
+
 
 # PRIMERO BÚSQUEDA PROGRAMÁTICA EN ENA
   # El estudio que escojamos en la búsqueda será el que se introduzca a continuación para 
@@ -136,18 +124,40 @@ filtradasMS_R2 <- filtradasMS[grepl("R2", filtradasMS)]
 filtradasH_R1 <- filtradasHealthy[grepl("R1", filtradasHealthy)]
 filtradasH_R2 <- filtradasHealthy[grepl("R2", filtradasHealthy)]
 
-  # Filtrado SHORTREAD
-#source("FUNC/FiltrarMuestras.R")
-#filtradoSR(listadoMuestras)
-
-
-  # Evalúa la calidad de las muestras ya filtradas
+# Evalúa la calidad de las muestras ya filtradas
 source("FUNC/InformeCalidad.R")
 informeCalidad(listadoFiltrado)
 
 source("FUNC/GraficosCalidad.R")
 graficosCalidad(filtradasMS_R1, filtradasMS_R2)
 graficosCalidad(filtradasHealthy_R1, filtradasHealthy_R2)
+
+
+  # Filtrado SHORTREAD
+dir.create("OUTPUT/FILTRADOSR")
+source("FUNC/FiltrarMuestras.R")
+filtradoSR(listadoMuestras)
+
+filtradoSR <- sort(list.files("OUTPUT/FILTRADOSR", pattern = "\\.fastq\\.gz$", full.names = TRUE))
+
+source("FUNC/InformeCalidad.R")
+informeCalidad(filtradoSR)
+
+filtradosrMS <- sort(list.files("OUTPUT/FILTRADOSR", pattern = "MS", full.names = TRUE))
+filtradosrH <-  sort(list.files("OUTPUT/FILTRADOSR", pattern = "Healthy", full.names = TRUE))
+
+filtradosrR1 <- filtradoSR[grepl("R1", filtradoSR)]
+filtradosrR2 <- filtradoSR[grepl("R2", filtradoSR)]
+
+filtradosrMS_R1 <- filtradosrMS[grepl("R1", filtradosrMS)]
+filtradosrMS_R2 <- filtradosrMS[grepl("R2", filtradosrMS)]
+
+filtradosrH_R1 <- filtradosrH[grepl("R1", filtradosrH)]
+filtradosrH_R2 <- filtradosrH[grepl("R2", filtradosrH)]
+
+source("FUNC/GraficosCalidad.R")
+graficosCalidad(filtradosrMS_R1, filtradosrMS_R2)
+graficosCalidad(filtradosrH_R1, filtradosrH_R2)
 
 
   # Error Rates
@@ -206,17 +216,6 @@ saveRDS(taxRDP_G, paste0("OUTPUT/RDS", "/taxRDP_G.Rds"))
 taxSilva <- assignTaxonomy(tabSinQuim, "INPUT/BB_DD/silva_nr99_v138.2_toGenus_trainset.fa.gz", multithread = TRUE)
 saveRDS(taxSilva, paste0("OUTPUT/RDS", "/taxSilva.Rds"))
 
-
-  # Análisis PHYLOSEQ
-#metadata <- data.frame(read.csv(file = "OUTPUT/RDS/tabSinQuim.Rds", sep = ',', header = TRUE))
-#samples.out <- rownames(tabSinQuim)
-#rownames(metadata) <- samples.out
-
-#ps <- phyloseq(otu_table(tabSinQuim, taxa_are_rows = FALSE), sample_data(metadata), tax_table(taxaHit))
-#save(ps, file = "OUTPUT")
-
-##Go to shiny-phyloseq
-#shiny::runGitHub("shiny-phyloseq","joey711")
 
 
 # ALMACENAMIENTO DE LOS DATOS EN UNA BASE DE DATOS MONGODB
