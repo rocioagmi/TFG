@@ -160,50 +160,29 @@ graficosCalidad(filtradosrMS_R1, filtradosrMS_R2)
 graficosCalidad(filtradosrH_R1, filtradosrH_R2)
 
 
-  # Error Rates
-err_R1 <- learnErrors(filtradoR1)
-err_R2 <- learnErrors(filtradoR2)
-
-
-  # Dereplicar y deduplicar
-derep_R1 <- derepFastq(filtradoR1, verbose = TRUE)
-derep_R2 <- derepFastq(filtradoR2, verbose = TRUE)
-
-
-  # Asignación de nombres
-nombres <- sapply(strsplit(basename(filtradoR1), "_"), `[`, 1)
-   
-names(derep_R1) <- nombres
-names(derep_R2) <- nombres
-
-
-  # Aplica algoritmo DADA2
-dadaR1 <- dada(derep_R1, err = err_R1, multithread = FALSE)
-dadaR2 <- dada(derep_R2, err = err_R2, multithread = FALSE)
-
-
-  # Junta las secuencias R1 y R2
-union <- mergePairs(dadaR1, derep_R1, dadaR2, derep_R2, verbose = TRUE, justConcatenate = TRUE)
+  # Aplica la función dada 
+source("FUNC/FlujoTrabajoDada.R")
+union <- flujoTrabajoDada(filtradoR1, filtradoR2)
 
 
   # Construye la tabla de secuencias
-seqtab <- makeSequenceTable(union)
-dim(seqtab)
-table(nchar(getSequences(seqtab)))
+source("FUNC/ConstruirTablaSecuencias.R")
+construirTablaSecuencias(union)
+tablaSecuencias <- "OUTPUT/RDS/seqtab.Rds"
 
-saveRDS(seqtab, paste0("OUTPUT/RDS","/seqtab.Rds"))
-  
 
   # Elimina las quimeras
-tabSinQuim <- removeBimeraDenovo(seqtab, method = "consensus", multithread = TRUE, verbose = TRUE)
-dim(tabSinQuim)
-sum(tabSinQuim)/sum(seqtab)
-
-saveRDS(tabSinQuim, paste0("OUTPUT/RDS", "/tabSinQuim.Rds"))
+source("FUNC/EliminarQuimeras.R")
+eliminarQuimeras(tablaSecuencias)
+tablaSinQuim <- "OUTPUT/RDS/tabSinQuim.Rds"
 
 
   # Asignación taxonómica
 dir.create("INPUT/BB_DD")
+
+source("FUNC/AsignarTaxonomia.R")
+asignarTaxonomia(tablaSinQuim)
+
 taxHit <- assignTaxonomy(tabSinQuim, "INPUT/BB_DD/hitdb_v1.00.fa.gz", multithread = TRUE)
 saveRDS(taxHit, paste0("OUTPUT/RDS", "/taxHit.Rds"))
 
