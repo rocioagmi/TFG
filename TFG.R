@@ -70,8 +70,7 @@ library(ggplot2)
 
 
 # PRIMERO BÚSQUEDA PROGRAMÁTICA EN ENA
-  # El estudio que escojamos en la búsqueda será el que se introduzca a continuación para 
-  # la descarga automática de las muestras.
+
 
 # DESCARGA DE LOS DATOS
 source("FUNC/Descargas_ENA.R")
