@@ -159,6 +159,8 @@ graficosCalidad(filtradosrMS_R1, filtradosrMS_R2)
 graficosCalidad(filtradosrH_R1, filtradosrH_R2)
 
 
+# PROCESAMIENTO DE LOS DATOS 
+
   # Aplica la función dada 
 source("FUNC/FlujoTrabajoDada.R")
 union <- flujoTrabajoDada(filtradoR1, filtradoR2)
@@ -177,22 +179,16 @@ tablaSinQuim <- "OUTPUT/RDS/tabSinQuim.Rds"
 
 
   # Asignación taxonómica
-dir.create("INPUT/BB_DD")
+# C:/ANTIGUA_D/TodoTFG/BB_DD/hitdb_v1.00.fa.gz
+# C:/ANTIGUA_D/TodoTFG/BB_DD/rdp_19_toGenus_trainset.fa.gz /rdp_19_toSpecies_trainset.fa.gz
+# C:/ANTIGUA_D/TodoTFG/BB_DD/silva_nr99_v138.2_toGenus_trainset.fa.gz
 
 source("FUNC/AsignarTaxonomia.R")
 asignarTaxonomia(tablaSinQuim)
 
-taxHit <- assignTaxonomy(tabSinQuim, "INPUT/BB_DD/hitdb_v1.00.fa.gz", multithread = TRUE)
-saveRDS(taxHit, paste0("OUTPUT/RDS", "/taxHit.Rds"))
 
-taxRDP_S <- assignTaxonomy(tabSinQuim, "INPUT/BB_DD/rdp_19_toSpecies_trainset.fa.gz", multithread = TRUE)
-saveRDS(taxRDP_S, paste0("OUTPUT/RDS", "/taxRDP_S.Rds"))
 
-taxRDP_G <- assignTaxonomy(tabSinQuim, "INPUT/BB_DD/rdp_19_toGenus_trainset.fa.gz", multithread = TRUE)
-saveRDS(taxRDP_G, paste0("OUTPUT/RDS", "/taxRDP_G.Rds"))
 
-taxSilva <- assignTaxonomy(tabSinQuim, "INPUT/BB_DD/silva_nr99_v138.2_toGenus_trainset.fa.gz", multithread = TRUE)
-saveRDS(taxSilva, paste0("OUTPUT/RDS", "/taxSilva.Rds"))
 
 
 
