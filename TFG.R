@@ -53,8 +53,14 @@ install.packages("DT")
 # BiocParallel
 BiocManager::install("BiocParallel")
 
+# httr
+install.packages("httr")
+
+# readr
+install.packages("readr")
 
 library(readr)
+library(httr)
 library(dplyr)
 library(Biostrings)
 library(ShortRead)
@@ -70,7 +76,8 @@ library(ggplot2)
 
 
 # PRIMERO BÚSQUEDA PROGRAMÁTICA EN ENA
-
+source("FUNC/BusquedaENA.R")
+busquedaInteractivaENA()
 
 # DESCARGA DE LOS DATOS
 source("FUNC/Descargas_ENA.R")
