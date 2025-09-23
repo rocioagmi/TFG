@@ -1,3 +1,5 @@
+# CAMBIAR ESTO
+
 busquedaEna <- function(result_type, query, fields, limit, format) {
   base_url <- "https://www.ebi.ac.uk/ena/portal/api/search"
   params <- list(
