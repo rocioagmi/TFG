@@ -75,7 +75,7 @@ library(BiocParallel)
 library(ggplot2)
 
 
-# PRIMERO BÚSQUEDA PROGRAMÁTICA EN ENA - CAMBIAR ESTO
+# PRIMERO BÚSQUEDA PROGRAMÁTICA EN ENA - IMPORTANTE CAMBIAR ESTO
 source("FUNC/BusquedaENA.R")
 busquedaInteractivaENA()
 
