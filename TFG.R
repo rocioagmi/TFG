@@ -92,23 +92,26 @@ listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", ful
 muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
 muestrasHealthy <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names = TRUE))
 
-MS_R1 <- muestrasMS[grepl("R1", muestrasMS)]
-MS_R2 <- muestrasMS[grepl("R2", muestrasMS)]
+muestrasR1 <- sort(list.files("INPUT/DATA", pattern = "R1", full.names = TRUE))
+muestrasR2 <- sort(list.files("INPUT/DATA", pattern = "R2", full.names = TRUE))
 
-Healthy_R1 <- muestrasHealthy[grepl("R1", muestrasHealthy)]
-Healthy_R2 <- muestrasHealthy[grepl("R2", muestrasHealthy)]
+#MS_R1 <- muestrasMS[grepl("R1", muestrasMS)]
+#MS_R2 <- muestrasMS[grepl("R2", muestrasMS)]
+#Healthy_R1 <- muestrasHealthy[grepl("R1", muestrasHealthy)]
+#Healthy_R2 <- muestrasHealthy[grepl("R2", muestrasHealthy)]
 
   # Informe de calidad
 dir.create("OUTPUT/REPORT")
 dir.create("OUTPUT/FIGURES")
 dir.create("OUTPUT/RDS")
+dir.create("OUTPUT/FILTRADO")
 
 source("FUNC/InformeCalidad.R")
 informeCalidad(listadoMuestras)
 
 source("FUNC/GraficosCalidad.R")
-graficosCalidad(MS_R1,MS_R2)
-graficosCalidad(Healthy_R1,Healthy_R2)
+graficosCalidad(muestrasR1)
+graficosCalidad(muestrasR2)
 
 
   # Filtrado DADA2
@@ -137,33 +140,6 @@ informeCalidad(listadoFiltrado)
 source("FUNC/GraficosCalidad.R")
 graficosCalidad(filtradasMS_R1, filtradasMS_R2)
 graficosCalidad(filtradasHealthy_R1, filtradasHealthy_R2)
-
-
-  # Filtrado SHORTREAD
-dir.create("OUTPUT/FILTRADOSR")
-source("FUNC/FiltrarMuestras.R")
-filtradoSR(listadoMuestras)
-
-filtradoSR <- sort(list.files("OUTPUT/FILTRADOSR", pattern = "\\.fastq\\.gz$", full.names = TRUE))
-
-source("FUNC/InformeCalidad.R")
-informeCalidad(filtradoSR)
-
-filtradosrMS <- sort(list.files("OUTPUT/FILTRADOSR", pattern = "MS", full.names = TRUE))
-filtradosrH <-  sort(list.files("OUTPUT/FILTRADOSR", pattern = "Healthy", full.names = TRUE))
-
-filtradosrR1 <- filtradoSR[grepl("R1", filtradoSR)]
-filtradosrR2 <- filtradoSR[grepl("R2", filtradoSR)]
-
-filtradosrMS_R1 <- filtradosrMS[grepl("R1", filtradosrMS)]
-filtradosrMS_R2 <- filtradosrMS[grepl("R2", filtradosrMS)]
-
-filtradosrH_R1 <- filtradosrH[grepl("R1", filtradosrH)]
-filtradosrH_R2 <- filtradosrH[grepl("R2", filtradosrH)]
-
-source("FUNC/GraficosCalidad.R")
-graficosCalidad(filtradosrMS_R1, filtradosrMS_R2)
-graficosCalidad(filtradosrH_R1, filtradosrH_R2)
 
 
 # PROCESAMIENTO DE LOS DATOS 
