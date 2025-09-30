@@ -95,10 +95,6 @@ muestrasHealthy <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names
 muestrasR1 <- sort(list.files("INPUT/DATA", pattern = "R1", full.names = TRUE))
 muestrasR2 <- sort(list.files("INPUT/DATA", pattern = "R2", full.names = TRUE))
 
-#MS_R1 <- muestrasMS[grepl("R1", muestrasMS)]
-#MS_R2 <- muestrasMS[grepl("R2", muestrasMS)]
-#Healthy_R1 <- muestrasHealthy[grepl("R1", muestrasHealthy)]
-#Healthy_R2 <- muestrasHealthy[grepl("R2", muestrasHealthy)]
 
   # Informe de calidad
 dir.create("OUTPUT/REPORT")
