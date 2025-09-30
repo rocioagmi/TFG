@@ -106,8 +106,7 @@ source("FUNC/InformeCalidad.R")
 informeCalidad(listadoMuestras)
 
 source("FUNC/GraficosCalidad.R")
-graficosCalidad(muestrasR1)
-graficosCalidad(muestrasR2)
+graficosCalidad(muestrasR1, muestrasR2)
 
 
   # Filtrado DADA2
@@ -123,19 +122,12 @@ filtradasHealthy <-  sort(list.files("OUTPUT/FILTRADO", pattern = "Healthy", ful
 filtradoR1 <- listadoFiltrado[grepl("R1", listadoFiltrado)]
 filtradoR2 <- listadoFiltrado[grepl("R2", listadoFiltrado)]
 
-filtradasMS_R1 <- filtradasMS[grepl("R1", filtradasMS)]
-filtradasMS_R2 <- filtradasMS[grepl("R2", filtradasMS)]
-
-filtradasH_R1 <- filtradasHealthy[grepl("R1", filtradasHealthy)]
-filtradasH_R2 <- filtradasHealthy[grepl("R2", filtradasHealthy)]
-
 # Evalúa la calidad de las muestras ya filtradas
 source("FUNC/InformeCalidad.R")
 informeCalidad(listadoFiltrado)
 
 source("FUNC/GraficosCalidad.R")
-graficosCalidad(filtradasMS_R1, filtradasMS_R2)
-graficosCalidad(filtradasHealthy_R1, filtradasHealthy_R2)
+graficosCalidad(filtradoR1, filtradoR2)
 
 
 # PROCESAMIENTO DE LOS DATOS 
