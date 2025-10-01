@@ -11,21 +11,30 @@ busquedaEna <- function(result_type, query, fields, limit, format) {
   )
   
   response <- POST(base_url, body = params, encode = "form")
-  data_text <- content(response, "text", encoding = "UTF-8")
-  df <- read_tsv(data_text, show_col_types = FALSE)
+  if (status_code(response) == 200) {
+    data_text <- content(response, as = "text", encoding = "UTF-8")
+    df <- read_tsv(data_text, show_col_types = FALSE)
+    
+    return(df)
+  } else if (status_code(response) == 429) {
+    stop("Error 429: Demasiadas solicitudes. Espera y reintenta.")
+  } else {
+    stop("Error en API: ", status_code(response))
+  }
   
-  return(df)
 }
 
 
 busquedaInteractivaENA <- function() {
   cat("---Búsqueda interactiva en ENA API ---\n")
   
-  cat("\n1. Consulta (ej:description = '16S rRNA' AND description = 'multiple sclerosis'): ")
-  query <- readline()
+  result_type <- "sample"
+  query <- "description='16S rRNA' AND (description='multiple slerosis' OR description='MS')"
+  fields <- "sample_accesion, description, sample_description, study_accesion"
+  limit <- "1000"
   
   cat("\nEjecutando búsqueda...\n")
-  resultados <- busquedaEna(result_type = study, query, fields = "study_accesion, study_title, description", limit = 1000, format = "tsv")
+  resultados <- busquedaEna(result_type, query, fields, limit, format = "tsv")
   
   if (nrow(resultados) == 0) {
     cat("No se encontraron resultados.\n")
