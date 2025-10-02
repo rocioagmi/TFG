@@ -11,17 +11,16 @@ busquedaEna <- function(result_type, query, fields, limit, format) {
   )
   
   response <- POST(base_url, body = params, encode = "form")
+  
   if (status_code(response) == 200) {
-    data_text <- content(response, as = "text", encoding = "UTF-8")
+    data_text <- httr::content(response,"text", encoding = "UTF-8")
     df <- read_tsv(data_text, show_col_types = FALSE)
-    
     return(df)
   } else if (status_code(response) == 429) {
     stop("Error 429: Demasiadas solicitudes. Espera y reintenta.")
   } else {
-    stop("Error en API: ", status_code(response))
+    stop("Error en API: ", status_code(response), "\n", httr::content(response, "text", encoding = "UTF-8"))
   }
-  
 }
 
 
@@ -29,8 +28,9 @@ busquedaInteractivaENA <- function() {
   cat("---Búsqueda interactiva en ENA API ---\n")
   
   result_type <- "sample"
-  query <- "description='16S rRNA' AND (description='multiple slerosis' OR description='MS')"
-  fields <- "sample_accesion, description, sample_description, study_accesion"
+  # 'description="16S rRNA" AND (description="multiple slerosis" OR description="MS")'
+  query <- 'description="16S rRNA"'
+  fields <- "sample_accession, sample_description, description, study_accession"
   limit <- "1000"
   
   cat("\nEjecutando búsqueda...\n")
@@ -41,7 +41,7 @@ busquedaInteractivaENA <- function() {
     return(NULL)
   }
   
-  filename <- paste0("INPUT/ena_resultados_", Sys.time(), ".tsv")
+  filename <- paste0("INPUT/ena_resultados_", format(Sys.time(), "%Y-%m-%d_%H-%M-%S"), ".tsv")
   write_tsv(resultados, filename)
   cat("Resultados guardados en: ", filename, "\n")
   cat("Número de resultados: ", nrow(resultados), "\n")
