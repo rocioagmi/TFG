@@ -27,7 +27,7 @@ busquedaEna <- function(result_type, query, fields, limit, format) {
 busquedaInteractivaENA <- function() {
   cat("---Búsqueda interactiva en ENA API ---\n")
   
-  result_type <- "raw_reads"
+  result_type <- "sample"
   # 'description="16S rRNA" AND (description="multiple slerosis" OR description="MS")'
   query <- 'description="16S rRNA"'
   fields <- "sample_accession, sample_description, description, study_accession"

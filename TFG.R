@@ -76,7 +76,7 @@ library(ggplot2)
 
 
 # PRIMERO BÚSQUEDA PROGRAMÁTICA EN ENA - IMPORTANTE CAMBIAR ESTO
-source("FUNC/BusquedaENA.R")
+source("FUNC/Busqueda_ENA.R")
 busquedaInteractivaENA()
 
 # DESCARGA DE LOS DATOS
