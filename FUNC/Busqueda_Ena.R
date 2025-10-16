@@ -1,8 +1,6 @@
-# CAMBIAR ESTO
-
-busquedaEna <- function(result_type, query, fields, limit, format) {
-  base_url <- "https://www.ebi.ac.uk/ena/portal/api/search"
-  params <- list(
+busquedaENA <- function(result_type, query, fields, limit, format){
+  url <- "https://www.ebi.ac.uk/ena/portal/api/search"
+  parametros <- list(
     result = result_type,
     query = query,
     fields = fields,
@@ -10,42 +8,39 @@ busquedaEna <- function(result_type, query, fields, limit, format) {
     format = format
   )
   
-  response <- POST(base_url, body = params, encode = "form")
+  response <- POST(url, body = parametros, encode = "form")
   
-  if (status_code(response) == 200) {
-    data_text <- httr::content(response,"text", encoding = "UTF-8")
-    df <- read_tsv(data_text, show_col_types = FALSE)
+  if(status_code(response) == 200){
+    data_text <- httr::content(response, "text", encoding = "UTF-8")
+    df <- fromJSON(data_text)
     return(df)
   } else if (status_code(response) == 429) {
     stop("Error 429: Demasiadas solicitudes. Espera y reintenta.")
   } else {
-    stop("Error en API: ", status_code(response), "\n", httr::content(response, "text", encoding = "UTF-8"))
+    stop("Error en API: ", status_code(response))
   }
 }
 
-
-busquedaInteractivaENA <- function() {
-  cat("---Búsqueda interactiva en ENA API ---\n")
+construirConsultaENA <- function(){
   
-  result_type <- "sample"
-  # 'description="16S rRNA" AND (description="multiple slerosis" OR description="MS")'
-  query <- 'description="16S rRNA"'
-  fields <- "sample_accession, sample_description, description, study_accession"
-  limit <- "1000"
+  result_type <- dlgInput("Tipo de resultado (sample, study):")$res
+  
+  input <- dlgInput("Introduce un término de búsqueda:")$res
+  query <- paste0('description="', input,'"')
+  
+  if(result_type == "sample"){
+    fields <- "sample_accession, study_accession, sample_title, sample_alias, description, sample_description"
+  } else if(result_type == "study"){
+    fields <- "study_accession, study_name, study_title, description, study_description"
+  } 
   
   cat("\nEjecutando búsqueda...\n")
-  resultados <- busquedaEna(result_type, query, fields, limit, format = "tsv")
+  resultados <- busquedaENA(result_type, query, fields, limit = 1000, format = "json")
   
   if (nrow(resultados) == 0) {
     cat("No se encontraron resultados.\n")
     return(NULL)
+  } else {
+    head(resultados)
   }
-  
-  filename <- paste0("INPUT/ena_resultados_", format(Sys.time(), "%Y-%m-%d_%H-%M-%S"), ".tsv")
-  write_tsv(resultados, filename)
-  cat("Resultados guardados en: ", filename, "\n")
-  cat("Número de resultados: ", nrow(resultados), "\n")
-  print(head(resultados))
-  
-  return(resultados)
 }

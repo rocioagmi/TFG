@@ -59,8 +59,12 @@ install.packages("httr")
 # readr
 install.packages("readr")
 
+# Jsonlite
+install.packages("jsonlite")
+
 library(readr)
 library(httr)
+library(jsonlite)
 library(dplyr)
 library(Biostrings)
 library(ShortRead)
@@ -77,7 +81,7 @@ library(ggplot2)
 
 # PRIMERO BÚSQUEDA PROGRAMÁTICA EN ENA - IMPORTANTE CAMBIAR ESTO
 source("FUNC/Busqueda_ENA.R")
-busquedaInteractivaENA()
+construirConsultaENA()
 
 # DESCARGA DE LOS DATOS
 source("FUNC/Descargas_ENA.R")
