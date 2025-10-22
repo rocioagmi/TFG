@@ -11,8 +11,8 @@ busquedaENA <- function(dominio, query, size = 10, fields, start = 0) {
   
 }
 
-construirBusqueda <- function() {
+construirConsulta <- function() {
   dominio <- dlgInput(message = "Introduzca el dominio de búsqueda:", default = "ena_sample, ena_run, ena_study")
-  query <- dlgInput(message = "Ingresa un término de búsqueda:")
+  query <- dlgInput(message = "Ingrese un término de búsqueda:")
   fields <- "ID, Name, Description"
 }

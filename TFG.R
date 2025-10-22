@@ -79,9 +79,9 @@ library(Rqc)
 library(BiocParallel)
 library(ggplot2)
 
-# PRIMERO BÚSQUEDA PROGRAMÁTICA EN ENA - IMPORTANTE CAMBIAR ESTO
+# PRIMERO BÚSQUEDA PROGRAMÁTICA EN ENA A TRAVÉS DE EBI
 source("FUNC/Busqueda_ENA.R")
-construirConsultaENA()
+construirConsulta()
 
 # DESCARGA DE LOS DATOS
 source("FUNC/Descargas_ENA.R")
