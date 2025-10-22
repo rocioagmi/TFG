@@ -81,7 +81,24 @@ library(ggplot2)
 
 # PRIMERO BÚSQUEDA PROGRAMÁTICA EN ENA A TRAVÉS DE EBI
 source("FUNC/Busqueda_ENA.R")
-construirConsulta()
+muestrasEBI <- construirConsulta()
+
+if (!is.null(muestrasEBI) && nrow(muestrasEBI) > 0) {
+  print("Búsqueda completada. Primeros resultados:")
+  print(head(muestrasEBI[, c("id", "fields.description", "fields.sample_title")]))
+  
+  print("Estructura de los campos devueltos (para ver los campos anidados):")
+  str(muestrasEBI, max.level = 2)
+  
+  # Guardar los resultados en un archivo CSV
+  # write.csv(muestras_encontradas_ebi, "muestras_MS_microbioma_EBI.csv", row.names = FALSE)
+  # print("Resultados guardados en 'muestras_MS_microbioma_EBI.csv'")
+
+} else if(is.null(resultados)){
+  print("La operación fue cancelada.")
+} else {
+  print("No se pudieron obtener resultados o la búsqueda terminó vacía.")
+}
 
 # DESCARGA DE LOS DATOS
 source("FUNC/Descargas_ENA.R")
