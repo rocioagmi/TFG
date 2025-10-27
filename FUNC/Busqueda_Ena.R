@@ -1,6 +1,9 @@
 busquedaENA <- function(dominio, query, fields, limit = 100) {
   url <- paste0("https://www.ebi.ac.uk/ebisearch/ws/rest/", dominio)
   
+  query <- gsub('"', '', query)
+  fields <- gsub(",\\s*", ",", fields)
+    
   parametros <- list(
     query = query,
     fields = fields,
@@ -13,9 +16,13 @@ busquedaENA <- function(dominio, query, fields, limit = 100) {
   
   respuesta <- GET(url = url, query = parametros)
   
+  if(http_error(respuesta)) {
+    print(paste("URL generada y fallida:", respuesta$url))
+  }
+  
   stop_for_status(respuesta, task = "consultar API de EBI")
   
-  contenidoRespuesta <- content(respuesta, "text", encoding = "UTF-8")
+  contenidoRespuesta <- httr::content(respuesta, "text", encoding = "UTF-8")
   
   dataJson <- fromJSON(contenidoRespuesta, flatten = TRUE)
   
@@ -24,27 +31,26 @@ busquedaENA <- function(dominio, query, fields, limit = 100) {
   }
   
   resultadosDF <- dataJson$entries
-  
   return(resultadosDF)
 }
 
 construirConsulta <- function(limit = 1000) {
-  dominio <- dlgInput(message = "Introduzca el dominio de búsqueda (ena_sample, ena_run, ena_study):", default = "ena_sample")
-  if (!is.character(dominio$res) || length(dominio$res) == 0) {
+  dominio <- dlgInput(message = "Introduzca el dominio de búsqueda (sra-sample, sra-run, sra-study):")$res
+  if (!is.character(dominio) || length(dominio) == 0) {
     print("Operación cancelada por el usuario (dominio).")
     return(NULL)
   }
   
-  query <- dlgInput(message = "Ingrese un término de búsqueda:")
-  if (!is.character(query$res) || length(query$res) == 0) {
+  query <- dlgInput(message = "Ingrese un término de búsqueda:")$res
+  if (!is.character(query) || length(query) == 0) {
     print("Operación cancelada por el usuario (query).")
     return(NULL)
   }
   
-  dominio <- trimws(dominio$res)
-  query <- trimws(query$res)
+  dominio <- trimws(dominio)
+  query <- trimws(query)
   
-  fields <- "id, acc, description, ena_study, ena_run, sample_title"
+  fields <- "id,acc,description,sample_title"
   
   muestrasDF <- busquedaENA(dominio = dominio, query = query, fields = fields, limit = limit)
   
