@@ -89,10 +89,6 @@ if (!is.null(muestrasEBI) && nrow(muestrasEBI) > 0) {
   
   print("Estructura de los campos devueltos (para ver los campos anidados):")
   str(muestrasEBI, max.level = 2)
-  
-  # Guardar los resultados en un archivo CSV
-  # write.csv(muestras_encontradas_ebi, "muestras_MS_microbioma_EBI.csv", row.names = FALSE)
-  # print("Resultados guardados en 'muestras_MS_microbioma_EBI.csv'")
 
 } else if(is.null(resultados)){
   print("La operación fue cancelada.")
