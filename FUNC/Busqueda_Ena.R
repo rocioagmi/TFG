@@ -35,7 +35,7 @@ busquedaENA <- function(dominio, query, fields, limit = 100) {
 }
 
 construirConsulta <- function(limit = 1000) {
-  dominio <- dlgInput(message = "Introduzca el dominio de búsqueda (sra-sample, sra-run, sra-study):")$res
+  dominio <- dlgInput(message = "Introduzca el dominio de búsqueda (biosamples, embl):")$res
   if (!is.character(dominio) || length(dominio) == 0) {
     print("Operación cancelada por el usuario (dominio).")
     return(NULL)
