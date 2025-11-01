@@ -83,95 +83,124 @@ library(ggplot2)
 source("FUNC/Busqueda_ENA.R")
 muestrasEBI <- construirConsulta()
 
-if (!is.null(muestrasEBI) && nrow(muestrasEBI) > 0) {
-  print("Búsqueda completada. Primeros resultados:")
-  print(head(muestrasEBI[, c("id", "fields.description", "fields.sample_title")]))
-  
-  print("Estructura de los campos devueltos (para ver los campos anidados):")
-  str(muestrasEBI, max.level = 2)
-
-} else if(is.null(resultados)){
-  print("La operación fue cancelada.")
-} else {
-  print("No se pudieron obtener resultados o la búsqueda terminó vacía.")
-}
 
 # DESCARGA DE LOS DATOS
 source("FUNC/Descargas_ENA.R")
 nAcceso <- dlgInput(message = "Introduzca el número de acceso al proyecto ENA: ")$res
 descargas_ENA(nAcceso)
 
-
+# ================================================
 # PREPROCESAMIENTO DE LOS DATOS
+# ================================================
 
+# Obtiene la lista ordenada de todos los archivos .fastq.gz en la carpeta de entrada
 listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
 
+# Separa las muestras por tipo: MS (enfermos) y Healthy (sanos)
 muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
 muestrasHealthy <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names = TRUE))
 
+# Separa los archivos por lectura: R1 (forward) y R2 (reverse)
 muestrasR1 <- sort(list.files("INPUT/DATA", pattern = "R1", full.names = TRUE))
 muestrasR2 <- sort(list.files("INPUT/DATA", pattern = "R2", full.names = TRUE))
 
-
-  # Informe de calidad
+# -------------------------------------------------
+# CREACIÓN DE CARPETAS DE SALIDA
+# -------------------------------------------------
+# Crea directorios para organizar los resultados: informes, gráficos, datos filtrados, ...
 dir.create("OUTPUT/REPORT")
 dir.create("OUTPUT/FIGURES")
 dir.create("OUTPUT/RDS")
 dir.create("OUTPUT/FILTRADO")
 
+# -------------------------------------------------
+# INFORME DE CALIDAD DE SECUENCIACIÓN
+# -------------------------------------------------
+# Carga la función para generar informes FastQC
 source("FUNC/InformeCalidad.R")
+# Genera informe de calidad para todas las muestras
 informeCalidad(listadoMuestras)
 
+# Carga función para gráficos de calidad 
 source("FUNC/GraficosCalidad.R")
+# Genera gráficos de calidad para lecturas R1 (forward) y R2 (reverse)
 graficosCalidad(muestrasR1, muestrasR2)
 
-
-  # Filtrado DADA2
+# ----------------------------------------------
+# FILTRADO DE CALIDAD CON DADA2
+# ----------------------------------------------
+# Carga función de filtrado 
 source("FUNC/FiltrarMuestras.R")
+
+# Aplica filtrado a muestras MS y Healthy por separado
 filtrarMuestras(MS_R1, MS_R2)
 filtrarMuestras(Healthy_R1, Healthy_R2)
 
+# Lista todos los archivos filtrados generados
 listadoFiltrado <- sort(list.files("OUTPUT/FILTRADO", pattern = "\\.fastq\\.gz$", full.names = TRUE))
 
+# Clasifica archivos filtrados por tipo de muestra
 filtradasMS <- sort(list.files("OUTPUT/FILTRADO", pattern = "MS", full.names = TRUE))
 filtradasHealthy <-  sort(list.files("OUTPUT/FILTRADO", pattern = "Healthy", full.names = TRUE))
 
+# Separa lecturas forward y reverse de los archivos filtrados
 filtradoR1 <- listadoFiltrado[grepl("R1", listadoFiltrado)]
 filtradoR2 <- listadoFiltrado[grepl("R2", listadoFiltrado)]
 
-# Evalúa la calidad de las muestras ya filtradas
+# -------------------------------------------
+# INFORME DE CALIDAD POST FILTRADO
+# -------------------------------------------
+# Reutiliza funciones para evaluar mejora tras filtrado
 source("FUNC/InformeCalidad.R")
 informeCalidad(listadoFiltrado)
 
 source("FUNC/GraficosCalidad.R")
 graficosCalidad(filtradoR1, filtradoR2)
 
-
+# ===========================================
 # PROCESAMIENTO DE LOS DATOS 
+# ===========================================
 
-  # Aplica la función dada 
+# -------------------------------------------
+# FLUJO PRINCIPAL DADA2
+# -------------------------------------------
+
+# Carga la función que ejecuta: learnErrors, derep, dada, mergePairs
 source("FUNC/FlujoTrabajoDada.R")
+# Procesa lecturas filtradas y devuelve la tabla de conteos de secuencias
 union <- flujoTrabajoDada(filtradoR1, filtradoR2)
 
 
-  # Construye la tabla de secuencias
+# ------------------------------------------
+# CONSTRUCCIÓN DE LA TABLA DE SECUENCIAS -- ESTE PASO IGUAL LO JUNTO AL ANTERIOR
+# ------------------------------------------
+# Genera y guarda la matriz de conteos
 source("FUNC/ConstruirTablaSecuencias.R")
 construirTablaSecuencias(union)
+# Ruta al objeto Rds con la tabla final de secuencias
 tablaSecuencias <- "OUTPUT/RDS/seqtab.Rds"
 
 
-  # Elimina las quimeras
+# -----------------------------------------
+# ELIMINACIÓN DE QUIMERAS
+# -----------------------------------------
+# Detecta y remueve secuencias quiméricas
 source("FUNC/EliminarQuimeras.R")
 eliminarQuimeras(tablaSecuencias)
+# Ruta a la tabla limpia
 tablaSinQuim <- "OUTPUT/RDS/tabSinQuim.Rds"
 
 
-  # Asignación taxonómica
+# ------------------------------------------
+# ASIGNACIÓN TAXONÓMICA
+# ------------------------------------------
+# Asigna taxonomóia usando bases de datos locales (HTTdb, RDP, SILVA)
 # C:/ANTIGUA_D/TodoTFG/BB_DD/hitdb_v1.00.fa.gz
 # C:/ANTIGUA_D/TodoTFG/BB_DD/rdp_19_toGenus_trainset.fa.gz /rdp_19_toSpecies_trainset.fa.gz
 # C:/ANTIGUA_D/TodoTFG/BB_DD/silva_nr99_v138.2_toGenus_trainset.fa.gz
 
 source("FUNC/AsignarTaxonomia.R")
+# Aplica asignación taxonómica a la tabla sin quimeras
 asignarTaxonomia(tablaSinQuim)
 
 
