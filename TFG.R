@@ -56,6 +56,9 @@ BiocManager::install("BiocParallel")
 # httr
 install.packages("httr")
 
+# httr2
+install.packages("httr2")
+
 # readr
 install.packages("readr")
 
@@ -79,15 +82,21 @@ library(Rqc)
 library(BiocParallel)
 library(ggplot2)
 
-# PRIMERO BÚSQUEDA PROGRAMÁTICA EN ENA A TRAVÉS DE EBI
+
+# ===============================================
+# BÚSQUEDA PROGRAMÁTICA EN ENA A TRAVÉS DE EBI
+# ===============================================
 source("FUNC/Busqueda_ENA.R")
 muestrasEBI <- construirConsulta()
 
 
+# ================================================
 # DESCARGA DE LOS DATOS
+# ================================================
 source("FUNC/Descargas_ENA.R")
 nAcceso <- dlgInput(message = "Introduzca el número de acceso al proyecto ENA: ")$res
 descargas_ENA(nAcceso)
+
 
 # ================================================
 # PREPROCESAMIENTO DE LOS DATOS
@@ -157,6 +166,7 @@ informeCalidad(listadoFiltrado)
 source("FUNC/GraficosCalidad.R")
 graficosCalidad(filtradoR1, filtradoR2)
 
+
 # ===========================================
 # PROCESAMIENTO DE LOS DATOS 
 # ===========================================
@@ -170,7 +180,6 @@ source("FUNC/FlujoTrabajoDada.R")
 # Procesa lecturas filtradas y devuelve la tabla de conteos de secuencias
 union <- flujoTrabajoDada(filtradoR1, filtradoR2)
 
-
 # ------------------------------------------
 # CONSTRUCCIÓN DE LA TABLA DE SECUENCIAS -- ESTE PASO IGUAL LO JUNTO AL ANTERIOR
 # ------------------------------------------
@@ -180,7 +189,6 @@ construirTablaSecuencias(union)
 # Ruta al objeto Rds con la tabla final de secuencias
 tablaSecuencias <- "OUTPUT/RDS/seqtab.Rds"
 
-
 # -----------------------------------------
 # ELIMINACIÓN DE QUIMERAS
 # -----------------------------------------
@@ -189,7 +197,6 @@ source("FUNC/EliminarQuimeras.R")
 eliminarQuimeras(tablaSecuencias)
 # Ruta a la tabla limpia
 tablaSinQuim <- "OUTPUT/RDS/tabSinQuim.Rds"
-
 
 # ------------------------------------------
 # ASIGNACIÓN TAXONÓMICA
