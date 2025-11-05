@@ -65,7 +65,9 @@ install.packages("readr")
 # Jsonlite
 install.packages("jsonlite")
 
-
+# ===============================================
+# LIBRERÍAS
+# ===============================================
 library(readr)
 library(httr)
 library(jsonlite)
