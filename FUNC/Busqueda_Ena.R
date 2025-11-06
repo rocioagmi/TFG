@@ -1,37 +1,35 @@
-busquedaENA <- function(dominio, query, fields, limit = 1000) {
+busquedaENA <- function(dominio, query, fields, limit = 100) {
   url <- paste0("https://www.ebi.ac.uk/ebisearch/ws/rest/", dominio)
   
-  # query <- gsub('"', '', query)
   fields <- gsub(",\\s*", ",", fields)
   
   parametros <- list(
     query = query,
     fields = fields,
     format = "json",
-    size = limit
+    size = 100
   )
   
+  
   print(paste("Realizando la consulta EBI Search (Dominio:", dominio, "):"))
-  print(paste("Query:", query))
+  print(paste("Query:", parametros$query))
   
   respuesta <- GET(url = url, query = parametros)
+  stop_for_status(respuesta)
   
   if(http_error(respuesta)) {
     print(paste("URL generada y fallida:", respuesta$url))
   }
   
-  stop_for_status(respuesta, task = "consultar API de EBI")
-  
   contenidoRespuesta <- httr::content(respuesta, "text", encoding = "UTF-8")
-  
   dataJson <- fromJSON(contenidoRespuesta, flatten = TRUE)
   
   if (dataJson$hitCount == 0) {
     print(paste("No se encontraron resultados para esta consulta:", respuesta$url))
   }
   
-  resultadosDF <- as.data.frame(dataJson$entries)
-  return(resultadosDF)
+  cat("ÉXITO:", dataJson$hitCount, "muestras encontradas\n")
+  return(as.data.frame(dataJson$entries))
 }
 
 
@@ -52,9 +50,31 @@ construirConsulta <- function(limit = 1000) {
   query <- trimws(query)
   
   # "id,acc,description,sample_title"
-  fields <- "sample_accession,study_accession,description,disease,subject"
+  fields <- "sample_accession,study_accession,description,disease"
   
   muestrasDF <- busquedaENA(dominio = dominio, query = query, fields = fields, limit = limit)
   
-  return(muestrasDF)
+  print(head(muestrasDF))
+}
+
+explorarResultado <- function(df) {
+  if (nrow(df) == 0) {
+    cat("El dataframe esta vacío. No hay nada que explorar.\n")
+    return(NULL)
+  }
+  
+  cat("Estructura del dataframe:\n")
+  str(df)
+  
+  cat("\nResumen estadístico:\n")
+  print(summary(df))
+  
+  if(interactive()) {
+    View(df, title = "Resultados búsqueda EBI")
+  } else {
+    cat("Vista interactiva no disponible. Mostrando las primeras 10 filas:\n")
+    print(head(df, 10))
+  }
+  
+  return(df)
 }

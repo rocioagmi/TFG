@@ -90,7 +90,7 @@ library(ggplot2)
 # ===============================================
 source("FUNC/Busqueda_ENA.R")
 muestrasEBI <- construirConsulta()
-
+explorarResultado(muestrasEBI)
 
 # ================================================
 # DESCARGA DE LOS DATOS
