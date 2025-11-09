@@ -1,35 +1,59 @@
-busquedaENA <- function(dominio, query, fields, limit = 100) {
+busquedaENA <- function(dominio, query, fields, limit = 1000) {
   url <- paste0("https://www.ebi.ac.uk/ebisearch/ws/rest/", dominio)
-  
   fields <- gsub(",\\s*", ",", fields)
   
-  parametros <- list(
-    query = query,
-    fields = fields,
-    format = "json",
-    size = 100
-  )
-  
   print(paste("Realizando la consulta EBI Search (Dominio:", dominio, "):"))
-  print(paste("Query:", parametros$query))
+  print(paste("Query:", query))
   
-  respuesta <- GET(url = url, query = parametros)
-  stop_for_status(respuesta)
+  todas_las_muestras <- data.frame()
+  start <- 0
   
-  if(http_error(respuesta)) {
-    print(paste("URL generada y fallida:", respuesta$url))
-  }
-  
-  contenidoRespuesta <- httr::content(respuesta, "text", encoding = "UTF-8")
-  dataJson <- fromJSON(contenidoRespuesta, flatten = TRUE)
-  
-  if (dataJson$hitCount == 0) {
-    print(paste("No se encontraron resultados para esta consulta:", respuesta$url))
+  repeat{
+    parametros <- list(
+      query = query,
+      fields = fields,
+      format = "json",
+      size = limit,
+      start = start
+    )
+    
+    print(paste("Descargando página desde start = ", start))
+    
+    respuesta <- GET(url = url, query = parametros)
+    if(http_error(respuesta)) {
+      print(paste("Error en página:", respuesta$url))
+      break
+    }
+    stop_for_status(respuesta)
+    
+    contenidoRespuesta <- httr::content(respuesta, "text", encoding = "UTF-8")
+    dataJson <- fromJSON(contenidoRespuesta, flatten = TRUE, simplifyDataFrame = TRUE)
+    
+    if(dataJson$hitCount == 0 || length(dataJson$entries) == 0){
+      print(paste("No se encontraron resultados para esta consulta:", respuesta$url))
+      break
+    }
+    
+    temporalDF <- as.data.frame(dataJson$entries) %>%
+      mutate(
+        fields.accession = sapply(fields.accession, function(x) if (length(x) > 0) x[1] else NA),
+        fields.project = sapply(fields.project, function(x) if (length(x) > 0) x[1] else NA),
+        fields.description = sapply(fields.description, function(x) if (length(x) > 0) x[1] else NA),
+        fields.disease = sapply(fields.disease, function(x) if (length(x) > 0) x[1] else NA)
+      ) %>%
+      mutate(across(where(is.list), ~ sapply(., paste, collapse = "; ")))
+    
+    todas_las_muestras <- rbind(todas_las_muestras,temporalDF)
+    
+    if(nrow(temporalDF) < limit) break
+    start <- start + limit
+    Sys.sleep(0.3)
   }
   
   cat("ÉXITO:", dataJson$hitCount, "muestras encontradas\n")
-  #return(as.data.frame(dataJson$entries))
+  return(todas_las_muestras)
 }
+
 
 
 construirConsulta <- function(limit = 1000) {
@@ -48,19 +72,21 @@ construirConsulta <- function(limit = 1000) {
   dominio <- trimws(dominio)
   query <- trimws(query)
   
-  fields <- "sample_accession,study_accession,description,disease"
+  #fields <- "sample_accession,study_accession,description,disease"
+  #fields biosamples
+  fields <- "id, accession, project, description, disease"
   
-  busquedaENA(dominio = dominio, query = query, fields = fields, limit = limit)
+  muestrasDF <- busquedaENA(dominio = dominio, query = query, fields = fields, limit = limit)
+  return(muestrasDF)
 }
 
 
 explorarResultado <- function(df) {
-  if (nrow(df) == 0) {
-    cat("El dataframe esta vacío. No hay nada que explorar.\n")
+  if (is.null(df) || nrow(df) == 0) {
+    cat("El dataframe está vacío. No hay nada que explorar.\n")
     return(NULL)
   }
   
-  datatable(df, options = list(papeLength = 50, scrollX = TRUE))
-  
+  datatable(df, options = list(pageLength = 50, scrollX = TRUE))
   return(df)
 }
