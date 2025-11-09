@@ -10,7 +10,6 @@ busquedaENA <- function(dominio, query, fields, limit = 100) {
     size = 100
   )
   
-  
   print(paste("Realizando la consulta EBI Search (Dominio:", dominio, "):"))
   print(paste("Query:", parametros$query))
   
@@ -29,7 +28,7 @@ busquedaENA <- function(dominio, query, fields, limit = 100) {
   }
   
   cat("ÉXITO:", dataJson$hitCount, "muestras encontradas\n")
-  return(as.data.frame(dataJson$entries))
+  #return(as.data.frame(dataJson$entries))
 }
 
 
@@ -49,13 +48,11 @@ construirConsulta <- function(limit = 1000) {
   dominio <- trimws(dominio)
   query <- trimws(query)
   
-  # "id,acc,description,sample_title"
   fields <- "sample_accession,study_accession,description,disease"
   
-  muestrasDF <- busquedaENA(dominio = dominio, query = query, fields = fields, limit = limit)
-  
-  print(head(muestrasDF))
+  busquedaENA(dominio = dominio, query = query, fields = fields, limit = limit)
 }
+
 
 explorarResultado <- function(df) {
   if (nrow(df) == 0) {
@@ -63,18 +60,7 @@ explorarResultado <- function(df) {
     return(NULL)
   }
   
-  cat("Estructura del dataframe:\n")
-  str(df)
-  
-  cat("\nResumen estadístico:\n")
-  print(summary(df))
-  
-  if(interactive()) {
-    View(df, title = "Resultados búsqueda EBI")
-  } else {
-    cat("Vista interactiva no disponible. Mostrando las primeras 10 filas:\n")
-    print(head(df, 10))
-  }
+  datatable(df, options = list(papeLength = 50, scrollX = TRUE))
   
   return(df)
 }

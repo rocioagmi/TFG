@@ -85,12 +85,13 @@ library(BiocParallel)
 library(ggplot2)
 
 
-# ===============================================
+# ================================================
 # BÚSQUEDA PROGRAMÁTICA EN ENA A TRAVÉS DE EBI
-# ===============================================
+# ================================================
 source("FUNC/Busqueda_ENA.R")
 muestrasEBI <- construirConsulta()
 explorarResultado(muestrasEBI)
+
 
 # ================================================
 # DESCARGA DE LOS DATOS
