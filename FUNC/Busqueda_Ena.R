@@ -36,25 +36,9 @@ busquedaENA <- function(dominio, query, fields, limit = 1000) {
       break
     }
     
-    entradasDF <- as.data.frame(dataJson$entries)
+    temporalDF <- as.data.frame(dataJson$entries)
     
-    if ("fields.id" %in% colnames(entradasDF) && "fields.description" %in% colnames(entradasDF)) {
-      temporalDF <- entradasDF %>%
-        select(id, source, "fields.description") %>%
-        mutate(
-          "fields.description" = sapply(fields.description, function(x) if (length(x) > 0) x[1] else NA)
-        )%>%
-        rename(
-          "description" = "fields.description"
-        )
-    } else {
-      temporalDF <- entradasDF %>% select(id, source)
-    }
-    
-    temporalDF <- temporalDF %>%
-      mutate(across(where(is.list), ~ sapply(., function(x) paste(x, collapse = "; "))))
-    
-    todas_las_muestras <- rbind(todas_las_muestras,temporalDF)
+    todas_las_muestras <- rbind(todas_las_muestras, temporalDF)
     
     if(nrow(temporalDF) < limit) break
     start <- start + limit
@@ -89,7 +73,7 @@ construirConsulta <- function(limit = 1000) {
   dominio <- trimws(dominio)
   query <- trimws(query)
   
-  fields <- "id, description"
+  fields <- "description"
   
   muestrasDF <- busquedaENA(dominio = dominio, query = query, fields = fields, limit = limit)
   return(muestrasDF)
