@@ -20,10 +20,12 @@ busquedaENA <- function(dominio, query, fields, limit = 1000) {
     print(paste("Descargando página desde start = ", start))
     
     respuesta <- GET(url = url, query = parametros)
+    
     if(http_error(respuesta)) {
       print(paste("Error en página:", respuesta$url))
       break
     }
+    
     stop_for_status(respuesta)
     
     contenidoRespuesta <- httr::content(respuesta, "text", encoding = "UTF-8")
@@ -34,14 +36,23 @@ busquedaENA <- function(dominio, query, fields, limit = 1000) {
       break
     }
     
-    temporalDF <- as.data.frame(dataJson$entries) %>%
-      mutate(
-        fields.accession = sapply(fields.accession, function(x) if (length(x) > 0) x[1] else NA),
-        fields.project = sapply(fields.project, function(x) if (length(x) > 0) x[1] else NA),
-        fields.description = sapply(fields.description, function(x) if (length(x) > 0) x[1] else NA),
-        fields.disease = sapply(fields.disease, function(x) if (length(x) > 0) x[1] else NA)
-      ) %>%
-      mutate(across(where(is.list), ~ sapply(., paste, collapse = "; ")))
+    entradasDF <- as.data.frame(dataJson$entries)
+    
+    if ("fields.id" %in% colnames(entradasDF) && "fields.description" %in% colnames(entradasDF)) {
+      temporalDF <- entradasDF %>%
+        select(id, source, "fields.description") %>%
+        mutate(
+          "fields.description" = sapply(fields.description, function(x) if (length(x) > 0) x[1] else NA)
+        )%>%
+        rename(
+          "description" = "fields.description"
+        )
+    } else {
+      temporalDF <- entradasDF %>% select(id, source)
+    }
+    
+    temporalDF <- temporalDF %>%
+      mutate(across(where(is.list), ~ sapply(., function(x) paste(x, collapse = "; "))))
     
     todas_las_muestras <- rbind(todas_las_muestras,temporalDF)
     
@@ -57,9 +68,15 @@ busquedaENA <- function(dominio, query, fields, limit = 1000) {
 
 
 construirConsulta <- function(limit = 1000) {
-  dominio <- dlgInput(message = "Introduzca el dominio de búsqueda (biosamples, sra-sample):")$res
+  dominios_validos <- c("nucleotideSequences", "project", "sra", "biosamples", 
+                        "sra-study", "sra-sample", "sra-run", "sra-experiment")
+  
+  dominio <- dlgInput(message = "Introduzca el dominio de búsqueda:")$res
   if (!is.character(dominio) || length(dominio) == 0) {
     print("Operación (dominio) cancelada por el usuario.")
+    return(NULL)
+  } else if (!dominio %in% dominios_validos){
+    print("Dominio no válido.")
     return(NULL)
   }
   
@@ -72,9 +89,7 @@ construirConsulta <- function(limit = 1000) {
   dominio <- trimws(dominio)
   query <- trimws(query)
   
-  #fields <- "sample_accession,study_accession,description,disease"
-  #fields biosamples
-  fields <- "id, accession, project, description, disease"
+  fields <- "id, description"
   
   muestrasDF <- busquedaENA(dominio = dominio, query = query, fields = fields, limit = limit)
   return(muestrasDF)
@@ -83,10 +98,10 @@ construirConsulta <- function(limit = 1000) {
 
 explorarResultado <- function(df) {
   if (is.null(df) || nrow(df) == 0) {
-    cat("El dataframe está vacío. No hay nada que explorar.\n")
+    cat("El dataframe está vacío.\n")
     return(NULL)
   }
   
-  datatable(df, options = list(pageLength = 50, scrollX = TRUE))
-  return(df)
+  print(datatable(df, options = list(pageLength = 50, scrollX = TRUE)))
+  return(invisible(df))
 }
