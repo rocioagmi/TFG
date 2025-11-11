@@ -1,9 +1,10 @@
-busquedaENA <- function(dominio, query, fields, limit = 1000) {
+busquedaENA <- function(dominio, query, fields, filter = filter, limit = 1000) {
   url <- paste0("https://www.ebi.ac.uk/ebisearch/ws/rest/", dominio)
   fields <- gsub(",\\s*", ",", fields)
   
   print(paste("Realizando la consulta EBI Search (Dominio:", dominio, "):"))
   print(paste("Query:", query))
+  print(paste("Filtros:", filter))
   
   todas_las_muestras <- data.frame()
   start <- 0
@@ -12,6 +13,7 @@ busquedaENA <- function(dominio, query, fields, limit = 1000) {
     parametros <- list(
       query = query,
       fields = fields,
+      filter = filter,
       format = "json",
       size = limit,
       start = start
@@ -70,12 +72,19 @@ construirConsulta <- function(limit = 1000) {
     return(NULL)
   }
   
+  filter <- dlgInput(message = "Ingrese un término para filtrar la búsqueda:")$res
+  if (!is.character(filter) || length(filter) == 0) {
+    print("Operación (filter) cancelada por el usuario.")
+    return(NULL)
+  }
+  
   dominio <- trimws(dominio)
   query <- trimws(query)
+  filter <- trimws(filter)
   
   fields <- "description"
   
-  muestrasDF <- busquedaENA(dominio = dominio, query = query, fields = fields, limit = limit)
+  muestrasDF <- busquedaENA(dominio = dominio, query = query, fields = fields, filter = filter, limit = limit)
   return(muestrasDF)
 }
 
