@@ -1,3 +1,6 @@
+library(dada2)
+library(svDialogs)
+
 asignarTaxonomia <- function(tabSinQuim){
   directorioBBDD <- dlgInput(message = "Ruta completa al directorio con la Base de Datos: ")$res
   taxa <- assignTaxonomy(tabSinQuim, directorioBBDD, multithread = TRUE)

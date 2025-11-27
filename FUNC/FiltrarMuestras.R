@@ -1,3 +1,5 @@
+library(dada2)
+
 filtrarMuestras <- function(R1, R2){
   
   nombres_R1 <- file.path("OUTPUT/FILTRADO", basename(R1))

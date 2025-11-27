@@ -1,3 +1,5 @@
+library(dada2)
+
 flujoTrabajoDada <- function(R1, R2){
   # Error Rates
   err_R1 <- learnErrors(R1)

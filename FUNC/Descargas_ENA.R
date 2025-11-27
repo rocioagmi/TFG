@@ -1,11 +1,5 @@
-
-# AUTOMATIZACIÓN DE LA DESCARGA DE LAS MUESTRAS DEL ENA
-
 library(readr)
-library(dplyr)
-library(svDialogs)
-library(TAF)
-
+library(httr)
 
 descargas_ENA <- function(nAcceso){
 

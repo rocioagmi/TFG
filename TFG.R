@@ -68,21 +68,23 @@ install.packages("jsonlite")
 # ===============================================
 # LIBRERÍAS
 # ===============================================
-library(readr)
+
 library(httr)
 library(jsonlite)
-library(dplyr)
-library(Biostrings)
-library(ShortRead)
-library(mongolite)
 library(svDialogs)
-library(TAF)
-library(dada2)
-library(QuasR)
 library(DT)
-library(Rqc)
-library(BiocParallel)
-library(ggplot2)
+library(readr)
+library(ShortRead)
+library(dada2)
+#library(dplyr)
+#library(Biostrings)
+#library(mongolite)
+#library(TAF)
+#library(QuasR)
+#library(Rqc)
+#library(BiocParallel)
+#library(ggplot2)
+
 
 
 # ================================================

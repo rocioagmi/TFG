@@ -11,26 +11,26 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Origen de los datos
 
-Los datos utilizados en este trabajo se obtuvieron de la base de datos del [European Nucleotide Archive (ENA)](https://www.ebi.ac.uk/ena/browser/home), específicamente del proyecto [PRJEB34168](https://www.ebi.ac.uk/ena/browser/view/PRJEB34168). En total, se descargaron 65 muestras: 39 correspondientes a personas sanas y 26 a pacientes con esclerosis múltiple. Las muestras se descargaron en formato .fastq, ya que es el único formato disponible en el proyecto que permite diferenciar entre muestras de personas con esclerosis múltiple y personas sanas.
+Los datos utilizados en este trabajo se obtuvieron de la base de datos del [European Nucleotide Archive (ENA)](https://www.ebi.ac.uk/ena/browser/home).
 
+###Búsqueda de los datos
+
+```{r warning = FALSE, message = FALSE}
+source("FUNC/Busqueda_ENA.R")
+muestrasEBI <- construirConsulta()
+explorarResultado(muestrasEBI)
+```
 
 ### Descarga de los datos
 
-La descarga de las muestras se realiza de forma automatizada mediante la función descargas_ENA, ubicada en el archivo Descargas_ENA, dentro de la carpeta FUNC. Para iniciar el proceso, es necesario introducir el código del proyecto del ENA que contiene las muestras a descargar.
-
-A partir de este código, se descarga un archivo en formato .tsv, que incluye los enlaces de descarga correspondientes a todas las muestras disponibles. Una vez obtenido este archivo, se procede a la descarga automática de todas las muestras comprimidas en formato .fastq.gz. Tanto el archivo .tsv como las muestras descargadas se almacenan en el directorio "INPUT/DATA".
-
 ```{r warning = FALSE, message = FALSE}
-library(DT)
-archivo_tsv <-"INPUT/DATA/filereport_read_run_PRJEB34168_tsv.tsv"
-tabla <- read.delim(archivo_tsv, sep = "\t")
-datatable(tabla)
+source("FUNC/Descargas_ENA.R")
+nAcceso <- dlgInput(message = "Introduzca el número de acceso al proyecto ENA: ")$res
+descargas_ENA(nAcceso)
 ```
 
 
 ### Preprocesamiento
-
-Una vez se han recopilado todas las muestras, el siguiente paso es prepararlas para su posterior procesamiento. Esta etapa comienza con la elavoración de un informe de calidad, que permite evaluar el estado de las muestras.
 
 ```{r, eval = FALSE, warning = FALSE, message = FALSE}
 library(ShortRead)

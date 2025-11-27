@@ -1,3 +1,6 @@
+library(dada2)
+library(ggplot2)
+
 graficosCalidad <- function(R1,R2){
   timestamp <- format(Sys.time(), "%d-%m-%Y_%H-%M")
   

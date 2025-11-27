@@ -1,3 +1,5 @@
+library(dada2)
+
 construirTablaSecuencias <- function(union){
   seqtab <- makeSequenceTable(union)
   dim(seqtab)

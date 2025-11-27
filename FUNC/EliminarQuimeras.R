@@ -1,3 +1,5 @@
+library(dada2)
+
 eliminarQuimeras <- function(seqtab){
   tabSinQuim <- removeBimeraDenovo(seqtab, method = "consensus", multithread = TRUE, verbose = TRUE)
   dim(tabSinQuim)

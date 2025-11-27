@@ -1,3 +1,5 @@
+library(ShortRead)
+
 informeCalidad <- function(directorioMuestras){
   qaSummary <- qa(directorioMuestras, type = "fastq")
   
