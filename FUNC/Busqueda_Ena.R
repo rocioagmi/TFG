@@ -3,6 +3,8 @@ library(jsonlite)
 library(svDialogs)  
 library(DT)         
 library(utils)
+library(stringr)
+library(dplyr)
 
 busquedaENA <- function(dominio, query, fields, filter = filter, limit = 1000) {
   url <- paste0("https://www.ebi.ac.uk/ebisearch/ws/rest/", dominio)

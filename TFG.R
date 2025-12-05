@@ -1,69 +1,72 @@
 # BIOCONDUCTOR
-if (!require("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
+#if (!require("BiocManager", quietly = TRUE))
+#  install.packages("BiocManager")
 
-BiocManager::install(c("GenomicFeatures", "AnnotationDbi"))
+#BiocManager::install(c("GenomicFeatures", "AnnotationDbi"))
 
 # Biostrings
-BiocManager::install("Biostrings", force = TRUE)
+#BiocManager::install("Biostrings", force = TRUE)
 
 # DADA2
-BiocManager::install("dada2")
+#BiocManager::install("dada2")
 
 # phyloseq
-BiocManager::install("phyloseq")
+#BiocManager::install("phyloseq")
 
 # DESeq2
-BiocManager::install("DESeq2")
+#BiocManager::install("DESeq2")
 
 # microbiome
-BiocManager::install("microbiome")
+#BiocManager::install("microbiome")
 
 # qiime2R
-if (!requireNamespace("devtools", quietly = TRUE)){install.packages("devtools")}
-  devtools::install_github("jbisanz/qiime2R")
+#if (!requireNamespace("devtools", quietly = TRUE)){install.packages("devtools")}
+#  devtools::install_github("jbisanz/qiime2R")
 
 # ANCOMBC
-BiocManager::install("ANCOMBC") 
+#BiocManager::install("ANCOMBC") 
 
 # microbiotaProcess
-BiocManager::install("MicrobiotaProcess")
+#BiocManager::install("MicrobiotaProcess")
 
 # mongolite
-install.packages("mongolite")
+#install.packages("mongolite")
 
 # QuasR
-BiocManager::install("QuasR")
+#BiocManager::install("QuasR")
 
 # svDialogs
-install.packages("svDialogs")
+#install.packages("svDialogs")
 
 # TAF
-install.packages("TAF")
+#install.packages("TAF")
 
 # ShortRead
-BiocManager::install("ShortRead", force = TRUE)
+#BiocManager::install("ShortRead", force = TRUE)
 
 # Rqc
-BiocManager::install("Rqc")
+#BiocManager::install("Rqc")
 
 # DT
-install.packages("DT")
+#install.packages("DT")
 
 # BiocParallel
-BiocManager::install("BiocParallel")
+#BiocManager::install("BiocParallel")
 
 # httr
-install.packages("httr")
+#install.packages("httr")
 
 # httr2
-install.packages("httr2")
+#install.packages("httr2")
 
 # readr
-install.packages("readr")
+#install.packages("readr")
 
 # Jsonlite
-install.packages("jsonlite")
+#install.packages("jsonlite")
+
+# stringr
+#install.packages("stringr")
 
 # ===============================================
 # LIBRERÍAS
@@ -88,7 +91,7 @@ library(dada2)
 
 
 # ================================================
-# BÚSQUEDA PROGRAMÁTICA EN ENA A TRAVÉS DE EBI
+# BÚSQUEDA PROGRAMÁTICA (EBI/ENA)
 # ================================================
 source("FUNC/Busqueda_ENA.R")
 muestrasEBI <- construirConsulta()
