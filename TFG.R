@@ -95,7 +95,6 @@ library(dada2)
 # ================================================
 source("FUNC/Busqueda_ENA.R")
 muestrasEBI <- construirConsulta()
-explorarResultado(muestrasEBI)
 
 
 # ================================================

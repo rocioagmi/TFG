@@ -6,103 +6,130 @@ library(utils)
 library(stringr)
 library(dplyr)
 
-busquedaENA <- function(dominio, query, fields, filter = filter, limit = 1000) {
-  url <- paste0("https://www.ebi.ac.uk/ebisearch/ws/rest/", dominio)
-  fields <- gsub(",\\s*", ",", fields)
+
+busquedaENA <- function(query, limit = 2000) {
   
-  print(paste("Realizando la consulta EBI Search (Dominio:", dominio, "):"))
+  url <- "https://www.ebi.ac.uk/ebisearch/ws/rest/sra-run"
+  fields <- "run_accession,study_accession,sample_accession,library_strategy,scientific_name,sample_alias,description,experiment_title,fastq_ftp"
+  
+  print(paste("Consultando EBI..."))
   print(paste("Query:", query))
-  print(paste("Filtros:", filter))
   
-  todas_las_muestras <- data.frame()
+  todas_muestras <- data.frame()
   start <- 0
   
   repeat{
     parametros <- list(
       query = query,
       fields = fields,
-      filter = filter,
       format = "json",
-      size = limit,
+      size = ifelse(limit > 100, 100, limit), 
       start = start
     )
     
-    print(paste("Descargando página desde start = ", start))
+    respuesta <- GET(url, query = parametros)
     
-    respuesta <- GET(url = url, query = parametros)
-    
-    if(http_error(respuesta)) {
-      print(paste("Error en página:", respuesta$url))
+    if (status_code(respuesta) != 200) {
+      warning("Error de conexión con EBI. Código:", status_code(respuesta))
       break
     }
     
-    stop_for_status(respuesta)
+    contenido <- httr::content(respuesta, "text", encoding = "UTF-8")
+    json <- fromJSON(contenido, flatten = TRUE)
     
-    contenidoRespuesta <- httr::content(respuesta, "text", encoding = "UTF-8")
-    dataJson <- fromJSON(contenidoRespuesta, flatten = TRUE, simplifyDataFrame = TRUE)
-    
-    if(dataJson$hitCount == 0 || length(dataJson$entries) == 0){
+    if (json$hitCount == 0 || length(json$entries) == 0){
       print(paste("No se encontraron resultados para esta consulta:", respuesta$url))
       break
-    }
+    } 
     
-    temporalDF <- as.data.frame(dataJson$entries)
+    df_temp <- as.data.frame(json$entries)
     
-    todas_las_muestras <- rbind(todas_las_muestras, temporalDF)
+    colnames(df_temp) <- gsub("fields\\.", "", colnames(df_temp))
+  
+    todas_muestras <- bind_rows(todas_muestras, df_temp)
     
-    if(nrow(temporalDF) < limit) break
-    start <- start + limit
-    Sys.sleep(0.3)
+    cat(sprintf("\rMetadatos recuperados: %d de %d...", nrow(todas_muestras), json$hitCount))
+    
+    if(nrow(todas_muestras) >= limit || nrow(todas_muestras) >= json$hitCount) break
+    start <- start + 100
   }
   
-  cat("ÉXITO:", dataJson$hitCount, "muestras encontradas\n")
-  return(todas_las_muestras)
+  cat("\nConsulta finalizada.\n")
+  return(todas_muestras)
 }
 
 
+filtrarDatos <- function(df) {
+  
+  if (is.null(df) || nrow(df) == 0) return(NULL)
+  
+  df_filtrado <- df
+  
+  cat("--- INICIANDO EL FILTRADO ---\n")
+  
+  # FILTRAR POR ORGANISMO
+  organismo <- unique(df_filtrado$scientific_name)
+  
+  if(length(organismo) > 0){
+    lista_org <- dlg_list(choices = organismo, 
+                      preselect = organismo,
+                      multiple = TRUE,
+                      title = "Selecciona organismos a MANTENER")$res
+    if(length(lista_org) > 0) {
+      df_filtrado <- df_filtrado %>% filter(scientific_name %in% lista_org)
+      cat(paste("Organismos seleccionados: ", paste(lista_org, collapse = ","), "\n"))
+    } else {
+      cat("Se mantienen todos los organismos.\n")
+    }
+  }
+  
+  # FILTRAR POR ESTRATEGIA
+  estrategia <- unique(df_filtrado$library_strategy)
+  
+  if(length(estrategia) > 0){
+    lista_est <- dlg_list(choices = estrategia,
+                          preselect = estrategia,
+                          multiple = TRUE,
+                          title = "Selecciona estrategias a MANTENER")$res
+    if(length(lista_est) > 0){
+      df_filtrado <- df_filtrado %>% filter(library_strategy %in% lista_est)
+      cat(paste("Estrategias seleccionadas: ", paste(lista_est, collapse = ","), "\n"))
+    } else {
+      cat("Se mantienen todos las estrategias.\n")
+    }
+  }
+    
+  # FILTRAR POR PALABRA CLAVE
+}
 
-construirConsulta <- function(limit = 1000) {
-  dominios_validos <- c("nucleotideSequences", "project", "sra", "biosamples", 
-                        "sra-study", "sra-sample", "sra-run", "sra-experiment")
+
+construirConsulta <- function() {
   
-  dominio <- dlgInput(message = "Introduzca el dominio de búsqueda:")$res
-  if (!is.character(dominio) || length(dominio) == 0) {
-    print("Operación (dominio) cancelada por el usuario.")
-    return(NULL)
-  } else if (!dominio %in% dominios_validos){
-    print("Dominio no válido.")
-    return(NULL)
-  }
+  query <- dlgInput(message = "Término general (ej: multiple sclerosis):", default = "multiple sclerosis")$res
+  if (!length(query)) return(NULL)
   
-  query <- dlgInput(message = "Ingrese un término de búsqueda:")$res
-  if (!is.character(query) || length(query) == 0) {
-    print("Operación (query) cancelada por el usuario.")
+  datos_raw <- busquedaENA(query, limit = 2000)
+  
+  datos_filtrados <- filtrarDatos(datos_raw)
+  
+  if (nrow(datos_filtrados) == 0) {
+    message("No se encontraron muestras que cumplan todos los criterios.")
     return(NULL)
   }
   
-  filter <- dlgInput(message = "Ingrese un término para filtrar la búsqueda:")$res
-  if (!is.character(filter) || length(filter) == 0) {
-    print("Operación (filter) cancelada por el usuario.")
-    return(NULL)
-  }
+  print(table(datos_filtrados$Grupo))
   
-  dominio <- trimws(dominio)
-  query <- trimws(query)
-  filter <- trimws(filter)
+  print(datatable(datos_filtrados, 
+                  caption = "Muestras seleccionadas. Revisa y filtra si es necesario.",
+                  options = list(pageLength = 10, scrollX = TRUE),
+                  filter = 'top',
+                  selection = 'none')) 
   
-  fields <- "description"
-  
-  muestrasDF <- busquedaENA(dominio = dominio, query = query, fields = fields, filter = filter, limit = limit)
-  return(muestrasDF)
+  return(datos_filtrados)
 }
 
 
 explorarResultado <- function(df) {
-  if (is.null(df) || nrow(df) == 0) {
-    cat("El dataframe está vacío.\n")
-    return(NULL)
-  }
-  
-  print(datatable(df, options = list(pageLength = 50, scrollX = TRUE)))
   return(invisible(df))
 }
+
