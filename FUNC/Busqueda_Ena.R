@@ -147,7 +147,7 @@ filtrarDatos <- function(df) {
       terminos_encontrados <- list()
       
       for (patron in names(terminos_sugeridos)) {
-        campos_texto <- c("library_strategy, scientific_name, sample_alias, description, experiment_title")
+        campos_texto <- c("library_strategy", "scientific_name", "sample_alias", "description", "experiment_title")
         campos_disponibles <- campos_texto[campos_texto %in% colnames(df_filtrado)]
         
         encontrado <- FALSE
@@ -308,4 +308,3 @@ construirConsulta <- function() {
 explorarResultado <- function(df) {
   return(invisible(df))
 }
-
