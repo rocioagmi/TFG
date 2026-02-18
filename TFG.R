@@ -90,19 +90,19 @@ library(dada2)
 
 
 # ================================================
-# BÚSQUEDA PROGRAMÁTICA (EBI/ENA)
+# BÚSQUEDA PROGRAMÁTICA (EBI/ENA)                 ----
 # ================================================
 source("FUNC/Busqueda_ENA.R")
 muestrasEBI <- construirConsulta()
 
 
 # ================================================
-# AÑADIR FUNCIÓN FILTRO AQUÍ
+# AÑADIR FUNCIÓN FILTRO AQUÍ                      ----
 # ================================================
 
 
 # ================================================
-# DESCARGA DE LOS DATOS
+# DESCARGA DE LOS DATOS - RETOCAR ESTA FUNCIÓN    ----
 # ================================================
 source("FUNC/Descargas_ENA.R")
 nAcceso <- dlgInput(message = "Introduzca el número de acceso al proyecto ENA: ")$res
@@ -116,7 +116,7 @@ descargas_ENA(nAcceso)
 # Obtiene la lista ordenada de todos los archivos .fastq.gz en la carpeta de entrada
 listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
 
-# Separa las muestras por tipo: MS (enfermos) y Healthy (sanos)
+# Separa las muestras por tipo: MS (enfermos) y Healthy (sanos) ---- TODAVIA NO LO ESTOY USANDO
 muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
 muestrasHealthy <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names = TRUE))
 
@@ -140,11 +140,6 @@ dir.create("OUTPUT/FILTRADO")
 source("FUNC/InformeCalidad.R")
 # Genera informe de calidad para todas las muestras
 informeCalidad(listadoMuestras, umbral_calidad = 20)
-
-# Carga función para gráficos de calidad 
-source("FUNC/GraficosCalidad.R")
-# Genera gráficos de calidad para lecturas R1 (forward) y R2 (reverse)
-graficosCalidad(muestrasR1, muestrasR2)
 
 # ----------------------------------------------
 # FILTRADO DE CALIDAD CON DADA2
@@ -172,10 +167,7 @@ filtradoR2 <- listadoFiltrado[grepl("R2", listadoFiltrado)]
 # -------------------------------------------
 # Reutiliza funciones para evaluar mejora tras filtrado
 source("FUNC/InformeCalidad.R")
-informeCalidad(listadoFiltrado)
-
-source("FUNC/GraficosCalidad.R")
-graficosCalidad(filtradoR1, filtradoR2)
+informeCalidad(listadoFiltrado, umbral_calidad = 20)
 
 
 # ===========================================
