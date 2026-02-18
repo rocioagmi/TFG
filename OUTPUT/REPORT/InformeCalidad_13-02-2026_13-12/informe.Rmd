@@ -1,0 +1,125 @@
+---
+title: "Control de Calidad FASTQ"
+date: "13-02-2026_13-12"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    code_folding: hide
+---
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE,
+                      fig.width = 10, fig.height = 7)
+library(ShortRead)
+library(ggplot2)
+library(dplyr)
+library(knitr)
+library(stats)
+
+# Cargar resultados
+datos_qa <- readRDS("datos_qa.rds")
+```
+
+# 1. Resumen General
+```{r resumen}
+
+read_counts <- as.data.frame(datos_qa[["readCounts"]])
+if (!"lane" %in% colnames(read_counts)) {
+  read_counts$lane <- rownames(read_counts)
+}
+read_counts$lane <- trimws(read_counts$lane)
+ShortRead::.plotReadCount(datos_qa)
+kable(read_counts, caption = "Número de reads por muestra")
+```
+
+# 2. Calidad media por Posición
+```{r calidad_posicion}
+
+qual_by_cycle <- as.data.frame(datos_qa[["perCycle"]]$quality)
+if (!"lane" %in% colnames(qual_by_cycle)) {
+  qual_by_cycle$lane <- "Muestra_Unica"
+}
+qual_by_cycle$lane <- trimws(qual_by_cycle$lane)
+
+qual_summary <- qual_by_cycle %>%
+  group_by(lane, Cycle) %>%
+  summarize(mean_score = weighted.mean(Score, Count), .groups = "drop")
+
+ggplot(qual_summary, aes(x = Cycle, y = mean_score, color = lane)) +
+  geom_line(linewidth = 1) +
+  geom_hline(yintercept = 30, linetype = "dashed", color = "darkgreen") +
+  geom_hline(yintercept = 20, linetype = "dashed", color = "orange") +
+  facet_wrap(~lane, ncol = 2) +
+  scale_y_continuous(limits = c(0, 42)) +
+  theme_minimal() +
+  labs(title = "Calidad Media por Ciclo",
+       subtitle = "Media ponderada (Score x Count)",
+       x = "Ciclo", y = "Phred Score Medio") +
+  theme(legend.position = "none")
+  
+  df <- datos_qa[["readQualityScore"]]
+  ShortRead::.plotReadQuality(df[df$type=="read",])
+```
+
+# 3. Composición de Bases
+```{r bases}
+
+base_by_cycle <- as.data.frame(datos_qa[["perCycle"]]$baseCall)
+if (!"lane" %in% colnames(base_by_cycle)) base_by_cycle$lane <- "Muestra_Unica"
+base_by_cycle$lane <- trimws(base_by_cycle$lane)
+
+ggplot(base_by_cycle, aes(x = Cycle, y = Count, color = Base)) +
+  geom_line(linewidth = 0.8) +
+  facet_wrap(~lane, ncol = 2, scales = "free_y") +
+  theme_minimal() +
+  labs(title = "Composición de bases por ciclo",
+       x = "Ciclo", y = "Frecuencia")
+
+ShortRead::.plotNucleotideCount(datos_qa)
+```
+
+# 4. Distribución de Calidad
+```{r dist_calidad}
+
+ggplot(qual_by_cycle, aes(x = Score, fill = lane, weight = Count)) +
+  geom_density(alpha = 0.5, color = NA) +
+  geom_vline(xintercept = 30, linetype = "dotted") + 
+  theme_minimal() +
+  labs(title = "Distribución de scores de calidad",
+       x = "Phred Score", y = "Densidad") + 
+  theme(legend.position = "bottom")
+```
+
+# 5. Frecuencia de Reads
+```{r freq_reads}
+# Frecuencia de reads (si está disponible)
+if ("frequentSequences" %in% names(datos_qa)) {
+  freq_seq <- datos_qa[["frequentSequences"]]
+  kable(head(freq_seq, 10), caption = "Secuencias más frecuentes")
+}
+```
+
+# 6. Conclusiones
+```{r conclusiones}
+
+total_reads <- sum(read_counts$read)
+avg_quality <- weighted.mean(qual_by_cycle$Score, qual_by_cycle$Count)
+```
+
+- **Total de reads:** `r format(total_reads, big.mark = ",")`
+- **Calidad media global:** `r round(avg_quality, 1)`
+- **Número de muestras:** `r nrow(read_counts)`
+```{r evaluacion, results="asis"}
+if (avg_quality >= 30) {
+  cat("\n✅ **Calidad excelente** - Puedes continuar con el análisis.\n")
+} else if (avg_quality >= 20) {
+  cat("\n⚠️ **Calidad aceptable** - Considera aplicar filtrado de calidad.\n")
+} else {
+  cat("\n❌ **Calidad baja** - Revisa el protocolo de secuenciación.\n")
+}
+```
+
+---
+*Generado el 13-02-2026_13-12*
+

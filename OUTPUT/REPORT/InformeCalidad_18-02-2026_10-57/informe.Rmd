@@ -1,0 +1,210 @@
+---
+title: "Control de Calidad"
+date: "18-02-2026_10-57"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    code_folding: hide
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+                          fig.width = 12, fig.height = 7)
+library(ggplot2)
+library(dplyr)
+library(knitr)
+
+datos <- readRDS("datos_qa.rds")
+calidad_ciclo <- datos$calidad_ciclo
+estadisticas <- datos$estadisticas
+gc_dist <- datos$gc_dist
+n_muestras <- datos$n_muestras
+umbral:20
+```
+
+# Resumen General
+
+Se analizaron **`r n_muestras`** muestra(s) FASTQ.
+
+```{r tabla_general}
+kable(
+  estadisticas %>%
+    arrange(calidad_media) %>%
+    mutate(
+      total_reads = format(total_reads, big.mark = ","),
+      calidad_media = round(calidad_media, 1),
+      longitud_media = round(longitud_media, 0),
+      gc_content = round(gc_content, 1)),
+    ),
+    col.names = c("Muestra", "Reads Totales", "Calidad Media", "Longitud Media", "GC (%)"),
+    caption = "Estadísticas generales por muestra"
+)
+```
+
+---
+
+# 1. Calidad por Posición - Vista General
+
+**Interpretación**:
+Cada línea representa una muestra.
+Líneas por debajo de **Q20** (rojo) indican problemas graves.
+Líneas por debajo de **Q30** (verde) pero sobre Q20 son aceptables pero pueden requerir trimming.
+
+```{r calidad_overlay, fig.height = 7}
+muestras_problematicas <- estadisticas %>%
+  filter(calidad_media < umbral) %>%
+  pull(muestra)
+
+calidad_ciclo <- calidad_ciclo %>%
+  mutate(problematica = muestra %in% muestras_problematicas)
+
+alpha_normal <- if (n_muestras <= 10) 0.6 else if (n_muestras <= 50) 0.3 else 0.15
+
+p <- ggplot(calidad_ciclo, aes(x = ciclo, y = calidad_media, group = muestra)) +
+  geom_line(data = calidad_ciclo %%>%% filter(!problematica),
+            color = "steelblue", alpha = alpha_normal, linewidth = 0.8) +
+  geom_line(data = calidad_ciclo %%>%% filter(problematica),
+            aes(color = muestra), linewidth = 1.2, alpha = 0.9) +
+  geom_hline(yintercept = 30, linetype = "dashed", color = "darkgreen", linewidth = 1) +
+  geom_hline(yintercept = 20, linetype = "dashed", color = "red", linewidth = 1) +
+  annotate("text", x = -Inf, y = 30.5, label = "Q30 (alta calidad)", 
+           hjust = -0.05, size = 4, color = "darkgreen", fontface = "bold") +
+  annotate("text", x = -Inf, y = 20.5, label = "Q20 (mínimo aceptable)",
+           hjust = -0.05, size = 4, color = "red", fontface = "bold") +
+  scale_y_continuous(limits = c(0, 42), breaks = seq(0, 40, 5)) +
+  labs(
+    title = paste("Calidad por Posición -", n_muestras, "muestra(s)"),
+    subtitle = ifelse (length(muestras_problematicas) > 0,
+                       paste(length(muestras_problematicas), "muestra(s) con calidad < Q", umbral),
+                       "Todas las muestras superan el umbral de calidad"),
+    x = "Posición en el Read (pb)",
+    y = "Phred Score Medio",
+    color = "Muestras problemáticas"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+   legend.position = ifelse (length(muestras_problematicas) > 0, "bottom", "none"),
+   legend.title = element_text(face = "bold")
+  )
+print(p)
+```
+
+---
+
+# 2. Muestras con Calidad Baja
+
+```{r muestras_bajas, results = "asis"}
+muestras_bajas <- estadisticas %>%
+  filter(calidad_media < umbral) %>%
+  arrange(calidad_media)
+
+if (nrow(muestras_bajas) > 0) {
+  cat("\n **Atención:** Se detectaron", nrow(muestras_bajas),
+      "muestra(s) con calidad media inferior a Q", umbral, ":\n\n")
+  print(kable(
+    muestras_bajas %>%
+      mutate(total_reads = format(total_reads, big.mark = ","),
+             calidad_media = round(calidad_media, 1),
+             gc_content = round(gc_content, 1)),
+    col.names = c("Muestra", "Reads Totales", "Calidad Media", "Longitud Media", "GC (%)"),
+    caption = "Muestras que requieren atención"
+  ))
+} else {
+  cat("\n**Excelente:** Todas las muestras tienen calidad media ≥ Q", umbral, "\n")
+}
+```
+
+```{r graficos_problematicas, fig.height = 4, results = "asis"}
+if (nrow(muestras_bajas) > 0) {
+  cat("\n### Gráficos Individuales de Muestras Problemáticas\n\n")
+  muestras_mostrar <- head(muestras_bajas$muestra, 10)
+  for (m in muestras_mostrar) {
+    cat("\n#### Muestra:", m, "\n\n")
+    datos_muestra <- filter(calidad_ciclo, muestra == m)
+    p_individual <- ggplot(datos_muestra, aes(x = ciclo, y = calidad_media)) +
+      geom_line(color = "darkred", linewidth = 1.2) +
+      geom_ribbon(aes(ymin = 0, ymax = calidad_media), fill = "darkred", alpha = 0.2) +
+      geom_hline(yintercept = 30, linetype = "dashed", color = "darkgreen") +
+      geom_hline(yintercept = 20, linetype = "dashed", color = "red") +
+      scale_y_continuous(limits = c(0, 42)) +
+      labs(x = "Posición (pb)", y = "Phred Score") +
+      theme_minimal(base_size = 12)
+   print(p_individual)
+   cat("\n")
+  }
+  if (nrow(muestras_bajas) > 10)
+    cat("\n*Nota: Se muestran solo las 10 peores muestras.*\n")
+}
+```
+
+---
+
+# 3. Distribución de Calidad Media
+
+```{r distribucion_calidad, fig.height = 5}
+media_global <- mean(estadisticas$calidad_media, na.rm = TRUE)
+ggplot(estadisticas, aes(x = calidad_media)) +
+  geom_histogram(bins = 30, fill = "steelblue", color = "white", alpha = 0.8) +
+  geom_vline(xintercept = media_global, color = "blue", linewidth = 1.2) +
+  geom_vline(xintercept = 30, linetype = "dashed", color = "darkgreen", linewidth = 1) +
+  geom_vline(xintercept = 20, linetype = "dashed", color = "red", linewidth = 1) +
+  geom_vline(xintercept = umbral, linetype = "dotted", color = "orange", linewidth = 1.2) +
+  annotate("text", x = media_global, y = Inf,
+           label = paste("Media:", round(media_global, 1)),
+           vjust = 1.5, hjust = -0.1, color = "blue", fontface = "bold") +
+  labs(title = "Distribución de Calidad Media entre Muestras",
+       x = "Calidad Media (Phred Score)", y = "Número de Muestras") +
+  theme_minimal(base_size = 13)
+```
+
+---
+
+# 4. Contenido GC
+
+```{r gc_content, fig.height = 5}
+ggplot(gc_dist, aes(x = porcentaje_gc)) +
+  geom_density(fill = "coral", alpha = 0.6, color = "coral4", linewidth = 1) +
+  geom_vline(xintercept = 50, linetype = "dotted", color = "gray30", linewidth = 1) +
+  scale_x_continuous(limits = c(0, 100), breaks = seq(0, 100, 10)) +
+  labs(title = "Distribución de Contenido GC",
+       subtitle = "Desviaciones importantes pueden indicar contaminación o sesgo de amplificación",
+       x = "Contenido GC (%%)", y = "Densidad") +
+  theme_minimal(base_size = 13)
+```
+
+---
+
+# 5. Conclusiones y Recomendaciones
+
+```{r conclusiones, results="asis"}
+total_reads <- sum(estadisticas$total_reads, na.rm = TRUE)
+calidad_global <- mean(estadisticas$calidad_media, na.rm = TRUE)
+n_problematicas <- sum(estadisticas$calidad_media < umbral, na.rm = TRUE)
+porc_problematicas <- round(100 * n_problematicas / n_muestras, 1)
+
+cat("\n### Resumen Final:\n\n")
+cat("- **Total de reads analizados:**", format(total_reads, big.mark = ","), "\n")
+cat("- **Calidad media global:**", round(calidad_global,1), "\n")
+cat("- **Muestras con calidad baja:**", n_problematicas, "de", n_muestras,
+    paste0("(", porc_problematicas, "%)"), "\n\n"),
+
+cat("### Recomendaciones:\n\n")
+if (n_problematicas == 0 && calidad_global >= 30) {
+  cat("**Calidad excelente** - Todas las muestras superan Q30.\n")
+  cat("Puedes proceder directamente con el análisis.\n")
+} else if (n_problematicas == 0) {
+  cat("**Calidad buena** - Todas las muestras están por encima del umbral mínimo.\n")
+  cat("Considera trimming ligero.\n")
+} else if (porc_problematicas < 10) {
+  cat("**Calidad aceptable con algunas muestras problemáticas**\n\n")
+  cat("  Revisa las", n_problematicas, "muestra(s) listadas arriba\n")
+} else {
+  cat("**Problemas de calidad detectados en", proc_problematicas, "% de las muestras.**\n\n")
+}
+```
+
+---
+
+*Informe generado el 18-02-2026_10-57- Umbral de calidad: Q20*

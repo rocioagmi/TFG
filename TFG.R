@@ -67,7 +67,6 @@
 
 # stringr
 #install.packages("stringr")
-
 # ===============================================
 # LIBRERÍAS
 # ===============================================
@@ -95,6 +94,11 @@ library(dada2)
 # ================================================
 source("FUNC/Busqueda_ENA.R")
 muestrasEBI <- construirConsulta()
+
+
+# ================================================
+# AÑADIR FUNCIÓN FILTRO AQUÍ
+# ================================================
 
 
 # ================================================
@@ -135,7 +139,7 @@ dir.create("OUTPUT/FILTRADO")
 # Carga la función para generar informes FastQC
 source("FUNC/InformeCalidad.R")
 # Genera informe de calidad para todas las muestras
-informeCalidad(listadoMuestras)
+informeCalidad(listadoMuestras, umbral_calidad = 20)
 
 # Carga función para gráficos de calidad 
 source("FUNC/GraficosCalidad.R")
