@@ -90,23 +90,64 @@ library(dada2)
 
 
 # ================================================
-# BÚSQUEDA PROGRAMÁTICA (EBI/ENA)                 ----
+# BÚSQUEDA PROGRAMÁTICA (EBI/ENA)                 
 # ================================================
-source("FUNC/Busqueda_ENA.R")
-muestrasEBI <- construirConsulta()
+source("FUNC/BusquedaHibrida.R")
+source("FUNC/FiltradoBusqueda.R")
+
+query <- "(multiple sclerosis) OR MS OR RRMS OR SPMS OR PPMS OR (relapsing remitting) OR (primary progressive) OR (secondary progressive)"
+muestras_totales <- busquedaHibrida(query, limit = 20000)
+
+if (is.null(muestras_totales) || nrow(muestras_totales) == 0) {
+  message("No se encontraron resultados para esta búsqueda.")
+  return(NULL)
+}
+
+respuesta_filtro <- dlg_message( 
+  message = sprintf("Se encontraron %d muestras. ¿Deseas filtrarlas?", nrow(muestras_totales)),
+  type = "yesno")$res
+
+if (respuesta_filtro == "yes") {
+  busqueda_filtrada <- filtrarBusqueda(muestras_totales)
+} else {
+  busqueda_filtrada <- muestras_totales
+  cat("Usando todas las muestras sin filtrar.\n")
+}
+
+if (is.null(busqueda_filtrada) || nrow(busqueda_filtrada) == 0) {
+  message("No quedan muestras después del filtrado.")
+  return(NULL)
+}
+
+suppressWarnings(
+  print(datatable(busqueda_filtrada, 
+                  caption = sprintf("Muestras seleccionadas: %d", nrow(busqueda_filtrada)),
+                  options = list(pageLength = 10, scrollX = TRUE, dom = "Bfrtip", buttons = c("copy", "csv", "excel"), deferRender = TRUE, scrollY = 400, scroller = TRUE),
+                  filter = 'top',
+                  selection = 'none',
+                  extensions = c('Buttons', 'Scroller')))
+)
+
+guardar <- dlg_message(message = "¿Deseas guardar estos resultados en un archivo CSV?",
+                       type = "yesno")$res
+
+if (guardar == "yes") {
+  nombre_archivo <- sprintf("busqueda_ENA_%s_%s.csv", 
+                            gsub(" ", "_", query),
+                            format(Sys.Date(), "%Y%m%d"))
+  write_csv(busqueda_filtrada, nombre_archivo)
+  cat(sprintf("\n Resultados guardados en: %s\n", nombre_archivo))
+}
 
 
-# ================================================
-# AÑADIR FUNCIÓN FILTRO AQUÍ                      ----
-# ================================================
-
 
 # ================================================
-# DESCARGA DE LOS DATOS - RETOCAR ESTA FUNCIÓN    ----
+# DESCARGA DE LOS DATOS - RETOCAR ESTA FUNCIÓN    <-----
 # ================================================
 source("FUNC/Descargas_ENA.R")
 nAcceso <- dlgInput(message = "Introduzca el número de acceso al proyecto ENA: ")$res
 descargas_ENA(nAcceso)
+
 
 
 # ================================================
@@ -117,12 +158,12 @@ descargas_ENA(nAcceso)
 listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
 
 # Separa las muestras por tipo: MS (enfermos) y Healthy (sanos) ---- TODAVIA NO LO ESTOY USANDO
-muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
-muestrasHealthy <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names = TRUE))
+# muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
+# muestrasHealthy <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names = TRUE))
 
 # Separa los archivos por lectura: R1 (forward) y R2 (reverse)
-muestrasR1 <- sort(list.files("INPUT/DATA", pattern = "R1", full.names = TRUE))
-muestrasR2 <- sort(list.files("INPUT/DATA", pattern = "R2", full.names = TRUE))
+# muestrasR1 <- sort(list.files("INPUT/DATA", pattern = "R1", full.names = TRUE))
+# muestrasR2 <- sort(list.files("INPUT/DATA", pattern = "R2", full.names = TRUE))
 
 # -------------------------------------------------
 # CREACIÓN DE CARPETAS DE SALIDA
@@ -134,16 +175,16 @@ dir.create("OUTPUT/RDS")
 dir.create("OUTPUT/FILTRADO")
 
 # -------------------------------------------------
-# INFORME DE CALIDAD DE SECUENCIACIÓN
+# INFORME DE CALIDAD DE SECUENCIACIÓN              <-----
 # -------------------------------------------------
 # Carga la función para generar informes FastQC
 source("FUNC/InformeCalidad.R")
 # Genera informe de calidad para todas las muestras
 informeCalidad(listadoMuestras, umbral_calidad = 20)
 
-# ----------------------------------------------
-# FILTRADO DE CALIDAD CON DADA2
-# ----------------------------------------------
+# ------------------------------------------------
+# FILTRADO DE CALIDAD CON DADA2                   <-----
+# ------------------------------------------------
 # Carga función de filtrado 
 source("FUNC/FiltrarMuestras.R")
 

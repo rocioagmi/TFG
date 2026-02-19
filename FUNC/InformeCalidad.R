@@ -6,7 +6,7 @@ library(knitr)
 
 informeCalidad <- function(listadoMuestras, umbral_calidad = 20){
   
-  timestamp <- format(Sys.time(), "%d-%m-%Y_%H-%M")
+  timestamp <- format(Sys.time(), "%Y-%m-%d_%H-%M")
   directorio_salida <- file.path("OUTPUT/REPORT", paste0("InformeCalidad_", timestamp))
   dir.create(directorio_salida, recursive = TRUE, showWarnings = FALSE)
   
