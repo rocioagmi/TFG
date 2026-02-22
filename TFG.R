@@ -148,22 +148,32 @@ source("FUNC/Descargas_ENA.R")
 nAcceso <- dlgInput(message = "Introduzca el número de acceso al proyecto ENA: ")$res
 descargas_ENA(nAcceso)
 
+# Obtiene una lista ordenada con todos los archivos .fastq.gz de la carpeta de entrada
+listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
+
+if(any(grepl("_R1", listadoMuestras))){
+  R1 <- listadoMuestras[grepl("_R1", listadoMuestras)]
+  R2 <- listadoMuestras[grepl("_R2", listadoMuestras)]
+} else if (any(grepl("_1\\.fastq", listadoMuestras))){
+  R1 <- listadoMuestras[grepl("_1\\.fastq", listadoMuestras)]
+  R2 <- listadoMuestras[grepl("_2\\.fastq", listadoMuestras)]
+} else {
+  stop("No se reconoce el patrón de nomenclatura de los archivos.")
+}
+
+# Separa las muestras por tipo: MS (enfermos) y Healthy (sanos) ---- TODAVIA NO LO ESTOY USANDO
+#muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
+#muestrasHealthy <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names = TRUE))
+
+# Separa los archivos por lectura: R1 (forward) y R2 (reverse)
+#muestrasR1 <- sort(list.files("INPUT/DATA", pattern = "R1", full.names = TRUE))
+#muestrasR2 <- sort(list.files("INPUT/DATA", pattern = "R2", full.names = TRUE))
+
 
 
 # ================================================
 # PREPROCESAMIENTO DE LOS DATOS
 # ================================================
-
-# Obtiene la lista ordenada de todos los archivos .fastq.gz en la carpeta de entrada
-listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
-
-# Separa las muestras por tipo: MS (enfermos) y Healthy (sanos) ---- TODAVIA NO LO ESTOY USANDO
-# muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
-# muestrasHealthy <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names = TRUE))
-
-# Separa los archivos por lectura: R1 (forward) y R2 (reverse)
-# muestrasR1 <- sort(list.files("INPUT/DATA", pattern = "R1", full.names = TRUE))
-# muestrasR2 <- sort(list.files("INPUT/DATA", pattern = "R2", full.names = TRUE))
 
 # -------------------------------------------------
 # CREACIÓN DE CARPETAS DE SALIDA
@@ -187,10 +197,7 @@ informeCalidad(listadoMuestras, umbral_calidad = 20)
 # ------------------------------------------------
 # Carga función de filtrado 
 source("FUNC/FiltrarMuestras.R")
-
-# Aplica filtrado a muestras MS y Healthy por separado
-filtrarMuestras(MS_R1, MS_R2)
-filtrarMuestras(Healthy_R1, Healthy_R2)
+filtrarMuestras(R1, R2)
 
 # Lista todos los archivos filtrados generados
 listadoFiltrado <- sort(list.files("OUTPUT/FILTRADO", pattern = "\\.fastq\\.gz$", full.names = TRUE))
