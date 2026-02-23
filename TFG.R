@@ -71,13 +71,6 @@
 # LIBRERÍAS
 # ===============================================
 
-library(httr)
-library(jsonlite)
-library(svDialogs)
-library(DT)
-library(readr)
-library(ShortRead)
-library(dada2)
 #library(dplyr)
 #library(Biostrings)
 #library(mongolite)
@@ -86,6 +79,13 @@ library(dada2)
 #library(Rqc)
 #library(BiocParallel)
 #library(ggplot2)
+library(httr)
+library(jsonlite)
+library(svDialogs)
+library(DT)
+library(readr)
+library(ShortRead)
+library(dada2)
 
 
 
