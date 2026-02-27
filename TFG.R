@@ -70,15 +70,6 @@
 # ===============================================
 # LIBRERÍAS
 # ===============================================
-
-#library(dplyr)
-#library(Biostrings)
-#library(mongolite)
-#library(TAF)
-#library(QuasR)
-#library(Rqc)
-#library(BiocParallel)
-#library(ggplot2)
 library(httr)
 library(jsonlite)
 library(svDialogs)
