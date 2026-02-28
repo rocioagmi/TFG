@@ -87,11 +87,11 @@ source("FUNC/BusquedaHibrida.R")
 source("FUNC/FiltradoBusqueda.R")
 
 query <- "(multiple sclerosis) OR MS OR RRMS OR SPMS OR PPMS OR (relapsing remitting) OR (primary progressive) OR (secondary progressive)"
-muestras_totales <- busquedaHibrida(query, limit = 20000)
+muestras_totales <- busquedaHibrida(query, limit = 200000)
 
 if (is.null(muestras_totales) || nrow(muestras_totales) == 0) {
   message("No se encontraron resultados para esta búsqueda.")
-  return(NULL)
+  stop()
 }
 
 respuesta_filtro <- dlg_message( 
