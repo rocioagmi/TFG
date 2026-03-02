@@ -13,8 +13,9 @@ busquedaEBI <- function(query, limit = 200000) {
   
   # PRIMERO BUSCAR DOMINIO: sra-study
   
-  url_study <- paste0(base_url, "/sra-study")
-  resultados_study <- c()
+  url_study <- paste0(base_url, "/project")
+  #resultados_study <- c()
+  todos_estudios <- data.frame()
   start <- 0
   
   repeat {
@@ -40,20 +41,24 @@ busquedaEBI <- function(query, limit = 200000) {
       break
     } 
     
-    resultados_study <- c(json_study$entries$acc)
+    #resultados_study <- c(resultados_study, json_study$entries$acc)
+    df_study <- data.frame(accession = json_study$entries$acc,
+                           tipo = "study",
+                           stringsAsFactors = FALSE)
+    todos_estudios <- bind_rows(todos_estudios, df_study)
+      
+    cat(sprintf("\rEstudios recuperados: %d de %d", nrow(todos_estudios), json_study$hitCount))
     
-    cat(sprintf("\rEstudios recuperados: %d de %d", length(resultados_study), json_study$hitCount))
-    
-    if(length(resultados_study) >= limit || length(resultados_study) >= json_study$hitCount) break
+    if(nrow(todos_estudios) >= limit || nrow(todos_estudios) >= json_study$hitCount) break
     start <- start + 100
-    Sys.sleep(0.2)
   }
 
   
   # SEGUNDO BUSCAR MUESTRA: sra-run
   
   url_run <- paste0(base_url, "/sra-run")
-  resultados_run <- c()
+  #resultados_run <- c()
+  todas_muestras <- data.frame()
   start <- 0
   
   repeat {
@@ -79,31 +84,34 @@ busquedaEBI <- function(query, limit = 200000) {
       break
     }
     
-    resultados_run <- c(resultados_run, json_run$entries$acc)
+    #resultados_run <- c(resultados_run, json_run$entries$acc)
+    df_run <- data.frame(accession = json_run$entries$acc,
+                         tipo = "run",
+                         stringsAsFactors = FALSE)
+    todas_muestras <- bind_rows(todas_muestras, df_run)
     
-    cat(sprintf("\rRuns recuperados: %d de %d", length(resultados_run), json_run$hitCount))
+    cat(sprintf("\rRuns recuperados: %d de %d\n", nrow(todas_muestras), json_run$hitCount))
     
-    if (length(resultados_run) >= limit || length(resultados_run) >= json_run$hitCount) break
+    if (nrow(todas_muestras) >= limit || nrow(todas_muestras) >= json_run$hitCount) break
     start <- start + 100
-    
-    Sys.sleep(0.2)
   }
   
-  df_study <- if (length(resultados_study) > 0) {
-    data.frame(accession = resultados_study, tipo = "study", stringsAsFactors = FALSE)
-  } else {
-    data.frame(accession = character(0), tipo = character(0))
-  }
+  #df_study <- if (length(resultados_study) > 0) {
+  #  data.frame(accession = resultados_study, tipo = "study", stringsAsFactors = FALSE)
+  #} else {
+  #  data.frame(accession = character(0), tipo = character(0))
+  #}
   
-  df_run <- if (length(resultados_run) > 0) {
-    data.frame(accession = resultados_run, tipo = "run", stringsAsFactors = FALSE)
-  } else {
-    data.frame(accession = character(0), tipo = character(0))
-  }
+  #df_run <- if (length(resultados_run) > 0) {
+  #  data.frame(accession = resultados_run, tipo = "run", stringsAsFactors = FALSE)
+  #} else {
+  #  data.frame(accession = character(0), tipo = character(0))
+  #}
   
-  resultado_final <- bind_rows(df_study, df_run)
+  #resultado_final <- bind_rows(df_study, df_run)
+  resultado_final <- bind_rows(todos_estudios, todas_muestras)
   
-  cat(sprintf("Total IDs recuperados: %d\n", nrow(resultado_final)))
+  cat(sprintf("\rTotal IDs recuperados: %d\n", nrow(resultado_final)))
   return(resultado_final)
 }
 
@@ -120,95 +128,135 @@ continuarConENA <- function(lista, batch_size = 100) {
   
   if (!is.null(lista$study_accessions) && length(lista$study_accessions) > 0) {
     
-    cat(sprintf("\nProcesando %d estudios...\n", length(lista$study_accessions)))
-    pb_studies <- txtProgressBar(min = 0, max = length(lista$study_accessions), style = 3)
+    # ELIMINAR CUANDO FUNCIONE
+    cat(sprintf("\nProcesando %d estudios...\n", length(lista$study_accessions))) 
+    batches_study <- ceiling(length(lista$study_accessions)/ batch_size)
+    pb_study <- txtProgressBar(min = 0, max = batches_study, style = 3)
     
-    for (i in seq_along(lista$study_accessions)) {
-      study_acc <- lista$study_accessions[i]
+    for (i in seq(1, length(lista$study_accessions), by = batch_size)) {
+      
+      finals <- min(i + batch_size - 1, length(lista$study_accessions))
+      study_acc <- lista$study_accessions[i:finals]
       
       parametros <- list(
         result = "read_run",
-        query = paste0("study_accession=", study_acc),
+        query = paste0("study_accession=", study_acc, collapse = " OR "),
         fields = "study_accession,sample_accession,run_accession,scientific_name,experiment_title,study_title,sample_title,run_alias,sample_alias,fastq_ftp",
         format = "tsv",
         limit = 0)
       
-      tryCatch({
-          respuesta <- GET(url, query = parametros, timeout(60))
+      exito <- FALSE
+      for (intento in 1:3) {
+        tryCatch({
+          respuesta_study <- GET(url, query = parametros, timeout(60))
           
-          if (status_code(respuesta) == 200) {
-            contenido <- httr::content(respuesta, "text", encoding = "UTF-8")
+          if (status_code(respuesta_study) == 200) {
+            contenido_study <- httr::content(respuesta_study, "text", encoding = "UTF-8")
             
-            if (nchar(contenido) > 100) {
-              df_batch <- read_tsv(contenido, show_col_types = FALSE)
+            if (nchar(contenido_study) > 100) {
+              df_batch_study <- read_tsv(contenido_study, show_col_types = FALSE)
               
-              if (nrow(df_batch) > 0) {
-                datos_completos <- bind_rows(datos_completos, df_batch)
+              if (nrow(df_batch_study) > 0) {
+                datos_completos <- bind_rows(datos_completos, df_batch_study)
               }
             }
-          } 
+            exito <- TRUE
+          } else {
+            if (intento < 3) {
+              Sys.sleep(2)
+            }
+          }
         }, error = function(e) {
-          warning(sprintf("Estudio al procesar el estudio %s: %s", study_acc, e$message))
-      })
+          if (intento < 3) {
+            warning(sprintf("\nError en intento %d para batch %d: %s\n",
+                            intento, ceiling(i/batch_size), e$message))
+            Sys.sleep(2)
+          }
+        })
+        if (exito) break
+      }
       
-      setTxtProgressBar(pb_studies, i)
+      if (!exito) {
+        warning(sprintf("Batch %d fallido después de %d intentos - continuando con el siguiente", 
+                        ceiling(i/batch_size), 3))
+      }
+      
+      setTxtProgressBar(pb_study, ceiling(i/batch_size))
       Sys.sleep(0.3)
     }
     
-    close(pb_studies)
+    close(pb_study)
   }
   
   # PROCESAR RUN-ACCESSIONS
   
   if (!is.null(lista$run_accessions) && length(lista$run_accessions) > 0) {
     
+    batches_run <- ceiling(length(lista$run_accessions)/ batch_size)
+    # ELIMINAR CUANDO FUNCIONE
     cat(sprintf("\nProcesando %d muestras...\n", length(lista$run_accessions)))
+    pb_run <- txtProgressBar(min = 0, max = batches_run, style = 3)
     
-    pb_run <- txtProgressBar(min = 0, max = length(lista$run_accessions), style = 3)
-    
-    for (i in seq_along(lista$run_accessions)) {
-      run_acc <- lista$run_accessions[i]
+    for (i in seq(1, length(lista$run_accessions), by = batch_size)) {
+      
+      finalr <- min(i + batch_size -1, length(lista$run_accessions))
+      run_acc <- lista$run_accessions[i:finalr]
       
       parametros <- list(
         result = "read_run",
-        query = paste0("run_accession=", run_acc),
+        query = paste0("run_accession=", run_acc, collapse = " OR "),
         fields = "study_accession,sample_accession,run_accession,scientific_name,experiment_title,study_title,sample_title,run_alias,sample_alias,fastq_ftp",
         format = "tsv",
         limit = 0)
       
-      tryCatch({
-        respuesta <- GET(url, query = parametros, timeout(60))
-        
-        if (status_code(respuesta) == 200) {
-          contenido <- httr::content(respuesta, "text", encoding = "UTF-8")
+      exito <- FALSE
+      for (intento in 1:3) {
+        tryCatch({
+          respuesta_run <- GET(url, query = parametros, timeout(60))
           
-          if (nchar(contenido) > 100) {
-            df_batch <- read_tsv(contenido, show_col_types = FALSE)
+          if (status_code(respuesta_run) == 200) {
+            contenido_run <- httr::content(respuesta_run, "text", encoding = "UTF-8")
             
-            if (nrow(df_batch) > 0) {
-              datos_completos <- bind_rows(datos_completos, df_batch)
+            if (nchar(contenido_run) > 100) {
+              df_batch_run <- read_tsv(contenido_run, show_col_types = FALSE)
+              
+              if (nrow(df_batch_run) > 0) {
+                datos_completos <- bind_rows(datos_completos, df_batch_run)
+              }
+            }
+            exito <- TRUE
+          } else {
+            if (intento < 3) {
+              Sys.sleep(2)
             }
           }
+        }, error = function(e) {
+            if (intento < 3) {
+              warning(sprintf("\nError en intento %d para batch %d: %s\n", 
+                              intento, ceiling(i/batch_size), e$message))
+              Sys.sleep(2)
+            }
+          })
+          if (exito) break
         }
-      }, error = function(e) {
-        warning(sprintf("Error al procesar muestra %s: %s", run_acc, e$message))
-      })
       
-      setTxtProgressBar(pb_run, i)
-      Sys.sleep(0.3)
-    }
-    
-    close(pb_run)
+        if (!exito) {
+          warning(sprintf("Batch %d fallido después de %d intentos - continuando con el siguiente", 
+                          ceiling(i/batch_size), 3))
+        }
+      
+        setTxtProgressBar(pb_run, ceiling(i/batch_size))
+        Sys.sleep(0.3)
+      }
+      close(pb_run)
   }
   
   # ELIMINAR DUPLICADOS
   
   if (nrow(datos_completos) > 0) {
     n_antes <- nrow(datos_completos)
-    
-    datos_completos <- datos_completos %>%
+    datos_completos <- datos_completos %>% 
       distinct(run_accession, .keep_all = TRUE)
-    
     n_despues <- nrow(datos_completos)
     
     if (n_antes > n_despues) {
@@ -217,7 +265,6 @@ continuarConENA <- function(lista, batch_size = 100) {
   }
   
   cat(sprintf("\nMuestras con metadatos (deduplicadas): %d\n", nrow(datos_completos)))
-  
   return(datos_completos)
 }
   
