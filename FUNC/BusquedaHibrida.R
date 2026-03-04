@@ -11,10 +11,9 @@ busquedaEBI <- function(query, limit = 200000) {
   print(paste("Consultando EBI..."))
   print(paste("Query:", query))
   
-  # PRIMERO BUSCAR DOMINIO: sra-study
+  # PRIMERO BUSCAR ESTUDIOS
   
   url_study <- paste0(base_url, "/project")
-  #resultados_study <- c()
   todos_estudios <- data.frame()
   start <- 0
   
@@ -29,7 +28,8 @@ busquedaEBI <- function(query, limit = 200000) {
     respuesta_study <- GET(url_study, query = parametros_study)
   
     if (status_code(respuesta_study) != 200) {
-      cat(sprintf("\nError de conexión con EBI al consultar sra-study. Código: %d\n", status_code(respuesta_study)))
+      cat(sprintf("\nError de conexión con EBI al consultar project. Código: %d\n", 
+                  status_code(respuesta_study)))
       break
     }
     
@@ -37,27 +37,23 @@ busquedaEBI <- function(query, limit = 200000) {
     json_study <- fromJSON(cont_study, flatten = TRUE)
     
     if (json_study$hitCount == 0 || length(json_study$entries) == 0){
-      print(paste("No se encontraron resultados para esta consulta:", respuesta_study$url_study))
+      print(paste("No se encontraron resultados para esta consulta:", 
+                  respuesta_study$url_study))
       break
     } 
     
-    #resultados_study <- c(resultados_study, json_study$entries$acc)
-    df_study <- data.frame(accession = json_study$entries$acc,
-                           tipo = "study",
+    df_study <- data.frame(accession = json_study$entries$acc, tipo = "study",
                            stringsAsFactors = FALSE)
     todos_estudios <- bind_rows(todos_estudios, df_study)
-      
-    cat(sprintf("\rEstudios recuperados: %d de %d", nrow(todos_estudios), json_study$hitCount))
     
     if(nrow(todos_estudios) >= limit || nrow(todos_estudios) >= json_study$hitCount) break
     start <- start + 100
   }
 
   
-  # SEGUNDO BUSCAR MUESTRA: sra-run
+  # SEGUNDO BUSCAR MUESTRAS
   
   url_run <- paste0(base_url, "/sra-run")
-  #resultados_run <- c()
   todas_muestras <- data.frame()
   start <- 0
   
@@ -72,7 +68,8 @@ busquedaEBI <- function(query, limit = 200000) {
     respuesta_run <- GET(url_run, query = parametros_run)
     
     if (status_code(respuesta_run) != 200) {
-      cat(sprintf("\nError de conexión con EBI al consultar sra-run. Código: %d\n", status_code(respuesta_run)))
+      cat(sprintf("\nError de conexión con EBI al consultar sra-run. Código: %d\n",
+                  status_code(respuesta_run)))
       break
     }
     
@@ -80,38 +77,22 @@ busquedaEBI <- function(query, limit = 200000) {
     json_run <- fromJSON(cont_run, flatten = TRUE)
     
     if (json_run$hitCount == 0 || length(json_run$entries) == 0){
-      print(paste("No se encontraron resultados para esta consulta:", respuesta_run$url_run))
+      print(paste("No se encontraron resultados para esta consulta:", 
+                  respuesta_run$url_run))
       break
     }
     
-    #resultados_run <- c(resultados_run, json_run$entries$acc)
-    df_run <- data.frame(accession = json_run$entries$acc,
-                         tipo = "run",
+    df_run <- data.frame(accession = json_run$entries$acc, tipo = "run",
                          stringsAsFactors = FALSE)
     todas_muestras <- bind_rows(todas_muestras, df_run)
-    
-    cat(sprintf("\rRuns recuperados: %d de %d\n", nrow(todas_muestras), json_run$hitCount))
     
     if (nrow(todas_muestras) >= limit || nrow(todas_muestras) >= json_run$hitCount) break
     start <- start + 100
   }
   
-  #df_study <- if (length(resultados_study) > 0) {
-  #  data.frame(accession = resultados_study, tipo = "study", stringsAsFactors = FALSE)
-  #} else {
-  #  data.frame(accession = character(0), tipo = character(0))
-  #}
-  
-  #df_run <- if (length(resultados_run) > 0) {
-  #  data.frame(accession = resultados_run, tipo = "run", stringsAsFactors = FALSE)
-  #} else {
-  #  data.frame(accession = character(0), tipo = character(0))
-  #}
-  
-  #resultado_final <- bind_rows(df_study, df_run)
   resultado_final <- bind_rows(todos_estudios, todas_muestras)
   
-  cat(sprintf("\rTotal IDs recuperados: %d\n", nrow(resultado_final)))
+  cat(sprintf("\rTotal IDs recuperados: %d estudios y %d muestras.\n", nrow(todos_estudios), nrow(todas_muestras)))
   return(resultado_final)
 }
 
@@ -128,7 +109,6 @@ continuarConENA <- function(lista, batch_size = 100) {
   
   if (!is.null(lista$study_accessions) && length(lista$study_accessions) > 0) {
     
-    # ELIMINAR CUANDO FUNCIONE
     cat(sprintf("\nProcesando %d estudios...\n", length(lista$study_accessions))) 
     batches_study <- ceiling(length(lista$study_accessions)/ batch_size)
     pb_study <- txtProgressBar(min = 0, max = batches_study, style = 3)
@@ -141,7 +121,8 @@ continuarConENA <- function(lista, batch_size = 100) {
       parametros <- list(
         result = "read_run",
         query = paste0("study_accession=", study_acc, collapse = " OR "),
-        fields = "study_accession,sample_accession,run_accession,scientific_name,experiment_title,study_title,sample_title,run_alias,sample_alias,fastq_ftp",
+        fields = "study_accession,sample_accession,run_accession,scientific_name,
+                  experiment_title,study_title,sample_title,run_alias,sample_alias,fastq_ftp",
         format = "tsv",
         limit = 0)
       
@@ -192,9 +173,8 @@ continuarConENA <- function(lista, batch_size = 100) {
   
   if (!is.null(lista$run_accessions) && length(lista$run_accessions) > 0) {
     
-    batches_run <- ceiling(length(lista$run_accessions)/ batch_size)
-    # ELIMINAR CUANDO FUNCIONE
     cat(sprintf("\nProcesando %d muestras...\n", length(lista$run_accessions)))
+    batches_run <- ceiling(length(lista$run_accessions)/ batch_size)
     pb_run <- txtProgressBar(min = 0, max = batches_run, style = 3)
     
     for (i in seq(1, length(lista$run_accessions), by = batch_size)) {
@@ -205,7 +185,8 @@ continuarConENA <- function(lista, batch_size = 100) {
       parametros <- list(
         result = "read_run",
         query = paste0("run_accession=", run_acc, collapse = " OR "),
-        fields = "study_accession,sample_accession,run_accession,scientific_name,experiment_title,study_title,sample_title,run_alias,sample_alias,fastq_ftp",
+        fields = "study_accession,sample_accession,run_accession,scientific_name,
+                  experiment_title,study_title,sample_title,run_alias,sample_alias,fastq_ftp",
         format = "tsv",
         limit = 0)
       
@@ -251,6 +232,8 @@ continuarConENA <- function(lista, batch_size = 100) {
       close(pb_run)
   }
   
+  cat(sprintf("\nEn total se han encontrado %d muestras.\n", nrow(datos_completos)))
+  
   # ELIMINAR DUPLICADOS
   
   if (nrow(datos_completos) > 0) {
@@ -264,7 +247,7 @@ continuarConENA <- function(lista, batch_size = 100) {
     }
   }
   
-  cat(sprintf("\nMuestras con metadatos (deduplicadas): %d\n", nrow(datos_completos)))
+  cat(sprintf("\nMuestras deduplicadas: %d\n", nrow(datos_completos)))
   return(datos_completos)
 }
   
@@ -287,6 +270,7 @@ busquedaHibrida <- function(query, limit = 200000) {
     return(NULL)
   }
   
+  # ESTO LO HE USADO PARA HACER PRUEBAS, ¿LO ELIMINO?
   campos_con_datos <- c()
   campos_vacios <- c()
   
@@ -301,8 +285,9 @@ busquedaHibrida <- function(query, limit = 200000) {
       campos_vacios <- c(campos_vacios, col)
     }
   }
-  
+  cat("-----------------------------\n\n")
   cat(sprintf("Campos CON DATOS (%d):\n", length(campos_con_datos)))
+  cat("-----------------------------\n\n")
   for (campo in campos_con_datos) {
     cat(sprintf("  - %s\n", campo))
   }

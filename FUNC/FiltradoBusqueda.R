@@ -8,7 +8,7 @@ filtrarBusqueda <- function(df) {
   df_filtrado <- df
   
   cat("INICIANDO FILTRADO\n")
-  cat(sprintf("Total de muestras inicial: %d\n\n", nrow(df_filtrado)))
+  cat(sprintf("Número de muestras iniciales: %d\n\n", nrow(df_filtrado)))
   
   campos_texto <- c("scientific_name", "experiment_title", "study_title",
                     "sample_title", "run_alias", "sample_alias")
@@ -23,36 +23,32 @@ filtrarBusqueda <- function(df) {
     return(df_filtrado)
   }
   
-  metodo <- dlg_list(
-    choices = c(
-      "Usar términos sugeridos del diccionario",
-      "Introducir mis propios términos"),
-    title = "¿Cómo deseas filtrar?",
-    multiple = FALSE)$res
+  metodo <- dlg_list(choices = c("Usar términos sugeridos del diccionario",
+                                 "Introducir mis propios términos"),
+                     title = "¿Cómo deseas filtrar?",multiple = FALSE)$res
   
   if (length(metodo) == 0) {
     cat("No se seleccionó método. Se devuelven las muestras sin filtrar.\n")
     return(df_filtrado)
   }
   
-  # TÉRMINOS SUGERIDOS DEL DICCIONARIO - TERMINAR DE MIRAR ESTO
-  # filtro automático que garantiza muestras humanas, intestinales o fecales de microbioma y/o 16S
+  # TÉRMINOS SUGERIDOS DEL DICCIONARIO 
   
   if (metodo == "Usar términos sugeridos del diccionario") {
     
     filtros_obligatorios <- list(
-      "Humano" = "\\b(human|homo\\s*sapiens)\\b",
-      "Intestinal/Fecal" = "\\b(fecal|stool|feces|faecal|gut|intestin(al|e)|colon|rectal|bowel)\\b")
-      "Microbioma/Metagenómica" = "\\b(microbiom(e|a)|metagenomic(s|a)?|16S(\\s*(rRNA|RNA|ribosomal))?)\\b"
+      "Humano" = "\\b(human|homo\\s*sapiens|patients?)\\b",
+      "Intestinal/Fecal" = "\\b(fecal|stool|feces|faecal|gut|intestin(al|e)|colon|rectal|bowel)\\b",
+      "Microbioma/Metagenómica" = "\\b(microbiom(e|a)|metagenomic(s|a)?|16S(\\s*(rRNA|RNA|ribosomal))?)\\b")
     
     aplica_patron <- function(df_local, patron, campos) {
-      matches <- rep(FALSE, nrow(df_local))
+      coincidencias <- rep(FALSE, nrow(df_local))
       for (col in campos) {
         valores <- df_local[[col]]
         valores[is.na(valores)] <- ""
-        matches <- matches | grepl(patron, valores, ignore.case = TRUE, perl = TRUE)
+        coincidencias <- coincidencias | grepl(patron, valores, ignore.case = TRUE, perl = TRUE)
       }
-      matches
+      coincidencias
     }
     
     for (nombre_grupo in names(filtros_obligatorios)) {
@@ -79,8 +75,8 @@ filtrarBusqueda <- function(df) {
     
   } else if (metodo == "Introducir mis propios términos") {
     
-    terminos <- dlgInput(
-      message = "Introduce términos separados por comas:", default = "")$res
+    terminos <- dlgInput(message = "Introduce términos separados por comas:", 
+                         default = "")$res
     
     if (length(terminos) == 0 || nchar(trimws(terminos)) == 0) {
       cat("No se introdujeron términos. Se devuelven las muestras sin filtrar.\n")
@@ -99,13 +95,15 @@ filtrarBusqueda <- function(df) {
       filter(if_any(all_of(campos_con_datos),
                     ~grepl(patron, ., ignore.case = TRUE, perl = TRUE)))
     
-    cat(sprintf("Muestras tras filtro: %d\n", nrow(df_filtrado)))
+    cat(sprintf("Muestras tras filtrado: %d\n", nrow(df_filtrado)))
   } 
   
   # ===========================================================
   # RESUMEN FINAL
   # ===========================================================
-  cat(sprintf("\n ---- FILTRADO COMPLETADO ----\n"))
+  cat(sprintf("\n ----------------------\n"))
+  cat(sprintf("    FILTRADO COMPLETADO"))
+  cat(sprintf("\n ----------------------\n"))
   cat(sprintf("Muestras iniciales : %d\n", nrow(df)))
   cat(sprintf("Muestras finales   : %d\n", nrow(df_filtrado)))
   cat(sprintf("Muestras eliminadas: %d (%.1f%%)\n",
