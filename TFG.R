@@ -107,7 +107,7 @@ if (respuesta_filtro == "yes") {
 
 if (is.null(busqueda_filtrada) || nrow(busqueda_filtrada) == 0) {
   message("No quedan muestras después del filtrado.")
-  return(NULL)
+  stop()
 }
 
 suppressWarnings(
@@ -133,9 +133,12 @@ if (guardar == "yes") {
 
 
 # ================================================
-# DESCARGA DE LOS DATOS - RETOCAR ESTA FUNCIÓN    <-----
+# DESCARGA DE LOS DATOS - RETOCAR ESTA FUNCIÓN    
 # ================================================
-source("FUNC/Descargas_ENA.R")
+
+dir.create("INPUT/DATA", recursive = TRUE, showWarnings = FALSE)
+
+source("FUNC/DescargarMuestras.R")
 nAcceso <- dlgInput(message = "Introduzca el número de acceso al proyecto ENA: ")$res
 descargas_ENA(nAcceso)
 
