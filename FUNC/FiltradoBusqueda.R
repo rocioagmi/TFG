@@ -38,8 +38,8 @@ filtrarBusqueda <- function(df) {
     
     filtros_obligatorios <- list(
       "Humano" = "\\b(human|homo\\s*sapiens|patients?)\\b",
-      "Intestinal/Fecal" = "\\b(fecal|stool|feces|faecal|gut|intestin(al|e)|colon|rectal|bowel)\\b",
-      "Microbioma/Metagenómica" = "\\b(microbiom(e|a)|metagenomic(s|a)?|16S(\\s*(rRNA|RNA|ribosomal))?)\\b")
+      "Intestinal/Fecal" = "\\b(fecal|stool|feces|faecal|gut|intestin(al|e)|colon|rectal|bowel)\\b")
+      #,"Microbioma/Metagenómica" = "\\b(microbiom(e|a)|metagenomic(s|a)?|16S(\\s*(rRNA|RNA|ribosomal))?)\\b")
     
     aplica_patron <- function(df_local, patron, campos) {
       coincidencias <- rep(FALSE, nrow(df_local))

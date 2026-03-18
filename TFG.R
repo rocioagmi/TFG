@@ -67,6 +67,12 @@
 
 # stringr
 #install.packages("stringr")
+
+# shiny
+#install.packages("shiny")
+
+# miniUI
+#install.packages("miniUI")
 # ===============================================
 # LIBRERÍAS
 # ===============================================
@@ -133,14 +139,19 @@ if (guardar == "yes") {
 
 
 # ================================================
-# DESCARGA DE LOS DATOS - RETOCAR ESTA FUNCIÓN    
+# DESCARGA DE LOS DATOS    
 # ================================================
 
+# ------------------------------------------------
+# CREAR CARPETA PARA DATOS DE ENTRADA
+# ------------------------------------------------
 dir.create("INPUT/DATA", recursive = TRUE, showWarnings = FALSE)
 
+# ------------------------------------------------
+# FUNCIÓN DE DESCARGA DE MUESTRAS
+# ------------------------------------------------
 source("FUNC/DescargarMuestras.R")
-nAcceso <- dlgInput(message = "Introduzca el número de acceso al proyecto ENA: ")$res
-descargas_ENA(nAcceso)
+descargarMuestras(busqueda_filtrada)
 
 # Obtiene una lista ordenada con todos los archivos .fastq.gz de la carpeta de entrada
 listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
