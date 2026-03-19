@@ -1,30 +1,40 @@
 library(readr)
 library(httr)
+library(dplyr)
 
-descargarMuestras <- function(nAcceso){
+descargarMuestras <- function(df, idEstudios){
   
   # --------------------------------------------------------------------------------------
   # CAMBIAR ESTA FUNCIÓN:
-  # - Descargar muestras de varios estudios
-  # - Usar las url de descarga del df de resultado de búsqueda (submitted_ftp/fastq_ftp)
   # - Nombrar a las secuencias por alias
   # --------------------------------------------------------------------------------------
   
-  # DESCARGA DEL TSV
-  enlaceTSV <- paste("https://www.ebi.ac.uk/ena/portal/api/filereport?accession=","&result=read_run&fields=study_accession,sample_accession,experiment_accession,run_accession,tax_id,scientific_name,fastq_bytes,fastq_ftp,submitted_bytes,submitted_ftp,sra_bytes,sra_ftp,bam_ftp,bam_bytes&format=tsv&download=true&limit=0", sep = nAcceso)
-  directorio <- mkdir("INPUT/DATA")
-  directorioTSV <- paste("INPUT/DATA/filereport_read_run_","_tsv.tsv",sep = nAcceso)
-  tsv <- download.file(enlaceTSV, directorioTSV)
+  idAcceso <- trimws(unlist(strsplit(idEstudios, ",")))
+  idAcceso <- idAcceso[nchar(idAcceso) > 0]
   
-  # DESCARGA DE LAS MUESTRAS
-  tabla <- read_delim(directorioTSV, col_names = TRUE, delim ="\t")
-  tabla_ordenada <- tabla[order(tabla$submitted_ftp), ]
-  enlaces <- strsplit(tabla_ordenada$submitted_ftp, ";")
+  df_procesado <- df %>%
+    filter(study_accession %in% idAccesso) %>%
+    mutate(
+      A = na_if(submitted_ftp, ""),
+      B = na_if(fastq_ftp, ""),
+      enlaces <-  coalesce(A, B)) %>%
+    arrange(enlaces)
+  
+  enlaces_validos <- df_procesado$enlaces
+  vacios <- sum(is.na(enlaces_validos))
+  
+  if (vacios > 0) {
+    sprintf("No se pueden descargar algunas muestras.")
+    enlaces_validos <- enlaces_validos[!is.na(enlaces_validos)]
+  }
+  
+  enlaces <- strsplit(enlaces_validos, ";")
   
   for (enl in enlaces){
     for (i in enl){
+      i <- trimws(i)
       destino <- strsplit(i, "/")[[1]]
-      directorioEnl <- paste("INPUT/DATA/",destino[length(destino)])
+      directorioEnl <- paste0("INPUT/DATA/",destino[length(destino)])
       download.file(i,directorioEnl)
     }
   }

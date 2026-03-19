@@ -122,7 +122,8 @@ continuarConENA <- function(lista, batch_size = 100) {
         result = "read_run",
         query = paste0("study_accession=", study_acc, collapse = " OR "),
         fields = "study_accession,sample_accession,run_accession,scientific_name,
-                  experiment_title,study_title,sample_title,run_alias,sample_alias,fastq_ftp",
+                  experiment_title,study_title,sample_title,run_alias,sample_alias,
+                  submitted_ftp,fastq_ftp",
         format = "tsv",
         limit = 0)
       
@@ -186,7 +187,8 @@ continuarConENA <- function(lista, batch_size = 100) {
         result = "read_run",
         query = paste0("run_accession=", run_acc, collapse = " OR "),
         fields = "study_accession,sample_accession,run_accession,scientific_name,
-                  experiment_title,study_title,sample_title,run_alias,sample_alias,fastq_ftp",
+                  experiment_title,study_title,sample_title,run_alias,sample_alias,
+                  submitted_ftp,fastq_ftp",
         format = "tsv",
         limit = 0)
       

@@ -151,7 +151,16 @@ dir.create("INPUT/DATA", recursive = TRUE, showWarnings = FALSE)
 # FUNCIÓN DE DESCARGA DE MUESTRAS
 # ------------------------------------------------
 source("FUNC/DescargarMuestras.R")
-descargarMuestras(busqueda_filtrada)
+
+descarga <- dlgInput(message = "Introduce los IDs de los estudios que deseas descargar separados por comas:",
+                     default = "")$res
+
+if (length(descarga) == 0 || nchar(trimws(descarga)) == 0) {
+  cat("No se ha descargado nada.\n")
+  return(busqueda_filtrada)
+}
+
+descargarMuestras(busqueda_filtrada, descarga)
 
 # Obtiene una lista ordenada con todos los archivos .fastq.gz de la carpeta de entrada
 listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
