@@ -175,14 +175,6 @@ if(any(grepl("_R1", listadoMuestras))){
   stop("No se reconoce el patrón de nomenclatura de los archivos.")
 }
 
-# Separa las muestras por tipo: MS (enfermos) y Healthy (sanos) ---- TODAVIA NO LO ESTOY USANDO
-#muestrasMS <- sort(list.files("INPUT/DATA", pattern = "MS", full.names = TRUE))
-#muestrasHealthy <- sort(list.files("INPUT/DATA", pattern = "Healthy", full.names = TRUE))
-
-# Separa los archivos por lectura: R1 (forward) y R2 (reverse)
-#muestrasR1 <- sort(list.files("INPUT/DATA", pattern = "R1", full.names = TRUE))
-#muestrasR2 <- sort(list.files("INPUT/DATA", pattern = "R2", full.names = TRUE))
-
 
 
 # ================================================
@@ -193,10 +185,10 @@ if(any(grepl("_R1", listadoMuestras))){
 # CREACIÓN DE CARPETAS DE SALIDA
 # -------------------------------------------------
 # Crea directorios para organizar los resultados: informes, gráficos, datos filtrados, ...
-dir.create("OUTPUT/REPORT")
-dir.create("OUTPUT/FIGURES")
-dir.create("OUTPUT/RDS")
-dir.create("OUTPUT/FILTRADO")
+dir.create("OUTPUT/REPORT", recursive = TRUE, showWarnings = FALSE)
+dir.create("OUTPUT/FIGURES", recursive = TRUE, showWarnings = FALSE)
+dir.create("OUTPUT/RDS", recursive = TRUE, showWarnings = FALSE)
+dir.create("OUTPUT/FILTRADO", recursive = TRUE, showWarnings = FALSE)
 
 # -------------------------------------------------
 # INFORME DE CALIDAD DE SECUENCIACIÓN              <-----
