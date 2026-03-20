@@ -162,6 +162,7 @@ if (length(descarga) == 0 || nchar(trimws(descarga)) == 0) {
 
 descargarMuestras(busqueda_filtrada, descarga)
 
+
 # Obtiene una lista ordenada con todos los archivos .fastq.gz de la carpeta de entrada
 listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
 
@@ -208,13 +209,16 @@ filtrarMuestras(R1, R2)
 # Lista todos los archivos filtrados generados
 listadoFiltrado <- sort(list.files("OUTPUT/FILTRADO", pattern = "\\.fastq\\.gz$", full.names = TRUE))
 
-# Clasifica archivos filtrados por tipo de muestra
-filtradasMS <- sort(list.files("OUTPUT/FILTRADO", pattern = "MS", full.names = TRUE))
-filtradasHealthy <-  sort(list.files("OUTPUT/FILTRADO", pattern = "Healthy", full.names = TRUE))
+if(any(grepl("_R1", listadoFiltrado))){
+  fR1 <- listadoFiltrado[grepl("_R1", listadoFiltrado)]
+  fR2 <- listadoFiltrado[grepl("_R2", listadoFiltrado)]
+} else if (any(grepl("_1\\.fastq", listadoFiltrado))){
+  fR1 <- listadoFiltrado[grepl("_1\\.fastq", listadoFiltrado)]
+  fR2 <- listadoFiltrado[grepl("_2\\.fastq", listadoFiltrado)]
+} else {
+  stop("No se reconoce el patrón de nomenclatura de los archivos.")
+}
 
-# Separa lecturas forward y reverse de los archivos filtrados
-filtradoR1 <- listadoFiltrado[grepl("R1", listadoFiltrado)]
-filtradoR2 <- listadoFiltrado[grepl("R2", listadoFiltrado)]
 
 # -------------------------------------------
 # INFORME DE CALIDAD POST FILTRADO
@@ -235,7 +239,7 @@ informeCalidad(listadoFiltrado, umbral_calidad = 20)
 # Carga la función que ejecuta: learnErrors, derep, dada, mergePairs
 source("FUNC/FlujoTrabajoDada.R")
 # Procesa lecturas filtradas y devuelve la tabla de conteos de secuencias
-union <- flujoTrabajoDada(filtradoR1, filtradoR2)
+union <- flujoTrabajoDada(fR1, fR2)
 
 # ------------------------------------------
 # CONSTRUCCIÓN DE LA TABLA DE SECUENCIAS -- ESTE PASO IGUAL LO JUNTO AL ANTERIOR
