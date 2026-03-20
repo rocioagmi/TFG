@@ -13,19 +13,24 @@ descargarMuestras <- function(df, idEstudios){
   idAcceso <- idAcceso[nchar(idAcceso) > 0]
   
   df_procesado <- df %>%
-    filter(study_accession %in% idAccesso) %>%
+    filter(study_accession %in% idAcceso) %>%
     mutate(
       A = na_if(submitted_ftp, ""),
       B = na_if(fastq_ftp, ""),
-      enlaces <-  coalesce(A, B)) %>%
+      enlaces =  coalesce(A, B)) %>%
     arrange(enlaces)
   
   enlaces_validos <- df_procesado$enlaces
   vacios <- sum(is.na(enlaces_validos))
   
   if (vacios > 0) {
-    sprintf("No se pueden descargar algunas muestras.")
+    cat(sprintf("No se pueden descargar algunas muestras."))
     enlaces_validos <- enlaces_validos[!is.na(enlaces_validos)]
+  }
+  
+  if (length(enlaces_validos) == 0) {
+    cat("No hay enlaces válidos para descargar.\n")
+    return(indivisible(NULL))
   }
   
   enlaces <- strsplit(enlaces_validos, ";")
