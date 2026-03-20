@@ -30,17 +30,33 @@ descargarMuestras <- function(df, idEstudios){
   
   if (length(enlaces_validos) == 0) {
     cat("No hay enlaces válidos para descargar.\n")
-    return(indivisible(NULL))
+    return(invisible(NULL))
   }
+  
+  fallidos <- c()
   
   enlaces <- strsplit(enlaces_validos, ";")
   
   for (enl in enlaces){
     for (i in enl){
       i <- trimws(i)
+      if (nchar(i) == 0) next
+      
       destino <- strsplit(i, "/")[[1]]
       directorioEnl <- paste0("INPUT/DATA/",destino[length(destino)])
-      download.file(i,directorioEnl)
+      tryCatch({
+        download.file(i,directorioEnl, mode = "wb")
+      }, error = function(e) {
+        cat(sprintf(" Error en %s: %s\n", directorioEnl, e$message))
+        fallidos <<- c(fallidos, i)
+      })
     }
+  }
+  
+  cat(sprintf("\n--- DESCARGA COMPLETADA ---\n"))
+  cat(sprintf("Archivos descargados: %d\n", length(unlist(enlaces)) - length(fallidos)))
+  if (length(fallidos) > 0) {
+    cat(sprintf("Archivos fallidos (%d):\n", length(fallidos)))
+    for (f in fallidos) cat(sprintf("  - %s\n", f))
   }
 }
