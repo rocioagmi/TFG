@@ -253,11 +253,13 @@ tabSinQuim <- procesarSecuencias(union)
 # ------------------------------------------
 # ASIGNACIÓN TAXONÓMICA
 # ------------------------------------------
-# Asigna taxonomóia usando bases de datos locales (HTTdb, RDP, SILVA)
-# C:/ANTIGUA_D/TodoTFG/BB_DD/hitdb_v1.00.fa.gz
-# C:/ANTIGUA_D/TodoTFG/BB_DD/rdp_19_toGenus_trainset.fa.gz /rdp_19_toSpecies_trainset.fa.gz
-# C:/ANTIGUA_D/TodoTFG/BB_DD/silva_nr99_v138.2_toGenus_trainset.fa.gz
-
 source("FUNC/AsignarTaxonomia.R")
 # Aplica asignación taxonómica a la tabla sin quimeras
 asignarTaxonomia(tablaSinQuim)
+
+
+# -----------------------------------------
+# INFORME FINAL
+# -----------------------------------------
+source("FUNC/GenerarInformeFinal.R")
+generarInformeFinal()
