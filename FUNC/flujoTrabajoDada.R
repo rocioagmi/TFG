@@ -20,6 +20,9 @@ flujoTrabajoDada <- function(R1, R2){
   
   # Junta las secuencias R1 y R2
   union <- mergePairs(dadaR1, derep_R1, dadaR2, derep_R2, verbose = TRUE, justConcatenate = TRUE)
-
+  
+  saveRDS(list(err_R1 = err_R1, err_R2 = err_R2), "OUTPUT/RDS/errores.Rds")
+  saveRDS(union, "OUTPUT/RDS/union.Rds")
+  
   return(union)
 } 

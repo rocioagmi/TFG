@@ -228,6 +228,7 @@ source("FUNC/InformeCalidad.R")
 informeCalidad(listadoFiltrado, umbral_calidad = 20)
 
 
+
 # ===========================================
 # PROCESAMIENTO DE LOS DATOS 
 # ===========================================
@@ -235,29 +236,19 @@ informeCalidad(listadoFiltrado, umbral_calidad = 20)
 # -------------------------------------------
 # FLUJO PRINCIPAL DADA2
 # -------------------------------------------
-
 # Carga la función que ejecuta: learnErrors, derep, dada, mergePairs
 source("FUNC/FlujoTrabajoDada.R")
 # Procesa lecturas filtradas y devuelve la tabla de conteos de secuencias
 union <- flujoTrabajoDada(fR1, fR2)
 
-# ------------------------------------------
-# CONSTRUCCIÓN DE LA TABLA DE SECUENCIAS -- ESTE PASO IGUAL LO JUNTO AL ANTERIOR
-# ------------------------------------------
-# Genera y guarda la matriz de conteos
-source("FUNC/ConstruirTablaSecuencias.R")
-construirTablaSecuencias(union)
-# Ruta al objeto Rds con la tabla final de secuencias
-tablaSecuencias <- "OUTPUT/RDS/seqtab.Rds"
 
-# -----------------------------------------
-# ELIMINACIÓN DE QUIMERAS
-# -----------------------------------------
-# Detecta y remueve secuencias quiméricas
-source("FUNC/EliminarQuimeras.R")
-eliminarQuimeras(tablaSecuencias)
-# Ruta a la tabla limpia
-tablaSinQuim <- "OUTPUT/RDS/tabSinQuim.Rds"
+# --------------------------------------------------------------------
+# CONSTRUCCIÓN DE LA TABLA DE SECUENCIAS Y ELIMINACIÓN DE QUIMERAS
+# --------------------------------------------------------------------
+# Construye la matriz de conteos de ASVs y elimina secuencias quiméricas
+source("FUNC/procesarSecuencias.R")
+tabSinQuim <- procesarSecuencias(union)
+
 
 # ------------------------------------------
 # ASIGNACIÓN TAXONÓMICA
@@ -270,23 +261,3 @@ tablaSinQuim <- "OUTPUT/RDS/tabSinQuim.Rds"
 source("FUNC/AsignarTaxonomia.R")
 # Aplica asignación taxonómica a la tabla sin quimeras
 asignarTaxonomia(tablaSinQuim)
-
-
-
-
-
-
-
-# ALMACENAMIENTO DE LOS DATOS EN UNA BASE DE DATOS MONGODB
-# Abrir consola y escribir mongodb
-datos_ENA <- mongo(collection = "datos_ENA", url = "mongodb://localhost:27017")
-
-muestras <- list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE)
-
-for (i in muestras) {
-  contenido <- list(nombre = basename(i), contenido = i)
-  datos_ENA$insert(contenido) 
-}
-
-datos_ENA$find(sort = '{"nombre": 1}')
-datos_ENA$disconnect()
