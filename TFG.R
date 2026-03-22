@@ -73,6 +73,9 @@
 
 # miniUI
 #install.packages("miniUI")
+
+#kableExtra
+#install.packages("kableExtra")
 # ===============================================
 # LIBRERÍAS
 # ===============================================
@@ -260,5 +263,5 @@ asignarTaxonomia(tabSinQuim)
 # -----------------------------------------
 # INFORME FINAL
 # -----------------------------------------
-source("FUNC/GenerarInformeFinal.R")
-generarInformeFinal()
+source("FUNC/InformeFinal.R")
+informeFinal()
