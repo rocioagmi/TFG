@@ -187,7 +187,6 @@ if(any(grepl("_R1", listadoMuestras))){
 # -------------------------------------------------
 # Crea directorios para organizar los resultados: informes, gráficos, datos filtrados, ...
 dir.create("OUTPUT/REPORT", recursive = TRUE, showWarnings = FALSE)
-dir.create("OUTPUT/FIGURES", recursive = TRUE, showWarnings = FALSE)
 dir.create("OUTPUT/RDS", recursive = TRUE, showWarnings = FALSE)
 dir.create("OUTPUT/FILTRADO", recursive = TRUE, showWarnings = FALSE)
 
@@ -255,7 +254,7 @@ tabSinQuim <- procesarSecuencias(union)
 # ------------------------------------------
 source("FUNC/AsignarTaxonomia.R")
 # Aplica asignación taxonómica a la tabla sin quimeras
-asignarTaxonomia(tablaSinQuim)
+asignarTaxonomia(tabSinQuim)
 
 
 # -----------------------------------------
