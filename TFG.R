@@ -103,6 +103,9 @@ if (is.null(muestras_totales) || nrow(muestras_totales) == 0) {
   stop()
 }
 
+# ------------------------------------------------
+# FILTRADO DE RESULTADOS DE BÚSQUEDA
+# ------------------------------------------------
 respuesta_filtro <- dlg_message( 
   message = sprintf("Se encontraron %d muestras. ¿Deseas filtrarlas?", nrow(muestras_totales)),
   type = "yesno")$res
@@ -119,6 +122,9 @@ if (is.null(busqueda_filtrada) || nrow(busqueda_filtrada) == 0) {
   stop()
 }
 
+# --------------------------------------------------------------
+# MUESTRA TABLA CON TODOS LOS RESULTADOS DE BÚSQUEDA FILTRADOS
+# --------------------------------------------------------------
 suppressWarnings(
   print(datatable(busqueda_filtrada, 
                   caption = sprintf("Muestras seleccionadas: %d", nrow(busqueda_filtrada)),

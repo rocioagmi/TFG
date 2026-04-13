@@ -11,7 +11,7 @@ informeCalidad <- function(listadoMuestras, umbral_calidad = 20){
   dir.create(directorio_salida, recursive = TRUE, showWarnings = FALSE)
   
   cat("Procesando", length(listadoMuestras), "archivos FASTQ.\n")
-  datosqa <- extraerCalidadFastq(listadoMuestras, subsample = 100000)
+  datosqa <- extraerCalidad(listadoMuestras, subsample = 100000)
   saveRDS(datosqa, file.path(directorio_salida, "datos_qa.rds"))
   
   cat("Creando informe Rmarkdown\n")
@@ -25,7 +25,7 @@ informeCalidad <- function(listadoMuestras, umbral_calidad = 20){
 }
 
 
-extraerCalidadFastq <- function(listadoMuestras, subsample = 100000) {
+extraerCalidad <- function(listadoMuestras, subsample = 100000) {
   
   calidad_ciclo <- data.frame()
   estadisticas_generales <- data.frame()
