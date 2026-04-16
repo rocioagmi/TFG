@@ -1,7 +1,7 @@
-library(httr)     
-library(jsonlite)
-library(dplyr)
-library(readr)
+require(httr)     
+require(jsonlite)
+require(dplyr)
+require(readr)
 
 
 busquedaEBI <- function(query, limit = 200000) {

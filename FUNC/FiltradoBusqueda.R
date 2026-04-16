@@ -1,5 +1,5 @@
-library(svDialogs)
-library(stringr)
+require(svDialogs)
+require(stringr)
 
 filtrarBusqueda <- function(df) {
   
