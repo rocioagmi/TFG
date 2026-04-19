@@ -1,81 +1,3 @@
-# BIOCONDUCTOR
-#if (!require("BiocManager", quietly = TRUE))
-#  install.packages("BiocManager")
-
-#BiocManager::install(c("GenomicFeatures", "AnnotationDbi"))
-
-# Biostrings
-#BiocManager::install("Biostrings", force = TRUE)
-
-# DADA2
-#BiocManager::install("dada2")
-
-# phyloseq
-#BiocManager::install("phyloseq")
-
-# DESeq2
-#BiocManager::install("DESeq2")
-
-# microbiome
-#BiocManager::install("microbiome")
-
-# qiime2R
-#if (!requireNamespace("devtools", quietly = TRUE)){install.packages("devtools")}
-#  devtools::install_github("jbisanz/qiime2R")
-
-# ANCOMBC
-#BiocManager::install("ANCOMBC") 
-
-# microbiotaProcess
-#BiocManager::install("MicrobiotaProcess")
-
-# mongolite
-#install.packages("mongolite")
-
-# QuasR
-#BiocManager::install("QuasR")
-
-# svDialogs
-#install.packages("svDialogs")
-
-# TAF
-#install.packages("TAF")
-
-# ShortRead
-#BiocManager::install("ShortRead", force = TRUE)
-
-# Rqc
-#BiocManager::install("Rqc")
-
-# DT
-#install.packages("DT")
-
-# BiocParallel
-#BiocManager::install("BiocParallel")
-
-# httr
-#install.packages("httr")
-
-# httr2
-#install.packages("httr2")
-
-# readr
-#install.packages("readr")
-
-# Jsonlite
-#install.packages("jsonlite")
-
-# stringr
-#install.packages("stringr")
-
-# shiny
-#install.packages("shiny")
-
-# miniUI
-#install.packages("miniUI")
-
-#kableExtra
-#install.packages("kableExtra")
 # ===============================================
 # LIBRERÍAS
 # ===============================================
@@ -96,6 +18,7 @@ source("FUNC/BusquedaHibrida.R")
 source("FUNC/FiltradoBusqueda.R")
 
 query <- "(multiple sclerosis) OR MS OR RRMS OR SPMS OR PPMS OR (relapsing remitting) OR (primary progressive) OR (secondary progressive)"
+
 muestras_totales <- busquedaHibrida(query, limit = 200000)
 
 if (is.null(muestras_totales) || nrow(muestras_totales) == 0) {
@@ -122,28 +45,14 @@ if (is.null(busqueda_filtrada) || nrow(busqueda_filtrada) == 0) {
   stop()
 }
 
-# --------------------------------------------------------------
-# MUESTRA TABLA CON TODOS LOS RESULTADOS DE BÚSQUEDA FILTRADOS
-# --------------------------------------------------------------
-suppressWarnings(
-  print(datatable(busqueda_filtrada, 
-                  caption = sprintf("Muestras seleccionadas: %d", nrow(busqueda_filtrada)),
-                  options = list(pageLength = 10, scrollX = TRUE, dom = "Bfrtip", buttons = c("copy", "csv", "excel"), deferRender = TRUE, scrollY = 400, scroller = TRUE),
-                  filter = 'top',
-                  selection = 'none',
-                  extensions = c('Buttons', 'Scroller')))
-)
+# ---------------------------------------------------------------------------
+# MUESTRA TABLA CON LOS RESULTADOS DE BÚSQUEDA FILTRADOS SU SELECCIÓN
+# ---------------------------------------------------------------------------
+cat("Abriendo aplicación Shiny para explorar y descargar resultados.\n")
 
-guardar <- dlg_message(message = "¿Deseas guardar estos resultados en un archivo CSV?",
-                       type = "yesno")$res
-
-if (guardar == "yes") {
-  nombre_archivo <- sprintf("busqueda_ENA_%s_%s.csv", 
-                            gsub(" ", "_", query),
-                            format(Sys.Date(), "%Y%m%d"))
-  write_csv(busqueda_filtrada, nombre_archivo)
-  cat(sprintf("\n Resultados guardados en: %s\n", nombre_archivo))
-}
+shiny::runApp(appDir = "FUNC",
+              launch.browser = TRUE,
+              options = list(busqueda_filtrada = busqueda_filtrada))
 
 
 
