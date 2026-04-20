@@ -8,7 +8,7 @@ mostrarTabla <- function(df){
     stop("El dataframe está vacío. No hay resultados para visualizar.")
   }
   
-  setDT(datos)
+  setDT(df)
   
   ui <- fluidPage(
     titlePanel("Resultados de Búsqueda - Microbiota Intestinal en Esclerosis Múltiple"),
@@ -52,7 +52,7 @@ mostrarTabla <- function(df){
       n_total <- nrow(df)
       
       if (n == 0) {
-        paste0("Ninguna fila seleccionada, se descargarán", n_total, "filas.")
+        paste0("Ninguna fila seleccionada, se descargarán ", n_total, " filas.")
       } else {
         paste0(n, " fila(s) seleccionada(s) de ", n_total, " totales")
       }
@@ -72,7 +72,7 @@ mostrarTabla <- function(df){
     })
   }
  
-  seleccion <- runApp(list(ui = ui, server = server), launch.browser = TRUE)
+  seleccion <- shiny::runApp(list(ui = ui, server = server), launch.browser = TRUE)
   
   return(seleccion)
 }

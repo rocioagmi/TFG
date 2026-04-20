@@ -49,11 +49,9 @@ if (is.null(busqueda_filtrada) || nrow(busqueda_filtrada) == 0) {
 # MUESTRA TABLA CON LOS RESULTADOS DE BÚSQUEDA FILTRADOS SU SELECCIÓN
 # ---------------------------------------------------------------------------
 cat("Abriendo aplicación Shiny para explorar y descargar resultados.\n")
+source("FUNC/mostrarTabla.R")
 
-shiny::runApp(appDir = "FUNC",
-              launch.browser = TRUE,
-              options = list(busqueda_filtrada = busqueda_filtrada))
-
+df_final <- mostrarTabla(busqueda_filtrada)
 
 
 # ================================================
