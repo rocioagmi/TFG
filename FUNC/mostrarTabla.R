@@ -2,28 +2,29 @@ mostrarTabla <- function(df){
   
   require(DT)
   require(shiny)
-  require(data.table)
+  #require(data.table)
   
   if (is.null(df) || nrow(df) == 0) {
     stop("El dataframe está vacío. No hay resultados para visualizar.")
   }
   
-  setDT(df)
+  #setDT(df)
   
   ui <- fluidPage(
     titlePanel("Resultados de Búsqueda - Microbiota Intestinal en Esclerosis Múltiple"),
     
-    tags$h4("Explora y selecciona las filas que deseas descargar"),
-    tags$p("Si no seleccionas ninguna fila y continúas con descarga, se usarán TODAS las filas."),
+    tags$h4("Explora y selecciona los estudios que deseas descargar"),
+    tags$p("Usa los filtros de la tabla para acotar resultados.
+            Si no seleccionas ninguna fila, se usarán todos los estudios visibles."),
     
-    fluidRow(column(12, DTOutput("tabla", height = "650px"))),
+    fluidRow(column(12, DTOutput("tabla", height = "600px"))),
     
     br(),
     
     fluidRow(column(8, verbatimTextOutput("info_seleccion")),
-             column(4, actionButton("btn_continuar", "Descargar filas seleccionadas", 
-                                    class = "btn-lg btn-primary", width = "100%"))))
-
+             column(4, uiOutput("btn_dinamico"))
+    )
+  )
 
   server <- function(input, output, session) {
     
@@ -36,26 +37,42 @@ mostrarTabla <- function(df){
         extensions = c("Buttons", "Scroller", "FixedHeader"),
         options = list(
           pageLength = 50,
-          lengthMenu = c(25, 50, 100, 250, 500, 1000),
+          lengthMenu = c(25, 50, 100, 250, 500),
           dom = "Bfrtip",
           buttons = c("copy", "csv", "excel"),
-          scrollY = 520,
+          scrollY = 480,
           scrollX = TRUE,
           deferRender = TRUE,
           scroller = TRUE,
           fixedHeader = TRUE,
-          stateSave = TRUE))
-      }, server = TRUE)
+          stateSave = FALSE))
+      }, server = FALSE)
     
     output$info_seleccion <- renderText({
-      n <- length(input$tabla_rows_selected)
+      n_sel <- length(input$tabla_rows_selected)
+      n_visible <- length(input$tabla_rows_all)
       n_total <- nrow(df)
       
-      if (n == 0) {
-        paste0("Ninguna fila seleccionada, se descargarán ", n_total, " filas.")
+      if (n_sel == 0) {
+        sprintf("Visibles: %d de %d | Sin selección → se usarán los %d visibles",
+                n_visible, n_total, n_visible)
       } else {
-        paste0(n, " fila(s) seleccionada(s) de ", n_total, " totales")
+        sprintf("Visibles: %d de %d | Seleccionados: %d",
+                n_visible, n_total, n_sel)
       }
+    })
+    
+    output$btn_dinamico <- renderUI({
+      n_sel <- length(input$tabla_rows_selected)
+      n_visible <- length(input$tabla_rows_all)
+      
+      label <- if (n_sel == 0) {
+        sprintf("Continuar con %d estudio(s) visible(s)", n_visible)
+      } else {
+        sprintf("Continuar con %d estudio(s) seleccionado(s)", n_sel)
+      }
+      
+      actionButton("btn_continuar", label, class = "btn-lg btn-ptimary", width = "100%")
     })
     
     observeEvent(input$btn_continuar, {
@@ -67,12 +84,10 @@ mostrarTabla <- function(df){
       }
       
       datos_seleccionados <- df[filas_a_usar, ]
-      
       stopApp(returnValue = datos_seleccionados)
     })
   }
  
   seleccion <- shiny::runApp(list(ui = ui, server = server), launch.browser = TRUE)
-  
   return(seleccion)
 }

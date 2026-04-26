@@ -1,17 +1,20 @@
-require(svDialogs)
-require(stringr)
-
 filtrarBusqueda <- function(df) {
+  
+  require(svDialogs)
+  require(stringr)
+  require(dplyr)
+  require(tidyr)
   
   if (is.null(df) || nrow(df) == 0) return(NULL)
   
   df_filtrado <- df
   
   cat("INICIANDO FILTRADO\n")
-  cat(sprintf("Número de muestras iniciales: %d\n\n", nrow(df_filtrado)))
+  cat(sprintf("Número de estudios iniciales: %d\n\n", nrow(df_filtrado)))
   
-  campos_texto <- c("scientific_name", "experiment_title", "study_title",
-                    "sample_title", "run_alias", "sample_alias")
+  campos_texto <- c("study_title", "description", "scientific_name",
+                    "center_name", "broker_name")
+  
   campos_disponibles <- campos_texto[campos_texto %in% colnames(df_filtrado)]
   
   campos_con_datos <- campos_disponibles[sapply(campos_disponibles, function(col) {
@@ -41,27 +44,17 @@ filtrarBusqueda <- function(df) {
       "Intestinal/Fecal" = "\\b(fecal|stool|feces|faecal|gut|intestin(al|e)|colon|rectal|bowel)\\b")
       #,"Microbioma/Metagenómica" = "\\b(microbiom(e|a)|metagenomic(s|a)?|16S(\\s*(rRNA|RNA|ribosomal))?)\\b")
     
-    aplica_patron <- function(df_local, patron, campos) {
-      coincidencias <- rep(FALSE, nrow(df_local))
-      for (col in campos) {
-        valores <- df_local[[col]]
-        valores[is.na(valores)] <- ""
-        coincidencias <- coincidencias | grepl(patron, valores, ignore.case = TRUE, perl = TRUE)
-      }
-      coincidencias
-    }
-    
     for (nombre_grupo in names(filtros_obligatorios)) {
       patron <- filtros_obligatorios[[nombre_grupo]]
-      mascara <- aplica_patron(df_filtrado, patron, campos_con_datos)
+      n_antes <- nrow(df_filtrado)
       
-      n_antes  <- nrow(df_filtrado)
-      df_filtrado <- df_filtrado[mascara, , drop = FALSE]
-      n_despues <- nrow(df_filtrado)
+      df_filtrado <- df_filtrado %>%
+        filter(if_any(all_of(campos_con_datos),
+                      ~grepl(patron,replace_na(., ""), ignore.case = TRUE, perl = TRUE)))
       
       cat(sprintf("  [%s] %d -> %d muestras (%.1f%% superaron)\n",
-                  nombre_grupo, n_antes, n_despues,
-                  ifelse(n_antes > 0, (n_despues / n_antes) * 100, 0)))
+                  nombre_grupo, n_antes, nrow(df_filtrado),
+                  ifelse(n_antes > 0, (nrow(df_filtrado) / n_antes) * 100, 0)))
       
       if (nrow(df_filtrado) == 0) {
         cat("\nNo quedan muestras después de aplicar el filtrado.\n")
@@ -85,7 +78,6 @@ filtrarBusqueda <- function(df) {
     
     terminos_usuario <- trimws(unlist(strsplit(terminos, ",")))
     terminos_usuario <- terminos_usuario[nchar(terminos_usuario) > 0]
-    
     patron <- paste0("\\b(", paste(terminos_usuario, collapse = "|"), ")\\b")
     
     cat(sprintf("\nBuscando términos: %s\n", paste(terminos_usuario, collapse = ", ")))
@@ -95,18 +87,16 @@ filtrarBusqueda <- function(df) {
       filter(if_any(all_of(campos_con_datos),
                     ~grepl(patron, ., ignore.case = TRUE, perl = TRUE)))
     
-    cat(sprintf("Muestras tras filtrado: %d\n", nrow(df_filtrado)))
+    cat(sprintf("Estudios tras filtrado: %d\n", nrow(df_filtrado)))
   } 
   
-  # ===========================================================
   # RESUMEN FINAL
-  # ===========================================================
   cat(sprintf("\n ----------------------\n"))
   cat(sprintf("    FILTRADO COMPLETADO"))
   cat(sprintf("\n ----------------------\n"))
-  cat(sprintf("Muestras iniciales : %d\n", nrow(df)))
-  cat(sprintf("Muestras finales   : %d\n", nrow(df_filtrado)))
-  cat(sprintf("Muestras eliminadas: %d (%.1f%%)\n",
+  cat(sprintf("Estudios iniciales : %d\n", nrow(df)))
+  cat(sprintf("Estudios finales   : %d\n", nrow(df_filtrado)))
+  cat(sprintf("Estudios eliminados: %d (%.1f%%)\n",
               nrow(df) - nrow(df_filtrado),
               ifelse(nrow(df) > 0, ((nrow(df) - nrow(df_filtrado)) / nrow(df)) * 100, 0)))
   

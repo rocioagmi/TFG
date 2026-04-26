@@ -1,152 +1,132 @@
-require(httr)     
-require(jsonlite)
-require(dplyr)
-require(readr)
-
 
 busquedaEBI <- function(query, limit = 200000) {
+  
+  require(httr)     
+  require(jsonlite)
+  require(dplyr)
   
   base_url <- "https://www.ebi.ac.uk/ebisearch/ws/rest"
   
   print(paste("Consultando EBI..."))
   print(paste("Query:", query))
   
-  # PRIMERO BUSCAR ESTUDIOS
+  dominios = c("project", "sra_study")
   
-  url_study <- paste0(base_url, "/project")
-  todos_estudios <- data.frame()
-  start <- 0
+  resultado_final <- data.frame()
+  conteo_dom <- list()
   
-  repeat {
-    parametros_study <- list(
-      query = query,
-      fields = "acc",
-      format = "json",
-      size = ifelse(limit > 100, 100, limit), 
-      start = start)
+  for (dom in dominios) {
     
-    respuesta_study <- GET(url_study, query = parametros_study)
-  
-    if (status_code(respuesta_study) != 200) {
-      cat(sprintf("\nError de conexión con EBI al consultar project. Código: %d\n", 
-                  status_code(respuesta_study)))
-      break
-    }
+    url <- paste0(base_url, "/", dom)
+    start <- 0
+    ids_dom <- data.frame()
     
-    cont_study <- httr::content(respuesta_study, "text", encoding = "UTF-8")
-    json_study <- fromJSON(cont_study, flatten = TRUE)
-    
-    if (json_study$hitCount == 0 || length(json_study$entries) == 0){
-      print(paste("No se encontraron resultados para esta consulta:", 
-                  respuesta_study$url_study))
-      break
-    } 
-    
-    df_study <- data.frame(accession = json_study$entries$acc, tipo = "study",
-                           stringsAsFactors = FALSE)
-    todos_estudios <- bind_rows(todos_estudios, df_study)
-    
-    if(nrow(todos_estudios) >= limit || nrow(todos_estudios) >= json_study$hitCount) break
-    start <- start + 100
-  }
-
-  
-  # SEGUNDO BUSCAR MUESTRAS
-  
-  url_run <- paste0(base_url, "/sra-run")
-  todas_muestras <- data.frame()
-  start <- 0
-  
-  repeat {
-    parametros_run <- list(
-      query = query,
-      fields = "run_accession",
-      format = "json",
-      size = ifelse(limit > 100, 100, limit),
-      start = start)
-  
-    respuesta_run <- GET(url_run, query = parametros_run)
-    
-    if (status_code(respuesta_run) != 200) {
-      cat(sprintf("\nError de conexión con EBI al consultar sra-run. Código: %d\n",
-                  status_code(respuesta_run)))
-      break
-    }
-    
-    cont_run <- httr::content(respuesta_run, "text", encoding = "UTF-8")
-    json_run <- fromJSON(cont_run, flatten = TRUE)
-    
-    if (json_run$hitCount == 0 || length(json_run$entries) == 0){
-      print(paste("No se encontraron resultados para esta consulta:", 
-                  respuesta_run$url_run))
-      break
-    }
-    
-    df_run <- data.frame(accession = json_run$entries$acc, tipo = "run",
-                         stringsAsFactors = FALSE)
-    todas_muestras <- bind_rows(todas_muestras, df_run)
-    
-    if (nrow(todas_muestras) >= limit || nrow(todas_muestras) >= json_run$hitCount) break
-    start <- start + 100
-  }
-  
-  resultado_final <- bind_rows(todos_estudios, todas_muestras)
-  
-  cat(sprintf("\rTotal IDs recuperados: %d estudios y %d muestras.\n", nrow(todos_estudios), nrow(todas_muestras)))
-  return(resultado_final)
-}
-
-
-
-continuarConENA <- function(lista, batch_size = 100) {
-  cat("Obteniendo metadatos completos desde ENA\n")
-  
-  url <- "https://www.ebi.ac.uk/ena/portal/api/search"
-  
-  datos_completos <- data.frame()
-  
-  # PROCESAR STUDY-ACCESSIONS
-  
-  if (!is.null(lista$study_accessions) && length(lista$study_accessions) > 0) {
-    
-    cat(sprintf("\nProcesando %d estudios...\n", length(lista$study_accessions))) 
-    batches_study <- ceiling(length(lista$study_accessions)/ batch_size)
-    pb_study <- txtProgressBar(min = 0, max = batches_study, style = 3)
-    
-    for (i in seq(1, length(lista$study_accessions), by = batch_size)) {
-      
-      finals <- min(i + batch_size - 1, length(lista$study_accessions))
-      study_acc <- lista$study_accessions[i:finals]
+    repeat {
+      pag <- min(100, limit - nrow(ids_dom))
+      if (pag <= 0) break
       
       parametros <- list(
-        result = "read_run",
-        query = paste0("study_accession=", study_acc, collapse = " OR "),
-        fields = "study_accession,sample_accession,run_accession,scientific_name,
-                  experiment_title,study_title,sample_title,run_alias,sample_alias,
-                  submitted_ftp,fastq_ftp",
+        query = query,
+        fields = "acc",
+        format = "json",
+        size = pag, 
+        start = start)
+      
+      respuesta <- GET(url, query = parametros)
+      
+      if (status_code(respuesta) != 200) {
+        cat(sprintf("\nError de conexión con EBI al consultar %s. Código: %d\n", 
+                    dom, status_code(respuesta)))
+        break
+      }
+      
+      cont <- httr::content(respuesta, "text", encoding = "UTF-8")
+      json <- fromJSON(cont, flatten = TRUE)
+      
+      if (is.null(json$hitCount) || json$hitCount == 0 || 
+          is.null(json$entries) || length(json$entries) == 0) {
+        cat(sprintf("No se encontraron resultados para %s:", dom))
+        break
+      } 
+      
+      nuevos <- data.frame(accession = json$entries$acc, 
+                           stringsAsFactors = FALSE)
+      ids_dom <- bind_rows(ids_dom, nuevos)
+      
+      if(nrow(ids_dom) >= json$hitCount || nrow(ids_dom) >= limit) break
+      
+      start <- start + pag
+    }
+    
+    conteo_dom[[dom]] <- nrow(ids_dom)
+    
+    resultado_final <- bind_rows(resultado_final, ids_dom)
+  }
+  
+  cat(sprintf(
+    "\nTotal IDs recuperados: %d (project: %d | sra-study: %d)\n",
+    nrow(resultado_final),
+    conteo_dom[["project"]],
+    conteo_dom[["sra_study"]]
+  ))
+  
+  return(resultado_final)
+}  
+  
+
+
+
+continuarConENA <- function(ids_ebi, batch_size = 100) {
+  
+  require(httr)
+  require(readr)
+  require(dplyr)
+  
+  cat("Obteniendo metadatos completos desde ENA\n")
+  
+  ids <- unique(ids_ebi$accession)
+  
+  cat(sprintf("\nProcesando %d estudios.\n", length(ids)))
+  
+  url <- "https://www.ebi.ac.uk/ena/portal/api/search"
+  datos_completos <- data.frame()
+  
+  batches_total <- ceiling(length(ids)/ batch_size)
+  pb <- txtProgressBar(min = 0, max = batches_total, style = 3)
+    
+  for (i in seq(1, length(ids), by = batch_size)) {
+      
+      final <- min(i + batch_size - 1, length(ids))
+      batch_ids <- ids[i:final]
+      
+      parametros <- list(
+        result = "study",
+        query = paste0("study_accession=", batch_ids, collapse = " OR "),
+        fields = paste("study_accession","secondary_study_accession","study_title",
+          "description","scientific_name","tax_id","center_name","broker_name", 
+          sep = ","),
         format = "tsv",
         limit = 0)
       
       exito <- FALSE
+      
       for (intento in 1:3) {
         tryCatch({
-          respuesta_study <- GET(url, query = parametros, timeout(60))
+          respuesta <- GET(url, query = parametros, timeout(60))
           
-          if (status_code(respuesta_study) == 200) {
-            contenido_study <- httr::content(respuesta_study, "text", encoding = "UTF-8")
+          if (status_code(respuesta) == 200) {
+            contenido <- httr::content(respuesta, "text", encoding = "UTF-8")
             
-            if (nchar(contenido_study) > 100) {
-              df_batch_study <- read_tsv(contenido_study, show_col_types = FALSE)
+            if (nchar(contenido) > 100) {
+              df_batch <- read_tsv(contenido, show_col_types = FALSE)
               
-              if (nrow(df_batch_study) > 0) {
-                datos_completos <- bind_rows(datos_completos, df_batch_study)
+              if (nrow(df_batch) > 0) {
+                datos_completos <- bind_rows(datos_completos, df_batch)
               }
             }
             exito <- TRUE
           } else {
-            if (intento < 3) {
-              Sys.sleep(2)
-            }
+            if (intento < 3) Sys.sleep(2)
           }
         }, error = function(e) {
           if (intento < 3) {
@@ -159,89 +139,22 @@ continuarConENA <- function(lista, batch_size = 100) {
       }
       
       if (!exito) {
-        warning(sprintf("Batch %d fallido después de %d intentos - continuando con el siguiente", 
-                        ceiling(i/batch_size), 3))
+        warning(sprintf("Batch %d fallido después de 3 intentos - continuando con el siguiente", 
+                        ceiling(i/batch_size)))
       }
       
-      setTxtProgressBar(pb_study, ceiling(i/batch_size))
+      setTxtProgressBar(pb, ceiling(i/batch_size))
       Sys.sleep(0.3)
     }
     
-    close(pb_study)
-  }
-  
-  # PROCESAR RUN-ACCESSIONS
-  
-  if (!is.null(lista$run_accessions) && length(lista$run_accessions) > 0) {
-    
-    cat(sprintf("\nProcesando %d muestras...\n", length(lista$run_accessions)))
-    batches_run <- ceiling(length(lista$run_accessions)/ batch_size)
-    pb_run <- txtProgressBar(min = 0, max = batches_run, style = 3)
-    
-    for (i in seq(1, length(lista$run_accessions), by = batch_size)) {
-      
-      finalr <- min(i + batch_size -1, length(lista$run_accessions))
-      run_acc <- lista$run_accessions[i:finalr]
-      
-      parametros <- list(
-        result = "read_run",
-        query = paste0("run_accession=", run_acc, collapse = " OR "),
-        fields = "study_accession,sample_accession,run_accession,scientific_name,
-                  experiment_title,study_title,sample_title,run_alias,sample_alias,
-                  submitted_ftp,fastq_ftp",
-        format = "tsv",
-        limit = 0)
-      
-      exito <- FALSE
-      for (intento in 1:3) {
-        tryCatch({
-          respuesta_run <- GET(url, query = parametros, timeout(60))
-          
-          if (status_code(respuesta_run) == 200) {
-            contenido_run <- httr::content(respuesta_run, "text", encoding = "UTF-8")
-            
-            if (nchar(contenido_run) > 100) {
-              df_batch_run <- read_tsv(contenido_run, show_col_types = FALSE)
-              
-              if (nrow(df_batch_run) > 0) {
-                datos_completos <- bind_rows(datos_completos, df_batch_run)
-              }
-            }
-            exito <- TRUE
-          } else {
-            if (intento < 3) {
-              Sys.sleep(2)
-            }
-          }
-        }, error = function(e) {
-            if (intento < 3) {
-              warning(sprintf("\nError en intento %d para batch %d: %s\n", 
-                              intento, ceiling(i/batch_size), e$message))
-              Sys.sleep(2)
-            }
-          })
-          if (exito) break
-        }
-      
-        if (!exito) {
-          warning(sprintf("Batch %d fallido después de %d intentos - continuando con el siguiente", 
-                          ceiling(i/batch_size), 3))
-        }
-      
-        setTxtProgressBar(pb_run, ceiling(i/batch_size))
-        Sys.sleep(0.3)
-      }
-      close(pb_run)
-  }
-  
-  cat(sprintf("\nEn total se han encontrado %d muestras.\n", nrow(datos_completos)))
+    close(pb)
+    cat(sprintf("\nTotal muestras encontradas: %d\n", nrow(datos_completos)))
   
   # ELIMINAR DUPLICADOS
-  
   if (nrow(datos_completos) > 0) {
     n_antes <- nrow(datos_completos)
     datos_completos <- datos_completos %>% 
-      distinct(run_accession, .keep_all = TRUE)
+      distinct(study_accession, .keep_all = TRUE)
     n_despues <- nrow(datos_completos)
     
     if (n_antes > n_despues) {
@@ -249,12 +162,15 @@ continuarConENA <- function(lista, batch_size = 100) {
     }
   }
   
-  cat(sprintf("\nMuestras deduplicadas: %d\n", nrow(datos_completos)))
+  cat(sprintf("\nEstudios únicos obtenidos: %d\n", nrow(datos_completos)))
   return(datos_completos)
 }
   
 
+
+
 busquedaHibrida <- function(query, limit = 200000) {
+  
   ids_ebi <- busquedaEBI(query, limit)
   
   if (is.null(ids_ebi) || nrow(ids_ebi) == 0) {
@@ -262,10 +178,7 @@ busquedaHibrida <- function(query, limit = 200000) {
     return(NULL)
   }
   
-  study_ids <- ids_ebi$accession[ids_ebi$tipo == "study"]
-  run_ids <- ids_ebi$accession[ids_ebi$tipo == "run"]
-  
-  datos_completos <- continuarConENA(list(study_accessions = study_ids, run_accessions = run_ids))
+  datos_completos <- continuarConENA(ids_ebi)
   
   if (is.null(datos_completos) || nrow(datos_completos) == 0) {
     warning("No se pudieron obtener metadatos de ENA.")
