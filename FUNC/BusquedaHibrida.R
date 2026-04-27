@@ -75,7 +75,6 @@ busquedaEBI <- function(query, limit = 200000) {
   
 
 
-
 continuarConENA <- function(ids_ebi, batch_size = 100) {
   
   require(httr)
@@ -166,7 +165,6 @@ continuarConENA <- function(ids_ebi, batch_size = 100) {
   return(datos_completos)
 }
   
-
 
 
 busquedaHibrida <- function(query, limit = 200000) {

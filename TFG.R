@@ -68,6 +68,8 @@ dir.create("INPUT/DATA", recursive = TRUE, showWarnings = FALSE)
 # ------------------------------------------------
 source("FUNC/DescargarMuestras.R")
 
+muestras <- obtenerMuestras(df_final)
+
 descarga <- dlgInput(message = "Introduce los IDs de los estudios que deseas descargar separados por comas:",
                      default = "")$res
 
