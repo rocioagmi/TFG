@@ -129,16 +129,25 @@ descargarMuestras <- function(df, idEstudios){
   for (idx in seq_along(enlaces_expandidos)){
     i <- enlaces_expandidos[idx]
     nombre_archivo <- tail(strsplit(i, "/")[[1]], 1)
-    destino <- file.path("INPUT", "DATA", nombre_archivo)   # ✅ más portable que paste0
+    destino <- file.path("INPUT", "DATA", nombre_archivo)   
     
-    tryCatch({
-      download.file(i, destino, mode = "wb")
-      descargados <- descargados + 1
-    }, error = function(e) {
-      cat(sprintf("\nError en %s: %s\n", nombre_archivo, e$message))
-      fallidos <<- c(fallidos, i)
-    })
-    
+    exito <- FALSE
+    for (intento in 1:3) {
+      intento_actual <- intento
+      tryCatch({
+        download.file(i, destino, mode = "wb", timeout = 120)
+        exito <- TRUE
+      }, error = function(e) {
+        if (intento_actual < 3) {
+          Sys.sleep(3)
+        } else {
+          cat(sprintf("\nError en %s: %s\n", nombre_archivo, e$message))
+          fallidos <<- c(fallidos, i)
+        }
+      })
+      if (exito) break
+    }
+    if (exito) descargados <- descargados + 1
     setTxtProgressBar(pb, idx)
   }
   
