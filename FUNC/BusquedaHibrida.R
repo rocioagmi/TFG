@@ -110,6 +110,7 @@ continuarConENA <- function(ids_ebi, batch_size = 100) {
       exito <- FALSE
       
       for (intento in 1:3) {
+        intento_actual <- intento
         tryCatch({
           respuesta <- GET(url, query = parametros, timeout(60))
           
@@ -128,9 +129,9 @@ continuarConENA <- function(ids_ebi, batch_size = 100) {
             if (intento < 3) Sys.sleep(2)
           }
         }, error = function(e) {
-          if (intento < 3) {
+          if (intento_actual < 3) {
             warning(sprintf("\nError en intento %d para batch %d: %s\n",
-                            intento, ceiling(i/batch_size), e$message))
+                            intento_actual, ceiling(i/batch_size), e$message))
             Sys.sleep(2)
           }
         })

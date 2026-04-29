@@ -30,23 +30,23 @@ if (is.null(muestras_totales) || nrow(muestras_totales) == 0) {
 # FILTRADO DE RESULTADOS DE BÚSQUEDA
 # ------------------------------------------------
 respuesta_filtro <- dlg_message( 
-  message = sprintf("Se encontraron %d muestras. ¿Deseas filtrarlas?", nrow(muestras_totales)),
+  message = sprintf("Se encontraron %d estudios. ¿Deseas filtrarlos?", nrow(muestras_totales)),
   type = "yesno")$res
 
 if (respuesta_filtro == "yes") {
   busqueda_filtrada <- filtrarBusqueda(muestras_totales)
 } else {
   busqueda_filtrada <- muestras_totales
-  cat("Usando todas las muestras sin filtrar.\n")
+  cat("Usando todas los estudios sin filtrar.\n")
 }
 
 if (is.null(busqueda_filtrada) || nrow(busqueda_filtrada) == 0) {
-  message("No quedan muestras después del filtrado.")
+  message("No quedan estudios después del filtrado.")
   stop()
 }
 
 # ---------------------------------------------------------------------------
-# MUESTRA TABLA CON LOS RESULTADOS DE BÚSQUEDA FILTRADOS SU SELECCIÓN
+# MUESTRA TABLA CON LOS RESULTADOS DE BÚSQUEDA FILTRADOS PARA SU SELECCIÓN
 # ---------------------------------------------------------------------------
 cat("Abriendo aplicación Shiny para explorar y descargar resultados.\n")
 source("FUNC/mostrarTabla.R")
@@ -70,15 +70,7 @@ source("FUNC/DescargarMuestras.R")
 
 muestras <- obtenerMuestras(df_final)
 
-descarga <- dlgInput(message = "Introduce los IDs de los estudios que deseas descargar separados por comas:",
-                     default = "")$res
-
-if (length(descarga) == 0 || nchar(trimws(descarga)) == 0) {
-  cat("No se ha descargado nada.\n")
-  return(busqueda_filtrada)
-}
-
-descargarMuestras(busqueda_filtrada, descarga)
+descargarMuestras(muestras)
 
 
 # Obtiene una lista ordenada con todos los archivos .fastq.gz de la carpeta de entrada

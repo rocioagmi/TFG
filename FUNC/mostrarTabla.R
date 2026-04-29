@@ -72,7 +72,7 @@ mostrarTabla <- function(df){
         sprintf("Continuar con %d estudio(s) seleccionado(s)", n_sel)
       }
       
-      actionButton("btn_continuar", label, class = "btn-lg btn-ptimary", width = "100%")
+      actionButton("btn_continuar", label, class = "btn-lg btn-primary", width = "100%")
     })
     
     observeEvent(input$btn_continuar, {

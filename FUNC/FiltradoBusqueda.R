@@ -1,3 +1,4 @@
+
 filtrarBusqueda <- function(df) {
   
   require(svDialogs)
@@ -78,7 +79,9 @@ filtrarBusqueda <- function(df) {
     
     terminos_usuario <- trimws(unlist(strsplit(terminos, ",")))
     terminos_usuario <- terminos_usuario[nchar(terminos_usuario) > 0]
-    patron <- paste0("\\b(", paste(terminos_usuario, collapse = "|"), ")\\b")
+    
+    terminos_escapados <- sapply(terminos_usuario, str_escape)
+    patron <- paste0("\\b(", paste(terminos_escapados, collapse = "|"), ")\\b")
     
     cat(sprintf("\nBuscando términos: %s\n", paste(terminos_usuario, collapse = ", ")))
     cat(sprintf("Campos donde se busca: %s\n", paste(campos_con_datos, collapse = ", ")))

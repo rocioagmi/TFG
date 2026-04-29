@@ -31,6 +31,7 @@ obtenerMuestras <- function(estudios, batch_size = 50){
     exito <- FALSE
     
     for (intento in 1:3) {
+      intento_actual <- intento
       tryCatch({
         respuesta <- GET(url, query = parametros, timeout(60))
         
@@ -50,9 +51,9 @@ obtenerMuestras <- function(estudios, batch_size = 50){
         }
         
       }, error = function(e) {
-        if (intento < 3) {
+        if (intento_actual < 3) {
           warning(sprintf("Error en intento %d para batch %d: %s",
-                          intento, ceiling(i / batch_size), e$message))
+                          intento_actual, ceiling(i / batch_size), e$message))
           Sys.sleep(2)
         }
       })
@@ -90,8 +91,6 @@ obtenerMuestras <- function(estudios, batch_size = 50){
 
 descargarMuestras <- function(df, idEstudios){
   
-  require(readr)
-  require(httr)
   require(dplyr)
   
   # nombrar archivos descargados por ¿alias o nombre archivo?
@@ -120,12 +119,6 @@ descargarMuestras <- function(df, idEstudios){
   enlaces_expandidos <- unlist(strsplit(enlaces_validos, ";"))
   enlaces_expandidos <- trimws(enlaces_expandidos)
   enlaces_expandidos <- enlaces_expandidos[nchar(enlaces_expandidos) > 0]
-
-  enlaces_expandidos <- ifelse(
-    startsWith(enlaces_expandidos, "ftp://") | startsWith(enlaces_expandidos, "https://"),
-    enlaces_expandidos,
-    paste0("ftp://", enlaces_expandidos)
-  )
   
   cat(sprintf("Iniciando descarga de %d archivos\n", length(enlaces_expandidos)))
   
@@ -139,7 +132,7 @@ descargarMuestras <- function(df, idEstudios){
     destino <- file.path("INPUT", "DATA", nombre_archivo)   # ✅ más portable que paste0
     
     tryCatch({
-      download.file(i, destino, mode = "wb", quiet = TRUE)
+      download.file(i, destino, mode = "wb")
       descargados <- descargados + 1
     }, error = function(e) {
       cat(sprintf("\nError en %s: %s\n", nombre_archivo, e$message))
