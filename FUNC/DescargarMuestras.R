@@ -120,7 +120,11 @@ descargarMuestras <- function(df, estudio_id){
   enlaces_expandidos <- trimws(enlaces_expandidos)
   enlaces_expandidos <- enlaces_expandidos[nchar(enlaces_expandidos) > 0]
   
-  cat(sprintf("Iniciando descarga de %d archivos\n", length(enlaces_expandidos)))
+  enlaces_expandidos <- ifelse(grepl("^http|^ftp", enlaces_expandidos),
+                               enlaces_expandidos,
+                               paste0("http://", enlaces_expandidos))
+  
+  cat(sprintf("Iniciando descarga de %d archivos para el estudio %s\n", length(enlaces_expandidos), estudio_id))
   
   fallidos <- c()
   descargados <- 0
@@ -138,11 +142,11 @@ descargarMuestras <- function(df, estudio_id){
     for (intento in 1:3) {
       intento_actual <- intento
       tryCatch({
-        download.file(i, destino, mode = "wb", timeout = 120)
+        download.file(i, destino, mode = "wb", timeout = 300, method = "libcurl")
         exito <- TRUE
       }, error = function(e) {
         if (intento_actual < 3) {
-          Sys.sleep(3)
+          Sys.sleep(5)
         } else {
           cat(sprintf("\nError en %s: %s\n", nombre_archivo, e$message))
           fallidos <<- c(fallidos, i)
@@ -156,7 +160,7 @@ descargarMuestras <- function(df, estudio_id){
   
   close(pb)
   
-  cat(sprintf("\n--- DESCARGA COMPLETADA ---\n"))
+  cat(sprintf("\n--- DESCARGA COMPLETADA %s ---\n", estudio_id))
   cat(sprintf("Archivos descargados : %d\n", descargados))
   cat(sprintf("Archivos fallidos    : %d\n", length(fallidos)))
   
