@@ -124,15 +124,16 @@ descargarMuestras <- function(df, estudio_id){
                                enlaces_expandidos,
                                paste0("http://", enlaces_expandidos))
   
-  cat(sprintf("Iniciando descarga de %d archivos para el estudio %s\n", length(enlaces_expandidos), estudio_id))
+  cat(sprintf("\nIniciando descarga de %d archivos para el estudio %s\n", length(enlaces_expandidos), estudio_id))
   
   fallidos <- c()
   descargados <- 0
-  pb <- txtProgressBar(min = 0, max = length(enlaces_expandidos), style = 3)
   
   for (idx in seq_along(enlaces_expandidos)){
     i <- enlaces_expandidos[idx]
     nombre_archivo <- tail(strsplit(i, "/")[[1]], 1)
+    
+    cat(sprintf("[%d / %d] %s\n", idx, length(enlaces_expandidos), nombre_archivo))
     
     carpeta_estudio <- file.path("INPUT", "DATA", estudio_id)
     if (!dir.exists(carpeta_estudio)) dir.create(carpeta_estudio, recursive = TRUE)
@@ -155,14 +156,13 @@ descargarMuestras <- function(df, estudio_id){
       if (exito) break
     }
     if (exito) descargados <- descargados + 1
-    setTxtProgressBar(pb, idx)
   }
   
-  close(pb)
-  
-  cat(sprintf("\n--- DESCARGA COMPLETADA %s ---\n", estudio_id))
-  cat(sprintf("Archivos descargados : %d\n", descargados))
-  cat(sprintf("Archivos fallidos    : %d\n", length(fallidos)))
+  cat("--------------------------------\n")
+  cat(sprintf("\n DESCARGA COMPLETADA %s\n", estudio_id))
+  cat("--------------------------------\n")
+  cat(sprintf("  Archivos descargados : %d\n", descargados))
+  cat(sprintf("  Archivos fallidos    : %d\n", length(fallidos)))
   
   if (length(fallidos) > 0) {
     cat(sprintf("\nEnlaces fallidos:\n"))
