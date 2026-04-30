@@ -70,7 +70,12 @@ source("FUNC/DescargarMuestras.R")
 
 muestras <- obtenerMuestras(df_final)
 
-descargarMuestras(muestras)
+estudios_ids <- unique(muestras$study_accession)
+
+for (estudio in estudios_ids) {
+  df_estudio <- muestras %>% filter(study_accession == estudio)
+  descargarMuestras(df_estudio, estudio_id = estudio)
+}
 
 
 # Obtiene una lista ordenada con todos los archivos .fastq.gz de la carpeta de entrada

@@ -89,7 +89,7 @@ obtenerMuestras <- function(estudios, batch_size = 50){
 
 
 
-descargarMuestras <- function(df, idEstudios){
+descargarMuestras <- function(df, estudio_id){
   
   require(dplyr)
   
@@ -129,7 +129,10 @@ descargarMuestras <- function(df, idEstudios){
   for (idx in seq_along(enlaces_expandidos)){
     i <- enlaces_expandidos[idx]
     nombre_archivo <- tail(strsplit(i, "/")[[1]], 1)
-    destino <- file.path("INPUT", "DATA", nombre_archivo)   
+    
+    carpeta_estudio <- file.path("INPUT", "DATA", estudio_id)
+    if (!dir.exists(carpeta_estudio)) dir.create(carpeta_estudio, recursive = TRUE)
+    destino <- file.path(carpeta_estudio, nombre_archivo)   
     
     exito <- FALSE
     for (intento in 1:3) {
