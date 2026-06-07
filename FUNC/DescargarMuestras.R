@@ -87,13 +87,51 @@ obtenerMuestras <- function(estudios, batch_size = 50){
   return(datos_completos)
 }
 
+clasificarEtiqueta <- function(texto) {
+  if(length(texto) == 0) return(character(0))
 
+  palabras_ms <- c("MS", "RRMS", "SPMS", "PPMS", "Patient", "PT", "pat")
+  palabras_hc <- c("HC", "HD", "Control", "Healthy", "ctrl")
+  
+  sep <- "[ ._0-9-]"
+  patron <- function(palabras) {
+    paste0("(^|", sep, ")(", paste(palabras, collapse = "|"), ")(", sep, "|$)") 
+  }
+  
+  ms <- grepl(patron(palabras_ms), texto, ignore.case = TRUE)
+  hc <- grepl(patron(palabras_hc), texto, ignore.case = TRUE)
+  
+  ifelse(ms & !hc, "MS",
+         ifelse(hc & !ms, "HC", NA_character_))
+}
+
+detectarEtiqueta <- function(df) {
+  
+  if (nrow(df) <= 4) {
+    idx <- seq_len(nrow(df))
+  } else {
+    centro <- ceiling(nrow(df) / 2)
+    medio  <- floor(4 / 2)
+    ini    <- max(1, centro - medio)
+    fin    <- min(nrow(df), ini + 4 - 1)
+    idx    <- ini:fin
+  }
+  
+  insp <- df[idx, , drop = FALSE]
+  
+  contieneEtiqueta <- function(x) any(!is.na(clasificarEtiqueta(x)))
+  
+  nombre_archivo <- basename(sub(";.*$", "", insp$enlaces))
+  
+  if (contieneEtiqueta(nombre_archivo))    return("nombre")
+  if (contieneEtiqueta(insp$sample_title)) return("sample_title")
+  if (contieneEtiqueta(insp$sample_alias)) return("sample_alias")
+  "ninguno"
+}
 
 descargarMuestras <- function(df, estudio_id){
   
   require(dplyr)
-  
-  # nombrar archivos descargados por ¿alias o nombre archivo?
   
   df_procesado <- df %>%
     mutate(
@@ -101,61 +139,63 @@ descargarMuestras <- function(df, estudio_id){
       fastq_ftp = na_if(fastq_ftp, ""),
       enlaces =  coalesce(submitted_ftp, fastq_ftp)
     ) %>%
+    filter(!is.na(enlaces)) %>%
     arrange(enlaces)
   
-  enlaces_validos <- df_procesado$enlaces
-  vacios <- sum(is.na(enlaces_validos))
-  
-  if (vacios > 0) {
-    cat(sprintf("Advertencia: %d muestras sin enlace de descarga disponible.\n", vacios))
-    enlaces_validos <- enlaces_validos[!is.na(enlaces_validos)]
-  }
-  
-  if (length(enlaces_validos) == 0) {
+  if (nrow(df_procesado) == 0) {
     cat("No hay enlaces válidos para descargar.\n")
     return(invisible(NULL))
   }
   
-  enlaces_expandidos <- unlist(strsplit(enlaces_validos, ";"))
-  enlaces_expandidos <- trimws(enlaces_expandidos)
-  enlaces_expandidos <- enlaces_expandidos[nchar(enlaces_expandidos) > 0]
+  carpeta_estudio <- file.path("INPUT", "DATA", estudio_id)
+  if (!dir.exists(carpeta_estudio)) dir.create(carpeta_estudio, recursive = TRUE)
   
-  enlaces_expandidos <- ifelse(grepl("^http|^ftp", enlaces_expandidos),
-                               enlaces_expandidos,
-                               paste0("http://", enlaces_expandidos))
-  
-  cat(sprintf("\nIniciando descarga de %d archivos para el estudio %s\n", length(enlaces_expandidos), estudio_id))
+  campo <- detectarEtiqueta(df_procesado)
+  renombrar <- campo %in% c("sample_title", "sample_alias")
   
   fallidos <- c()
   descargados <- 0
+  contador <- 0
   
-  for (idx in seq_along(enlaces_expandidos)){
-    i <- enlaces_expandidos[idx]
-    nombre_archivo <- tail(strsplit(i, "/")[[1]], 1)
+  for (idx in seq_along(df_procesado)){
     
-    cat(sprintf("[%d / %d] %s\n", idx, length(enlaces_expandidos), nombre_archivo))
+    fila <- df_procesado[idx, ]
     
-    carpeta_estudio <- file.path("INPUT", "DATA", estudio_id)
-    if (!dir.exists(carpeta_estudio)) dir.create(carpeta_estudio, recursive = TRUE)
-    destino <- file.path(carpeta_estudio, nombre_archivo)   
+    grupo <- if (renombrar) clasificarGrupo(fila[[campo]]) else NA_character_
     
-    exito <- FALSE
-    for (intento in 1:3) {
-      intento_actual <- intento
-      tryCatch({
-        download.file(i, destino, mode = "wb", timeout = 300, method = "libcurl")
-        exito <- TRUE
-      }, error = function(e) {
-        if (intento_actual < 3) {
-          Sys.sleep(5)
-        } else {
-          cat(sprintf("\nError en %s: %s\n", nombre_archivo, e$message))
-          fallidos <<- c(fallidos, i)
-        }
-      })
-      if (exito) break
+    nombre_archivo <- trimws(strsplit(fila$enlaces, ";")[[1]])
+    nombre_archivo <- nombre_archivo[nchar(nombre_archivo) > 0]
+    
+    for (i in nombre_archivo) {
+      contador <- contador + 1
+      nombre_completo <- ifelse(grepl("^http|^ftp", nombre_archivo), 
+                                nombre_archivo, paste0("http://", nombre_archivo))
+      original <- basename(nombre_archivo) 
+      
+      nuevo <- if (!is.na(grupo)) paste0(grupo, "_", original) else original
+      
+      destino <- file.path(carpeta_estudio, nuevo)
+      cat(sprintf("[%d / %d] %s\n", contador, 
+                  sum(lengths(strsplit(df_procesado$enlaces, ";"))), nuevo))
+      
+      exito <- FALSE
+      for (intento in 1:3) {
+        intento_actual <- intento
+        tryCatch({
+          download.file(nombre_completo, destino, mode = "wb", timeout = 300, method = "libcurl")
+          exito <- TRUE
+        }, error = function(e) {
+          if (intento_actual < 3) {
+            Sys.sleep(5)
+          } else {
+            cat(sprintf("\nError en %s: %s\n", original, e$message))
+            fallidos <<- c(fallidos, nombre_completo)
+          }
+        })
+        if (exito) break
+      }
+      if (exito) descargados <- descargados + 1
     }
-    if (exito) descargados <- descargados + 1
   }
   
   cat("--------------------------------\n")
