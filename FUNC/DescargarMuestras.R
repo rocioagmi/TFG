@@ -133,6 +133,10 @@ descargarMuestras <- function(df, estudio_id){
   
   require(dplyr)
   
+  timeout <- getOption("timeout")
+  options(timeout = 300)
+  on.exit(options(timeout = timeout), add = TRUE)
+  
   df_procesado <- df %>%
     mutate(
       submitted_ftp = na_if(submitted_ftp, ""),
@@ -156,39 +160,43 @@ descargarMuestras <- function(df, estudio_id){
   fallidos <- c()
   descargados <- 0
   contador <- 0
+  archivos_totales <- sum(lengths(strsplit(df_procesado$enlaces, ";")))
   
-  for (idx in seq_along(df_procesado)){
+  
+  for (idx in seq_len(nrow(df_procesado))){
     
     fila <- df_procesado[idx, ]
     
-    grupo <- if (renombrar) clasificarGrupo(fila[[campo]]) else NA_character_
+    grupo <- if (renombrar) clasificarEtiqueta(fila[[campo]]) else NA_character_
     
     nombre_archivo <- trimws(strsplit(fila$enlaces, ";")[[1]])
     nombre_archivo <- nombre_archivo[nchar(nombre_archivo) > 0]
     
     for (i in nombre_archivo) {
       contador <- contador + 1
-      nombre_completo <- ifelse(grepl("^http|^ftp", nombre_archivo), 
-                                nombre_archivo, paste0("http://", nombre_archivo))
-      original <- basename(nombre_archivo) 
+      nombre_completo <- ifelse(grepl("://", i, fixed = TRUE), 
+                                i, paste0("ftp://", i))
+      original <- basename(i) 
       
       nuevo <- if (!is.na(grupo)) paste0(grupo, "_", original) else original
       
       destino <- file.path(carpeta_estudio, nuevo)
-      cat(sprintf("[%d / %d] %s\n", contador, 
-                  sum(lengths(strsplit(df_procesado$enlaces, ";"))), nuevo))
+      cat(sprintf("[%d / %d] %s\n", contador, archivos_totales, nuevo))
       
       exito <- FALSE
       for (intento in 1:3) {
         intento_actual <- intento
         tryCatch({
-          download.file(nombre_completo, destino, mode = "wb", timeout = 300, method = "libcurl")
+          download.file(nombre_completo, destino, mode = "wb", method = "libcurl")
           exito <- TRUE
         }, error = function(e) {
           if (intento_actual < 3) {
             Sys.sleep(5)
           } else {
             cat(sprintf("\nError en %s: %s\n", original, e$message))
+            if (file.exists(destino)) {
+              file.remove(destino)
+            }
             fallidos <<- c(fallidos, nombre_completo)
           }
         })

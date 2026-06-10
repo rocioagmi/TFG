@@ -148,7 +148,7 @@ continuarConENA <- function(ids_ebi, batch_size = 100) {
     }
     
     close(pb)
-    cat(sprintf("\nTotal muestras encontradas: %d\n", nrow(datos_completos)))
+    cat(sprintf("\nEstudios encontrados: %d\n", nrow(datos_completos)))
   
   # ELIMINAR DUPLICADOS
   if (nrow(datos_completos) > 0) {

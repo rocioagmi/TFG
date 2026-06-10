@@ -79,7 +79,7 @@ for (estudio in estudios_ids) {
 
 
 # Obtiene una lista ordenada con todos los archivos .fastq.gz de la carpeta de entrada
-listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE))
+listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE, recursive = TRUE))
 
 if(any(grepl("_R1", listadoMuestras))){
   R1 <- listadoMuestras[grepl("_R1", listadoMuestras)]
