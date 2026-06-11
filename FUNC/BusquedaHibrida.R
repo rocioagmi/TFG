@@ -10,7 +10,7 @@ busquedaEBI <- function(query, limit = 200000) {
   print(paste("Consultando EBI..."))
   print(paste("Query:", query))
   
-  dominios = c("project", "sra_study")
+  dominios = c("project", "sra-study")
   
   resultado_final <- data.frame()
   conteo_dom <- list()
@@ -35,8 +35,9 @@ busquedaEBI <- function(query, limit = 200000) {
       respuesta <- GET(url, query = parametros)
       
       if (status_code(respuesta) != 200) {
-        cat(sprintf("\nError de conexión con EBI al consultar %s. Código: %d\n", 
-                    dom, status_code(respuesta)))
+        cuerpo <- httr::content(respuesta, "text", encoding = "UTF-8")
+        cat(sprintf("\nError de conexión con EBI al consultar %s. Código: %d | %s\n", 
+                    dom, status_code(respuesta), substr(cuerpo, 1, 200)))
         break
       }
       
@@ -67,7 +68,7 @@ busquedaEBI <- function(query, limit = 200000) {
     "\nTotal IDs recuperados: %d (project: %d | sra-study: %d)\n",
     nrow(resultado_final),
     conteo_dom[["project"]],
-    conteo_dom[["sra_study"]]
+    conteo_dom[["sra-study"]]
   ))
   
   return(resultado_final)
@@ -100,10 +101,10 @@ continuarConENA <- function(ids_ebi, batch_size = 100) {
       
       parametros <- list(
         result = "study",
-        query = paste0("study_accession=", batch_ids, collapse = " OR "),
-        fields = paste("study_accession","secondary_study_accession","study_title",
-          "description","scientific_name","tax_id","center_name","broker_name", 
-          sep = ","),
+        query = paste0('study_accession="', batch_ids, '"', collapse = " OR "),
+        fields = paste("study_accession","secondary_study_accession",
+                       "study_title", "description","scientific_name","tax_id",
+                       "center_name", sep = ","),
         format = "tsv",
         limit = 0)
       
@@ -126,7 +127,13 @@ continuarConENA <- function(ids_ebi, batch_size = 100) {
             }
             exito <- TRUE
           } else {
-            if (intento < 3) Sys.sleep(2)
+            codigo <- status_code(respuesta)
+            cuerpo <- httr::content(respuesta, "text", encoding = "UTF-8")
+            message(sprintf("  [ENA] Batch %d intento %d -> HTTP %d | %s",
+                            ceiling(i/batch_size), intento, codigo, 
+                            substr(cuerpo, 1, 200)))
+            if (codigo >= 400 && codigo < 500) break
+            if (intento < 3) Sys.sleep(2 * intento)
           }
         }, error = function(e) {
           if (intento_actual < 3) {
@@ -183,35 +190,6 @@ busquedaHibrida <- function(query, limit = 200000) {
     warning("No se pudieron obtener metadatos de ENA.")
     return(NULL)
   }
-  
-  # ESTO LO HE USADO PARA HACER PRUEBAS, ¿LO ELIMINO?
-  campos_con_datos <- c()
-  campos_vacios <- c()
-  
-  for (col in names(datos_completos)) {
-    valores_validos <- datos_completos[[col]][!is.na(datos_completos[[col]]) & 
-                                                datos_completos[[col]] != ""]
-    if (length(valores_validos) > 0) {
-      porcentaje <- (length(valores_validos) / nrow(datos_completos)) * 100
-      campos_con_datos <- c(campos_con_datos, 
-                            sprintf("%s (%.1f%%)", col, porcentaje))
-    } else {
-      campos_vacios <- c(campos_vacios, col)
-    }
-  }
-  cat("-----------------------------\n\n")
-  cat(sprintf("Campos CON DATOS (%d):\n", length(campos_con_datos)))
-  cat("-----------------------------\n\n")
-  for (campo in campos_con_datos) {
-    cat(sprintf("  - %s\n", campo))
-  }
-  
-  if (length(campos_vacios) > 0) {
-    cat(sprintf("\n Campos VACÍOS (%d): %s\n", 
-                length(campos_vacios), 
-                paste(campos_vacios, collapse = ", ")))
-  }
-  cat("-----------------------------\n\n")
   
   return(datos_completos)
 }
