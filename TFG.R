@@ -8,7 +8,7 @@ library(DT)
 library(readr)
 library(ShortRead)
 library(dada2)
-
+library(rmarkdown)
 
 
 # ================================================
@@ -78,40 +78,45 @@ for (estudio in estudios_ids) {
 }
 
 
-# Obtiene una lista ordenada con todos los archivos .fastq.gz de la carpeta de entrada
-listadoMuestras <- sort(list.files("INPUT/DATA", pattern = "\\.fastq\\.gz$", full.names = TRUE, recursive = TRUE))
-
-if(any(grepl("_R1", listadoMuestras))){
-  R1 <- listadoMuestras[grepl("_R1", listadoMuestras)]
-  R2 <- listadoMuestras[grepl("_R2", listadoMuestras)]
-} else if (any(grepl("_1\\.fastq", listadoMuestras))){
-  R1 <- listadoMuestras[grepl("_1\\.fastq", listadoMuestras)]
-  R2 <- listadoMuestras[grepl("_2\\.fastq", listadoMuestras)]
-} else {
-  stop("No se reconoce el patrón de nomenclatura de los archivos.")
-}
-
-
-
 # ================================================
 # PREPROCESAMIENTO DE LOS DATOS
 # ================================================
 
-# -------------------------------------------------
-# CREACIÓN DE CARPETAS DE SALIDA
-# -------------------------------------------------
-# Crea directorios para organizar los resultados: informes, gráficos, datos filtrados, ...
-dir.create("OUTPUT/REPORT", recursive = TRUE, showWarnings = FALSE)
-dir.create("OUTPUT/RDS", recursive = TRUE, showWarnings = FALSE)
-dir.create("OUTPUT/FILTRADO", recursive = TRUE, showWarnings = FALSE)
+# Obtiene una lista ordenada con todos los estudios y sus muestras .fastq.gz
+
+estudio_ids <- basename(list.dirs("INPUT/DATA", recursive = FALSE))
+estudios <- list()
+
+for (estudio in estudio_ids) {
+  carpeta_estudio <- file.path("INPUT/DATA", estudio)
+  muestras_estudio <- sort(list.files(carpeta_estudio, 
+                                      pattern = "\\.fastq\\.gz$",
+                                      full.names = TRUE))
+  if(any(grepl("_R1", muestras_estudio))){
+    muestra_R1 <- muestras_estudio[grepl("_R1", muestras_estudio)]
+    muestra_R2 <- muestras_estudio[grepl("_R2", muestras_estudio)]
+  } else if (any(grepl("_1\\.fastq", muestras_estudio))){
+    muestra_R1 <- muestras_estudio[grepl("_1\\.fastq", muestras_estudio)]
+    muestra_R2 <- muestras_estudio[grepl("_2\\.fastq", muestras_estudio)]
+  } else {
+    stop("No se reconoce el patrón de nomenclatura de los archivos.")
+  }
+  
+  estudios[[estudio]] <- list(R1 = muestra_R1, R2 = muestra_R2)
+}
+
 
 # -------------------------------------------------
-# INFORME DE CALIDAD DE SECUENCIACIÓN              <-----
+# INFORME DE CALIDAD DE SECUENCIACIÓN              
 # -------------------------------------------------
 # Carga la función para generar informes FastQC
 source("FUNC/InformeCalidad.R")
 # Genera informe de calidad para todas las muestras
-informeCalidad(listadoMuestras, umbral_calidad = 20)
+estudio <- names(estudios)[1]
+informeCalidad(estudio_id = estudio, 
+               muestras = estudios[[estudio]],
+               umbral_calidad = 20,
+               umbral_ee = 2)
 
 # ------------------------------------------------
 # FILTRADO DE CALIDAD CON DADA2                   <-----

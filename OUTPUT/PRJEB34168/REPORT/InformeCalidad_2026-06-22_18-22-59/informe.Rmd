@@ -1,0 +1,238 @@
+---
+title: "Control de Calidad"
+date: "2026-06-22_18-22-59"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    code_folding: hide
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+                          fig.width = 12, fig.height = 7)
+library(ggplot2)
+library(dplyr)
+library(knitr)
+
+datos <- readRDS("datos_qa.rds")
+calidad_ciclo <- datos$calidad_ciclo
+estadisticas <- datos$estadisticas
+gc_dist <- datos$gc_dist
+composicion_ciclo <- datos$composicion_ciclo
+n_muestras <- datos$n_muestras
+n_archivos <- datos$n_archivos
+umbral <- 20
+umbral_ee <- 2
+```
+
+## Resumen General
+
+Se analizaron **`r n_muestras`** muestra(s) biológica(s) (**`r n_archivos`** archivos FASTQ, R1 + R2).
+
+```{r tabla_general}
+kable(
+  estadisticas %>%
+    arrange(calidad_media) %>%
+    mutate(
+      total_reads    = format(total_reads, big.mark = ","),
+      calidad_media  = round(calidad_media, 1),
+      longitud_min   = as.integer(longitud_min),
+      longitud_media = round(longitud_media, 0),
+      longitud_max   = as.integer(longitud_max),
+      gc_content     = round(gc_content, 1),
+      pct_reads_N    = round(pct_reads_N, 2)
+    ),
+    col.names = c("Archivo", "Hebra", "Reads Totales", "Cal. Media",
+                  "Long. Mín", "Long. Media", "Long. Máx", "GC (%)", "% con N"),
+    caption = "Estadísticas generales por archivo"
+)
+```
+
+---
+
+## 1. Calidad por Posición y Hebra (distribución)
+
+Por hebra (R1/R2) se muestran, por muestra, la **mediana** (azul), el **cuartil inferior Q25** (naranja) y el **percentil P10** (morado) en cada posición.
+El truncado debe guiarse por el **cuartil inferior**: conviene truncar antes de que el Q25 cruce **Q20** (rojo). El percentil 10 muestra la cola baja de la distribución: una caída temprana respecto al Q25 indica heterogeneidad creciente entre lecturas en esa posición.
+
+```{r calidad_distribucion, fig.height = 6}
+alpha_normal <- if (n_muestras <= 10) 0.6 else if (n_muestras <= 50) 0.3 else 0.15
+
+ggplot(calidad_ciclo, aes(x = ciclo, group = muestra)) +
+  geom_line(aes(y = mediana), color = "steelblue", alpha = alpha_normal, linewidth = 0.7) +
+  geom_line(aes(y = q25), color = "orange", alpha = alpha_normal, linewidth = 0.7) +
+  geom_line(aes(y = p10), color = "purple4", alpha = alpha_normal, linewidth = 0.7) +
+  geom_hline(yintercept = 30, linetype = "dashed", color = "darkgreen", linewidth = 0.8) +
+  geom_hline(yintercept = 20, linetype = "dashed", color = "red", linewidth = 0.8) +
+  facet_wrap(~ hebra) +
+  scale_y_continuous(limits = c(0, 42), breaks = seq(0, 40, 5)) +
+  labs(x = "Posición en el read (pb)", y = "Phred Score") +
+  theme_minimal(base_size = 13)
+```
+
+---
+
+## 2. Error Esperado Acumulado (EE)
+
+Por hebra (R1/R2) se muestra, por muestra, el **error esperado acumulado** (suma de la probabilidad de error en cada posición desde el inicio de la lectura), resumido en su **mediana** (azul), **cuartil superior Q75** (naranja) y **percentil 90** (morado) entre lecturas.
+A diferencia de la calidad, aquí el problema está en la **cola alta**: cuanto mayor el EE acumulado, más lecturas se descartarán al aplicar `maxEE` en `filterAndTrim()`.
+
+La línea roja marca el `maxEE` de referencia (`r umbral_ee`). **Es un indicador, no una regla automática de truncado**: el punto donde la curva cruza esta línea debe contrastarse con la longitud esperada del amplicón y el solape necesario para `mergePairs()`, no usarse de forma aislada.
+
+```{r ee_acumulado, fig.height = 6}
+ggplot(calidad_ciclo, aes(x = ciclo, group = muestra)) +
+  geom_line(aes(y = ee_mediana), color = "steelblue", alpha = alpha_normal, linewidth = 0.7) +
+  geom_line(aes(y = ee_q75), color = "orange", alpha = alpha_normal, linewidth = 0.7) +
+  geom_line(aes(y = ee_p90), color = "purple4", alpha = alpha_normal, linewidth = 0.7) +
+  geom_hline(yintercept = umbral_ee, linetype = "dashed", color = "red", linewidth = 0.8) +
+  facet_wrap(~ hebra) +
+  labs(x = "Posición en el read (pb)", y = "Error esperado acumulado") +
+  theme_minimal(base_size = 13)
+```
+
+---
+
+## 3. Composición por Base (primeros 30 pb)
+
+Por hebra (R1/R2) se muestra el porcentaje de cada base (A, C, G, T) en cada una de las primeras 30 posiciones, agregando todas las muestras del estudio.
+
+Una composición biológica normal fluctúa de forma irregular entre ciclos. Un cebador o adaptador no eliminado, en cambio, produce un **patrón anormalmente estable durante varios ciclos consecutivos**: puede ser una base claramente dominante (cebador no degenerado) o una proporción fija entre dos bases. La posición donde ocurre esa transición es una estimación razonable de `trimLeft`.
+
+```{r composicion_bases, fig.height = 5}
+composicion_resumen <- composicion_ciclo %>%
+  group_by(hebra, ciclo, base) %>%
+  summarise(total = sum(count), .groups = "drop") %>%
+  group_by(hebra, ciclo) %>%
+  mutate(porcentaje = 100 * total / sum(total)) %>%
+  ungroup()
+
+ggplot(composicion_resumen, aes(x = ciclo, y = porcentaje, color = base)) +
+  geom_line(linewidth = 1) +
+  scale_color_manual(values = c(A = "darkgreen", C = "blue", G = "black", T = "red")) +
+  facet_wrap(~ hebra) +
+  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 25)) +
+  scale_x_continuous(breaks = seq(0, 30, 5)) +
+  labs(x = "Posición en el read (pb)", y = "Composición (%)", color = "Base") +
+  theme_minimal(base_size = 13)
+```
+
+---
+
+## 4. Archivos con Calidad Baja
+
+```{r muestras_bajas, results = "asis"}
+muestras_bajas <- estadisticas %>%
+  filter(calidad_media < umbral) %>%
+  arrange(calidad_media)
+
+if (nrow(muestras_bajas) > 0) {
+  cat("\n **Atención:** Se detectaron", nrow(muestras_bajas),
+      "archivo(s) con calidad media inferior a Q", umbral, ":\n\n")
+  cat("*Nota: R1 y R2 se evalúan de forma independiente; una misma muestra ",
+      "biológica puede figurar hasta dos veces si ambas hebras presentan baja calidad.*\n\n")
+  print(kable(
+    muestras_bajas %>%
+      mutate(total_reads    = format(total_reads, big.mark = ","),
+             calidad_media  = round(calidad_media, 1),
+             longitud_min   = as.integer(longitud_min),
+             longitud_media = round(longitud_media, 0),
+             longitud_max   = as.integer(longitud_max),
+             gc_content     = round(gc_content, 1),
+             pct_reads_N    = round(pct_reads_N, 2)),
+    col.names = c("Archivo", "Hebra", "Reads Totales", "Cal. Media",
+                  "Long. Mín", "Long. Media", "Long. Máx", "GC (%)", "% con N"),
+    caption = "Archivos que requieren atención"
+  ))
+} else {
+  cat("\n**Excelente:** Todas los archivos tienen calidad media ≥ Q", umbral, "\n")
+}
+```
+
+```{r graficos_problematicas, fig.height = 4, results = "asis"}
+if (nrow(muestras_bajas) > 0) {
+  cat("\n### Gráficos Individuales de Archivos Problemáticos\n\n")
+  muestras_mostrar <- head(muestras_bajas$muestra, 10)
+  for (m in muestras_mostrar) {
+    cat("\n#### Archivo:", m, "\n\n")
+    datos_muestra <- filter(calidad_ciclo, muestra == m)
+    p_individual <- ggplot(datos_muestra, aes(x = ciclo, y = calidad_media)) +
+      geom_line(color = "darkred", linewidth = 1.2) +
+      geom_ribbon(aes(ymin = 0, ymax = calidad_media), fill = "darkred", alpha = 0.2) +
+      geom_hline(yintercept = 30, linetype = "dashed", color = "darkgreen") +
+      geom_hline(yintercept = 20, linetype = "dashed", color = "red") +
+      scale_y_continuous(limits = c(0, 42)) +
+      labs(x = "Posición (pb)", y = "Phred Score") +
+      theme_minimal(base_size = 12)
+   print(p_individual)
+   cat("\n")
+  }
+  if (nrow(muestras_bajas) > 10)
+    cat("\n*Nota: Se muestran solo los 10 peores archivos.*\n")
+}
+```
+
+---
+
+## 5. Distribución de Calidad Media
+
+```{r distribucion_calidad, fig.height = 5}
+ggplot(estadisticas, aes(x = calidad_media, fill = hebra)) +
+  geom_histogram(bins = 30, color = "white", alpha = 0.6, position = "identity") +
+  scale_fill_manual(values = c(R1 = "steelblue", R2 = "coral")) +
+  geom_vline(xintercept = 30, linetype = "dashed", color = "darkgreen", linewidth = 1) +
+  labs(x = "Calidad Media (Phred Score)", y = "Número de Archivos", fill = "Hebra") +
+  theme_minimal(base_size = 13)
+```
+
+---
+
+## 6. Contenido GC
+
+```{r gc_content, fig.height = 5}
+ggplot(gc_dist, aes(x = porcentaje_gc)) +
+  geom_density(fill = "coral", alpha = 0.6, color = "coral4", linewidth = 1) +
+  geom_vline(xintercept = 50, linetype = "dotted", color = "gray30", linewidth = 1) +
+  scale_x_continuous(limits = c(0, 100), breaks = seq(0, 100, 10)) +
+  labs(title = "Distribución de Contenido GC",
+       subtitle = "La multimodalidad refleja la composición taxonómica de la comunidad amplificada",
+       x = "Contenido GC (%)", y = "Densidad") +
+  theme_minimal(base_size = 13)
+```
+
+---
+
+## 7. Conclusiones y Recomendaciones
+
+```{r conclusiones, results="asis"}
+total_reads <- sum(estadisticas$total_reads, na.rm = TRUE)
+calidad_global <- mean(estadisticas$calidad_media, na.rm = TRUE)
+n_problematicas <- sum(estadisticas$calidad_media < umbral, na.rm = TRUE)
+porc_problematicas <- round(100 * n_problematicas / n_archivos, 1)
+
+cat("\n#### Resumen Final:\n\n")
+cat("- **Total de reads analizados:**", format(total_reads, big.mark = ","), "\n")
+cat("- **Calidad media global:**", round(calidad_global,1), "\n")
+cat("- **Archivos con calidad media baja (< Q", umbral, "):**", n_problematicas, "de", n_archivos,
+    paste0("(", porc_problematicas, "%)"), "\n\n")
+
+cat("#### Qué revisar antes de configurar `filterAndTrim()`:\n\n")
+cat("Este informe no calcula automáticamente un valor de `truncLen` ni `trimLeft`:",
+    "esa decisión depende también de la longitud del amplicón y la región objetivo del 16S,",
+    "información que no puede inferirse únicamente a partir de los FASTQ.\n\n")
+cat("- **`truncLen` (por hebra):** contrastar la Sección 1 (calidad por posición) y la Sección 2",
+    "(error esperado acumulado, referencia `maxEE` =", umbral_ee, ") — el punto donde la curva",
+    "cruza ese umbral, considerando el solape necesario para `mergePairs()`.\n")
+cat("- **`trimLeft`:** revisar la Sección 3 (composición por base) para identificar si hay un",
+    "patrón estable compatible con cebador o adaptador residual.\n")
+if (n_problematicas > 0) {
+  cat("- **Atención individual:** las", n_problematicas, "muestra(s) listadas en la Sección 4",
+      "presentan calidad media baja; conviene revisarlas por separado antes de fijar parámetros",
+      "comunes para el conjunto del estudio.\n")
+}
+```
+
+---
+
+*Informe generado el 2026-06-22_18-22-59- Umbral de calidad: Q20*
