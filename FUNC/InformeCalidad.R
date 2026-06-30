@@ -80,7 +80,7 @@ extraerCalidad <- function(archivos, hebra, subsample = 100000, ciclos_composici
     resumen_pos <- apply(matrix_qa, 2, function(col) {
       q <- quantile(col, probs = c(0.10, 0.25, 0.50, 0.75), na.rm = TRUE)
       c(media = mean(col, na.rm = TRUE),
-        p10 = q[[1]], q25 = q[[2]], mediana = q[[3]], q75 = q[[4]])
+        q10 = q[[1]], q25 = q[[2]], mediana = q[[3]], q75 = q[[4]])
     })
     resumen_pos <- t(resumen_pos)
     
@@ -98,6 +98,7 @@ extraerCalidad <- function(archivos, hebra, subsample = 100000, ciclos_composici
       hebra = hebra,
       ciclo = seq_len(nrow(resumen_pos)),
       calidad_media = resumen_pos[, "media"],
+      q10 = resumen_pos[, "q10"],
       q25 = resumen_pos[, "q25"],
       mediana = resumen_pos[, "mediana"],
       ee_mediana = resumen_ee[, "ee_mediana"],

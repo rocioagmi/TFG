@@ -10,6 +10,10 @@ filtrarMuestras <- function(muestras, parametros, estudio_id){
     stop("No se encontraron archivos de entrada para el estudio: ", estudio_id)
   }
   
+  if (length(R1) != length(R2)) {
+    stop("El número de archivos R1 y R2 no coincide para el estudio: ", estudio_id)
+  }
+  
   campos_requeridos <- c("truncLen", "trimLeft", "maxEE", "truncQ")
   campos_faltantes <- setdiff(campos_requeridos, names(parametros))
   
@@ -42,11 +46,11 @@ filtrarMuestras <- function(muestras, parametros, estudio_id){
   pct_retencion <- round(100 * sum(filtrado[, 2]) / max(sum(filtrado[, 1]), 1), 1)
   
   cat(sprintf("Filtrado completado %s: %d/%d muestras conservaron reads - %.1f%% reads retenidos.\n", 
-              estudio_id, n_reads, ntotal, pct_retencion))
+              estudio_id, n_reads, n_total, pct_retencion))
   
   muestras_vacias <- rownames(filtrado)[filtrado[, 2] == 0]
   if (length(muestras_vacias) > 0) {
-    warning(sprintf("%s - Las siguientes muestras quedaron vacías tras el filtrado:\n",
+    warning(sprintf("%s - Las siguientes muestras quedaron vacías tras el filtrado: %s\n",
             estudio_id, paste(muestras_vacias, collapse = "\n")))
   }
   
@@ -56,7 +60,88 @@ filtrarMuestras <- function(muestras, parametros, estudio_id){
   cat(sprintf("Parámetros de filtrado %s almacenados en: %s\n",
               estudio_id, ruta_params))
   
-  return(list(R1 = nombres_R1[filtrado[,2] > 0], 
-              R2 = nombres_R2[filtrado[,2] > 0],
+  return(list(R1 = salida_R1[filtrado[,2] > 0], 
+              R2 = salida_R2[filtrado[,2] > 0],
               stats = filtrado))
+}
+
+
+proponerParametros <- function(datos_qa, umbral_calidad) {
+  
+  require(dplyr)
+  
+  campos_necesarios <- c("calidad_ciclo", "estadisticas")
+  campos_faltantes  <- setdiff(campos_necesarios, names(datos_qa))
+  if (length(campos_faltantes) > 0) {
+    stop("datos_qa no contiene los campos requeridos: ",
+         paste(campos_faltantes, collapse = ", "))
+  }
+  
+  # Mediana de calidades por hebra y ciclo
+  resumen_calidad <- datos_qa$calidad_ciclo %>%
+    group_by(hebra, ciclo) %>%
+    summarise(q10_md = median(q10, na.rm = TRUE),
+              q25_md = median(q25, na.rm = TRUE),
+              mediana_md = median(mediana, na.rm = TRUE),
+              ee_mediana_md = median(ee_mediana, na.rm = TRUE),
+              .groups = "drop"
+    )
+  
+  # Longitud max por hebra
+  max_R1 <- max(datos_qa$estadisticas$longitud_max[
+    datos_qa$estadisticas$hebra == "R1"], na.rm = TRUE)
+  max_R2 <- max(datos_qa$estadisticas$longitud_max[
+    datos_qa$estadisticas$hebra == "R2"], na.rm = TRUE)
+  
+  # Funcion interna devuelve el último ciclo donde la curva >= umbral
+  ultimo_ciclo <- function(ciclos, valores, umbral) {
+    ciclos_buenos <- ciclos[valores >= umbral]
+    if (length(ciclos_buenos) == 0) {
+      warning("La curva de calidad no supera el umbral en ningún ciclo.")
+      return(1L)
+    }
+    as.integer(max(ciclos_buenos))
+  }
+  
+  # Cálculo truncLen & truncLen_rango
+  for_R1 <- resumen_calidad[resumen_calidad$hebra == "R1", ]
+  for_R2 <- resumen_calidad[resumen_calidad$hebra == "R2", ]
+  
+  trunc_R1 <- ultimo_ciclo(for_R1$ciclo, for_R1$q25_md, umbral_calidad)
+  trunc_R2 <- ultimo_ciclo(for_R2$ciclo, for_R2$q25_md, umbral_calidad)
+  
+  rango_R1 <- c(
+    min = ultimo_ciclo(for_R1$ciclo, for_R1$q10_md, umbral_calidad),
+    max = ultimo_ciclo(for_R1$ciclo, for_R1$mediana_md, umbral_calidad)
+  )
+  rango_R2 <- c(
+    min = ultimo_ciclo(for_R2$ciclo, for_R2$q10_md, umbral_calidad),
+    max = ultimo_ciclo(for_R2$ciclo, for_R2$mediana_md, umbral_calidad)
+  )
+  
+  # EE estimado en el pto de corte propuesto
+  ee_R1 <- for_R1$ee_mediana_md[for_R1$ciclo == trunc_R1]
+  ee_R2 <- for_R2$ee_mediana_md[for_R2$ciclo == trunc_R2]
+  
+  if (length(ee_R1) == 0) ee_R1 <- NA
+  if (length(ee_R2) == 0) ee_R2 <- NA
+  
+  # Parámetros filtrado
+  parametros_filtrado <- list(truncLen = c(R1 = trunc_R1, R2 = trunc_R2),
+                              truncLen_rango = list(R1 = rango_R1, R2 = rango_R2),
+                              trimLeft = c(R1 = 0L,  R2 = 0L),
+                              maxEE = c(R1 = 2,   R2 = 2),
+                              truncQ = 2,
+                              max_R1 = max_R1,
+                              max_R2 = max_R2,
+                              ee_estimado = c(R1 = round(ee_R1, 2), 
+                                              R2 = round(ee_R2, 2))
+  )
+  
+  return(parametros_filtrado)
+}
+
+
+confirmarParametros <- function(parametros) {
+  
 }

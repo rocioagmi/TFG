@@ -46,7 +46,7 @@ knitr:
 
 ```{=latex}
 %% ── Datos de portada (editar aquí) ─────────────────────────
-\title{Título del Trabajo Fin de Grado}
+\title{Desarrollo de una plataforma bioinformática para el análisis taxonómico y la diversidad microbiana en Esclerosis Múltiple}
 \author{\nombre}
 \date{\today}
 
