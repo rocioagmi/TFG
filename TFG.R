@@ -123,7 +123,9 @@ informeCalidad(estudio_id = estudio,
 # ------------------------------------------------
 # Carga función de filtrado 
 source("FUNC/FiltrarMuestras.R")
-filtrarMuestras(R1, R2)
+muestras_filtradas <- filtrarMuestras(muestras = estudios[[estudio]],
+                                      parametros = paramaetros,
+                                      estudio_id = estudio)
 
 # Lista todos los archivos filtrados generados
 listadoFiltrado <- sort(list.files("OUTPUT/FILTRADO", pattern = "\\.fastq\\.gz$", full.names = TRUE))
