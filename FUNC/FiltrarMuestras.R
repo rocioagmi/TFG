@@ -1,6 +1,7 @@
-library(dada2)
 
 filtrarMuestras <- function(R1, R2){
+  
+  require(dada2)
   
   if(length(R1) == 0 || length(R2) == 0) stop("No se encontraron archivos de entrada.")
   
