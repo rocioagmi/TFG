@@ -98,9 +98,9 @@ proponerParametros <- function(datos_qa, umbral_calidad) {
     ciclos_buenos <- ciclos[valores >= umbral]
     if (length(ciclos_buenos) == 0) {
       warning("La curva de calidad no supera el umbral en ningún ciclo.")
-      return(1L)
+      return(1)
     }
-    as.integer(max(ciclos_buenos))
+    max(ciclos_buenos)
   }
   
   # Cálculo truncLen & truncLen_rango
@@ -129,19 +129,126 @@ proponerParametros <- function(datos_qa, umbral_calidad) {
   # Parámetros filtrado
   parametros_filtrado <- list(truncLen = c(R1 = trunc_R1, R2 = trunc_R2),
                               truncLen_rango = list(R1 = rango_R1, R2 = rango_R2),
-                              trimLeft = c(R1 = 0L,  R2 = 0L),
+                              trimLeft = c(R1 = 0,  R2 = 0),
                               maxEE = c(R1 = 2,   R2 = 2),
                               truncQ = 2,
                               max_R1 = max_R1,
                               max_R2 = max_R2,
-                              ee_estimado = c(R1 = round(ee_R1, 2), 
-                                              R2 = round(ee_R2, 2))
-  )
+                              ee_estimado_truncLen = c(R1 = round(ee_R1, 2), 
+                                                       R2 = round(ee_R2, 2)))
   
   return(parametros_filtrado)
 }
 
 
-confirmarParametros <- function(parametros) {
+confirmarParametros <- function(parametros, interactivo = TRUE) {
   
+  require(svDialogs)
+  
+  if (!interactivo) {
+    return(parametros)
+  }
+  
+  parsear_par <- function(texto) {
+    partes <- strsplit(trimws(texto), "[,.\\s]+")[[1]]
+    if (length(partes) != 2) return(NULL)
+    valores <- suppressWarnings(as.integer(partes))
+    if (any(is.na(valores))) return(NULL)
+    if (any(valores < 0)) return(NULL)
+    return(valores)
+  }
+  
+  # truncLen y el EE estimado en ese punto
+  ee_R1 <- parametros$ee_estimado_truncLen["R1"]
+  ee_R2 <- parametros$ee_estimado_truncLen["R2"]
+  
+  aviso_ee <- ""
+  if (!is.na(ee_R2) && ee_R2 > parametros$maxEE["R2"]) {
+    aviso_ee <- sprintf(
+      "\nAVISO: EE mediano de R2 en el punto de corte: %.2f (supera maxEE = %.0f).\n  Considera acortar R2 para mejorar la retención de reads.",
+      ee_R2, parametros$maxEE["R2"])
+  }
+  
+  mensaje_truncLen <- sprintf(
+    paste0(
+      "Estudio: longitud máxima de reads — R1: %d pb | R2: %d pb\n\n",
+      "Valor propuesto:  R1 = %d | R2 = %d\n",
+      "Rango recomendado: R1 [%d – %d] | R2 [%d – %d]\n",
+      "EE mediano estimado en el punto de corte: R1 = %.2f | R2 = %.2f",
+      "%s\n\n",
+      "Introduce dos valores separados por coma (R1,R2):"
+    ),
+    parametros$max_R1, parametros$max_R2,
+    parametros$truncLen["R1"], parametros$truncLen["R2"],
+    parametros$truncLen_rango$R1["min"], parametros$truncLen_rango$R1["max"],
+    parametros$truncLen_rango$R2["min"], parametros$truncLen_rango$R2["max"],
+    ee_R1, ee_R2,
+    aviso_ee
+  )
+  
+  repeat {
+    respuesta <- dlgInput(message = mensaje_truncLen, 
+                          default = paste(parametros$truncLen["R1"], 
+                                          parametros$truncLen["R2"], sep = ","))$res
+    
+    if (is.null(respuesta) || respuesta == "") {
+      stop("Parámetro truncLen no confirmado. Filtrado cancelado por el usuario.")
+    }
+    
+    valores <- parsear_par(respuesta)
+    
+    if (is.null(valores)) {
+      dlg_message(sprintf("Entrada no válida: '%s'.\nIntroduce exactamente dos números enteros separados por coma (ej: 230,160).",
+                  respuesta), type = "ok")
+      next
+    }
+    
+    if (valores[1] > parametros$max_R1 || valores[2] > parametros$max_R2) {
+      dlg_message(sprintf(
+        "Los valores introducidos (%d, %d) superan la longitud máxima de los reads (R1: %d, R2: %d).\nIntroduce valores dentro del rango.",
+        valores[1], valores[2], parametros$max_R1, parametros$max_R2), type = "ok")
+      next
+    }
+    
+    break
+  }
+  truncLen_confirmado <- valores
+  
+  # trimLeft
+  mensaje_trimLeft <- paste0(
+    "Eliminación de nucleótidos en el extremo 5' de cada read (trimLeft).\n\n",
+    "Valor propuesto: R1 = 0 | R2 = 0\n\n",
+    "Si conoces la longitud de los primers utilizados en este estudio,\n",
+    "introdúcela aquí para eliminarlos antes del filtrado.\n",
+    "Si no la conoces, acepta el valor 0,0.\n\n",
+    "Introduce dos valores separados por coma (R1,R2):"
+  )
+  
+  repeat {
+    respuesta <- dlgInput(
+      message = mensaje_trimLeft,
+      default = paste(parametros$trimLeft["R1"], parametros$trimLeft["R2"], sep = ",")
+    )$res
+    
+    if (is.null(respuesta) || respuesta == "") {
+      stop("Parámetro trimLeft no confirmado. Filtrado cancelado por el usuario.")
+    }
+    
+    valores <- parsear_par(respuesta)
+    
+    if (is.null(valores)) {
+      dlg_message(sprintf(
+        "Entrada no válida: '%s'.\nIntroduce exactamente dos números enteros separados por coma (ej: 19,20).",
+        respuesta), type = "ok")
+      next
+    }
+    
+    break
+  }
+  trimLeft_confirmado <- valores
+  
+  parametros$truncLen <- c(R1 = truncLen_confirmado[1], R2 = truncLen_confirmado[2])
+  parametros$trimLeft <- c(R1 = trimLeft_confirmado[1], R2 = trimLeft_confirmado[2])
+  
+  return(parametros)
 }
