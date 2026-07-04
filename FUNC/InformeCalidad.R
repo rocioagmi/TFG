@@ -32,7 +32,7 @@ informeCalidad <- function(estudio_id, muestras, umbral_calidad = 20, umbral_ee 
   if (abrir_navegador) browseURL(ruta)
   
   cat("Informe disponible en:", ruta, "\n")
-  return(directorio_salida)
+  return(datosqa)
 }
 
 

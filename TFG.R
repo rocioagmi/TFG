@@ -113,19 +113,22 @@ for (estudio in estudio_ids) {
 source("FUNC/InformeCalidad.R")
 # Genera informe de calidad para todas las muestras
 estudio <- names(estudios)[1]
-informeCalidad(estudio_id = estudio, 
-               muestras = estudios[[estudio]],
+muestras <- estudios[[estudio]]
+
+datos_qa <- informeCalidad(estudio_id = estudio, 
+               muestras = muestras,
                umbral_calidad = 20,
                umbral_ee = 2)
 
+
 # ------------------------------------------------
-# FILTRADO DE CALIDAD CON DADA2                   <-----
+# FILTRADO DE CALIDAD CON DADA2                   
 # ------------------------------------------------
 # Carga función de filtrado 
 source("FUNC/FiltrarMuestras.R")
-muestras_filtradas <- filtrarMuestras(muestras = estudios[[estudio]],
-                                      parametros = paramaetros,
-                                      estudio_id = estudio)
+propuesta <- proponerParametros(datos_qa, umbral_calidad = 20)
+parametros <- confirmarParametros(propuesta, interactivo = TRUE)
+filtrarMuestras(muestras, parametros, estudio)
 
 # Lista todos los archivos filtrados generados
 listadoFiltrado <- sort(list.files("OUTPUT/FILTRADO", pattern = "\\.fastq\\.gz$", full.names = TRUE))

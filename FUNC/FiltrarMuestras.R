@@ -170,14 +170,12 @@ confirmarParametros <- function(parametros, interactivo = TRUE) {
   }
   
   mensaje_truncLen <- sprintf(
-    paste0(
-      "Estudio: longitud máxima de reads — R1: %d pb | R2: %d pb\n\n",
-      "Valor propuesto:  R1 = %d | R2 = %d\n",
-      "Rango recomendado: R1 [%d – %d] | R2 [%d – %d]\n",
-      "EE mediano estimado en el punto de corte: R1 = %.2f | R2 = %.2f",
-      "%s\n\n",
-      "Introduce dos valores separados por coma (R1,R2):"
-    ),
+    paste0("\n\ntruncLen:\n",
+           "Longitud máxima de reads (R1: %d pb | R2: %d pb)\n",
+           "Valor propuesto:  R1 = %d | R2 = %d\n",
+           "Rango recomendado: R1 [%d – %d] | R2 [%d – %d]\n",
+           "EE mediano estimado en el punto de corte: R1 = %.2f | R2 = %.2f",
+           "%s\n\n"),
     parametros$max_R1, parametros$max_R2,
     parametros$truncLen["R1"], parametros$truncLen["R2"],
     parametros$truncLen_rango$R1["min"], parametros$truncLen_rango$R1["max"],
@@ -186,27 +184,32 @@ confirmarParametros <- function(parametros, interactivo = TRUE) {
     aviso_ee
   )
   
+  cat(mensaje_truncLen, "\n\n")
+  
+  mensaje_dialogo1 <- sprintf("Introduce dos valores de truncLen separados por coma (R1,R2):",
+                              parametros$truncLen["R1"], parametros$truncLen["R2"])
+    
   repeat {
-    respuesta <- dlgInput(message = mensaje_truncLen, 
+    respuesta <- dlgInput(message = mensaje_dialogo1, 
                           default = paste(parametros$truncLen["R1"], 
                                           parametros$truncLen["R2"], sep = ","))$res
     
-    if (is.null(respuesta) || respuesta == "") {
+    if (length(respuesta) == 0 || respuesta == "") {
       stop("Parámetro truncLen no confirmado. Filtrado cancelado por el usuario.")
     }
     
     valores <- parsear_par(respuesta)
     
     if (is.null(valores)) {
-      dlg_message(sprintf("Entrada no válida: '%s'.\nIntroduce exactamente dos números enteros separados por coma (ej: 230,160).",
+      dlg_message(sprintf("Entrada no válida: '%s'. Introduce exactamente dos números enteros separados por coma (ej: 230,160).",
                   respuesta), type = "ok")
       next
     }
     
     if (valores[1] > parametros$max_R1 || valores[2] > parametros$max_R2) {
       dlg_message(sprintf(
-        "Los valores introducidos (%d, %d) superan la longitud máxima de los reads (R1: %d, R2: %d).\nIntroduce valores dentro del rango.",
-        valores[1], valores[2], parametros$max_R1, parametros$max_R2), type = "ok")
+        "Los valores introducidos superan la longitud máxima de los reads (R1: %d, R2: %d). Introduce valores dentro del rango.",
+        parametros$max_R1, parametros$max_R2), type = "ok")
       next
     }
     
@@ -215,20 +218,18 @@ confirmarParametros <- function(parametros, interactivo = TRUE) {
   truncLen_confirmado <- valores
   
   # trimLeft
-  mensaje_trimLeft <- paste0(
-    "Eliminación de nucleótidos en el extremo 5' de cada read (trimLeft).\n\n",
-    "Valor propuesto: R1 = 0 | R2 = 0\n\n",
-    "Si conoces la longitud de los primers utilizados en este estudio,\n",
-    "introdúcela aquí para eliminarlos antes del filtrado.\n",
-    "Si no la conoces, acepta el valor 0,0.\n\n",
-    "Introduce dos valores separados por coma (R1,R2):"
-  )
+  mensaje_trimLeft <- sprintf(paste0("\n\ntrimLeft:\n",
+                             "Valor propuesto: R1 = 0 | R2 = 0"))
+  
+  cat(mensaje_trimLeft, "\n\n")
+  
+  mensaje_dialogo2 <- sprintf("Introduce dos valores de trimLeft separados por coma (R1,R2):",
+                             parametros$trimLeft["R1"], parametros$trimLeft["R2"])
   
   repeat {
-    respuesta <- dlgInput(
-      message = mensaje_trimLeft,
-      default = paste(parametros$trimLeft["R1"], parametros$trimLeft["R2"], sep = ",")
-    )$res
+    respuesta <- dlgInput(message = mensaje_dialogo2,
+                          default = paste(parametros$trimLeft["R1"], 
+                                          parametros$trimLeft["R2"], sep = ","))$res
     
     if (is.null(respuesta) || respuesta == "") {
       stop("Parámetro trimLeft no confirmado. Filtrado cancelado por el usuario.")
@@ -238,7 +239,7 @@ confirmarParametros <- function(parametros, interactivo = TRUE) {
     
     if (is.null(valores)) {
       dlg_message(sprintf(
-        "Entrada no válida: '%s'.\nIntroduce exactamente dos números enteros separados por coma (ej: 19,20).",
+        "Entrada no válida: '%s'. Introduce exactamente dos números enteros separados por coma (ej: 19,20).",
         respuesta), type = "ok")
       next
     }
