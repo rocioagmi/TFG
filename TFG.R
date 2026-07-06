@@ -105,33 +105,38 @@ for (estudio in estudio_ids) {
   estudios[[estudio]] <- list(R1 = muestra_R1, R2 = muestra_R2)
 }
 
-
 # -------------------------------------------------
 # INFORME DE CALIDAD DE SECUENCIACIÓN              
 # -------------------------------------------------
 # Carga la función para generar informes FastQC
 source("FUNC/InformeCalidad.R")
-# Genera informe de calidad para todas las muestras
+
+# Genera informe de calidad para cada estudio
 estudio <- names(estudios)[1]
 muestras <- estudios[[estudio]]
 
 datos_qa <- informeCalidad(estudio_id = estudio, 
                muestras = muestras,
+               etapa = "prefiltrado",
                umbral_calidad = 20,
                umbral_ee = 2)
-
 
 # ------------------------------------------------
 # FILTRADO DE CALIDAD CON DADA2                   
 # ------------------------------------------------
 # Carga función de filtrado 
 source("FUNC/FiltrarMuestras.R")
+
 propuesta <- proponerParametros(datos_qa, umbral_calidad = 20)
 parametros <- confirmarParametros(propuesta, interactivo = TRUE)
 filtrarMuestras(muestras, parametros, estudio)
 
-# Lista todos los archivos filtrados generados
-listadoFiltrado <- sort(list.files("OUTPUT/FILTRADO", pattern = "\\.fastq\\.gz$", full.names = TRUE))
+
+# Lista todos los archivos filtrados generados para el estudio actual
+
+dir_filtrado <- file.path("OUTPUT", estudio, "FILTRADO")
+listadoFiltrado <- sort(list.files(dir_filtrado, pattern = "\\.fastq\\.gz$",
+                                   full.names = TRUE))
 
 if(any(grepl("_R1", listadoFiltrado))){
   fR1 <- listadoFiltrado[grepl("_R1", listadoFiltrado)]
@@ -143,14 +148,18 @@ if(any(grepl("_R1", listadoFiltrado))){
   stop("No se reconoce el patrón de nomenclatura de los archivos.")
 }
 
-
 # -------------------------------------------
 # INFORME DE CALIDAD POST FILTRADO
 # -------------------------------------------
 # Reutiliza funciones para evaluar mejora tras filtrado
 source("FUNC/InformeCalidad.R")
-informeCalidad(listadoFiltrado, umbral_calidad = 20)
+muestras_filtradas <- list(R1 = fR1, R2 = fR2)
 
+datos_qa_post <- informeCalidad(estudio_id = estudio,
+                                muestras = muestras_filtradas,
+                                etapa = "postfiltrado",
+                                umbral_calidad = 20,
+                                umbral_ee = 2)
 
 
 # ===========================================

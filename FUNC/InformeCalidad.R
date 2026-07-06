@@ -1,4 +1,5 @@
-informeCalidad <- function(estudio_id, muestras, umbral_calidad = 20, umbral_ee = 2, abrir_navegador = interactive()){
+
+informeCalidad <- function(estudio_id, muestras, etapa, umbral_calidad = 20, umbral_ee = 2, abrir_navegador = interactive()){
   
   require(rmarkdown)
   
@@ -19,7 +20,7 @@ informeCalidad <- function(estudio_id, muestras, umbral_calidad = 20, umbral_ee 
   
   timestamp <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")
   directorio_salida <- file.path("OUTPUT", estudio_id, "REPORT",
-                                 paste0("InformeCalidad_", timestamp))
+                                 paste0("InformeCalidad_", etapa, timestamp))
   dir.create(directorio_salida, recursive = TRUE, showWarnings = FALSE)
   
   saveRDS(datosqa, file.path(directorio_salida, "datos_qa.rds"))

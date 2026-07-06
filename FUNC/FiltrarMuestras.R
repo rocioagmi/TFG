@@ -54,7 +54,7 @@ filtrarMuestras <- function(muestras, parametros, estudio_id){
             estudio_id, paste(muestras_vacias, collapse = "\n")))
   }
   
-  ruta_params <- file.path("OUTPUT", estudio_id, "parametros_filtrado.rds")
+  ruta_params <- file.path("OUTPUT", estudio_id, "FILTRADO/parametros_filtrado.rds")
   saveRDS(parametros, ruta_params)
   
   cat(sprintf("Parámetros de filtrado %s almacenados en: %s\n",
