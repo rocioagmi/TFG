@@ -172,7 +172,7 @@ datos_qa_post <- informeCalidad(estudio_id = estudio,
 # Carga la función que ejecuta: learnErrors, derep, dada, mergePairs
 source("FUNC/FlujoTrabajoDada.R")
 # Procesa lecturas filtradas y devuelve la tabla de conteos de secuencias
-union <- flujoTrabajoDada(fR1, fR2, estudio)
+union <- flujoTrabajoDada(muestras_filtradas$R1, muestras_filtradas$R2, estudio)
 
 
 # --------------------------------------------------------------------
@@ -180,7 +180,7 @@ union <- flujoTrabajoDada(fR1, fR2, estudio)
 # --------------------------------------------------------------------
 # Construye la matriz de conteos de ASVs y elimina secuencias quiméricas
 source("FUNC/procesarSecuencias.R")
-tabSinQuim <- procesarSecuencias(union)
+tabSinQuim <- procesarSecuencias(union, estudio)
 
 
 # ------------------------------------------

@@ -1,6 +1,10 @@
-library(dada2)
 
-procesarSecuencias <- function(union) {
+procesarSecuencias <- function(union, estudio) {
+  
+  require(dada2)
+  
+  directorio_rds <- file.path("OUTPUT", estudio, "RDS")
+  dir.create(directorio_rds, recursive = TRUE, showWarnings = FALSE)
   
   # CONSTRUIR LA TABLA DE SECUENCIAS
   message("Construyendo tabla de secuencias")
@@ -10,18 +14,19 @@ procesarSecuencias <- function(union) {
   message("Distribución de longitudes de amplicón:")
   print(table(nchar(getSequences(seqtab))))
   
-  saveRDS(seqtab, "OUTPUT/RDS/seqtab.Rds")
+  saveRDS(seqtab, file.path(directorio_rds, "seqtab.Rds"))
 
   # ELIMINAR QUIMERAS
   message("Eliminando quimeras")
   tabSinQuim <- removeBimeraDenovo(seqtab, method = "consensus", 
-                                   multithread = TRUE, verbose = TRUE)
+                                   multithread = FALSE, verbose = TRUE)
   pct_limpias <- round(sum(tabSinQuim) / sum(seqtab) * 100, 2)
+  
   message(sprintf("Lecturas conservadas tras eliminar quimeras: %s%%", pct_limpias))
   message(sprintf("ASV's: %d  - %d", ncol(seqtab), ncol(tabSinQuim)))
   
-  saveRDS(tabSinQuim, "OUTPUT/RDS/tabSinQuim.Rds")
-  message("Tabla de secuencias sin quimeras guardada en OUTPUT/RDS/tabSinQuim.Rds")
+  saveRDS(tabSinQuim, file.path(directorio_rds, "tabSinQuim.Rds"))
+  message("Tabla de secuencias sin quimeras guardada en %s", file.path(directorio_rds, "tabSinQuim.Rds"))
   
   return(tabSinQuim)
 }
