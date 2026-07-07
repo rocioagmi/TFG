@@ -172,7 +172,7 @@ datos_qa_post <- informeCalidad(estudio_id = estudio,
 # Carga la función que ejecuta: learnErrors, derep, dada, mergePairs
 source("FUNC/FlujoTrabajoDada.R")
 # Procesa lecturas filtradas y devuelve la tabla de conteos de secuencias
-union <- flujoTrabajoDada(fR1, fR2)
+union <- flujoTrabajoDada(fR1, fR2, estudio)
 
 
 # --------------------------------------------------------------------
