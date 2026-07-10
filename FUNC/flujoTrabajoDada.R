@@ -4,8 +4,8 @@ flujoTrabajoDada <- function(R1, R2, estudio){
   require(dada2)
   
   # Error Rates
-  err_R1 <- learnErrors(R1)
-  err_R2 <- learnErrors(R2)
+  err_R1 <- learnErrors(R1, multithread =  FALSE)
+  err_R2 <- learnErrors(R2, multithread =  FALSE)
   
   # Derreplicar
   derep_R1 <- derepFastq(R1, verbose = TRUE)
@@ -17,8 +17,8 @@ flujoTrabajoDada <- function(R1, R2, estudio){
   names(derep_R2) <- nombres
   
   # Aplica algoritmo DADA2
-  dadaR1 <- dada(derep_R1, err = err_R1, multithread = FALSE)
-  dadaR2 <- dada(derep_R2, err = err_R2, multithread = FALSE)
+  dadaR1 <- dada(derep_R1, err = err_R1, pool = "pseudo", multithread = FALSE)
+  dadaR2 <- dada(derep_R2, err = err_R2, pool = "pseudo", multithread = FALSE)
   
   # Junta las secuencias R1 y R2
   union <- mergePairs(dadaR1, derep_R1, dadaR2, derep_R2, verbose = TRUE)

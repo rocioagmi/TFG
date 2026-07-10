@@ -188,7 +188,7 @@ tabSinQuim <- procesarSecuencias(union, estudio)
 # ------------------------------------------
 source("FUNC/AsignarTaxonomia.R")
 # Aplica asignación taxonómica a la tabla sin quimeras
-asignarTaxonomia(tabSinQuim)
+asignarTaxonomia(tabSinQuim, estudio)
 
 
 # -----------------------------------------
